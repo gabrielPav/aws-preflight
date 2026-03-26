@@ -1,0 +1,190 @@
+[
+  {
+    "command": "rds create-db-instance",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--storage-encrypted",
+        "severity": "HIGH",
+        "message": "RDS storage encryption not enabled",
+        "context": "Unencrypted RDS snapshots can be shared or copied to another account, exposing your entire database. Encryption cannot be enabled after creation — you'd need to snapshot, restore, and migrate.",
+        "suggestion": "--storage-encrypted"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--deletion-protection",
+        "severity": "MEDIUM",
+        "message": "Deletion protection not enabled",
+        "context": "Without this, a single `rds delete-db-instance` command — accidental or malicious — permanently destroys your database. This is a one-line safeguard that has saved countless production databases.",
+        "suggestion": "--deletion-protection"
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--publicly-accessible",
+        "forbidden_value": "true",
+        "severity": "HIGH",
+        "message": "RDS instance set to publicly accessible",
+        "context": "A publicly accessible database is reachable from the entire internet. Automated scanners will find it and attempt brute-force logins within hours. Databases should only be reachable from within your VPC.",
+        "suggestion": "--no-publicly-accessible"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--backup-retention-period",
+        "severity": "MEDIUM",
+        "message": "Backup retention period not specified",
+        "context": "The default backup retention is 1 day. For production databases, set this to at least 7 days to allow recovery from ransomware or accidental data corruption that isn't immediately noticed.",
+        "suggestion": "--backup-retention-period 7"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--enable-cloudwatch-logs-exports",
+        "severity": "MEDIUM",
+        "message": "CloudWatch log exports not configured",
+        "context": "Without log exports, you have no visibility into slow queries, errors, or suspicious login attempts. Enable audit, error, and general logs for security monitoring and incident response.",
+        "suggestion": "--enable-cloudwatch-logs-exports '[\"audit\",\"error\",\"general\"]'"
+      }
+    ]
+  },
+  {
+    "command": "rds modify-db-instance",
+    "checks": [
+      {
+        "type": "forbidden_value",
+        "flag": "--publicly-accessible",
+        "forbidden_value": "true",
+        "severity": "HIGH",
+        "message": "Making RDS instance publicly accessible",
+        "context": "You are about to expose a database directly to the internet. If this is for debugging, use an SSH tunnel or SSM port forwarding instead — then revert this change immediately after.",
+        "suggestion": "--no-publicly-accessible"
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--deletion-protection",
+        "forbidden_value": "false",
+        "severity": "HIGH",
+        "message": "Disabling deletion protection on RDS instance",
+        "context": "Removing deletion protection makes the database vulnerable to accidental or malicious deletion. Only disable this immediately before a planned deletion, then re-enable it if the deletion is cancelled.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "rds create-db-cluster",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--storage-encrypted",
+        "severity": "HIGH",
+        "message": "Aurora cluster storage encryption not enabled",
+        "context": "Unencrypted Aurora clusters expose all data at rest. Encryption must be set at creation time and cannot be added later without creating a new cluster.",
+        "suggestion": "--storage-encrypted"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--deletion-protection",
+        "severity": "MEDIUM",
+        "message": "Deletion protection not enabled on Aurora cluster",
+        "context": "Without deletion protection, the entire cluster and all its instances can be deleted with a single command. Enable this to prevent accidental or malicious destruction of your database.",
+        "suggestion": "--deletion-protection"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--backup-retention-period",
+        "severity": "MEDIUM",
+        "message": "Backup retention period not specified",
+        "context": "Default retention is 1 day. Set to at least 7 days for production workloads to allow recovery from data corruption or ransomware that isn't immediately detected.",
+        "suggestion": "--backup-retention-period 7"
+      }
+    ]
+  },
+  {
+    "command": "rds delete-db-instance",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "RDS instance deletion — ensure a final snapshot is taken",
+        "context": "Without --final-db-snapshot-identifier, the database is deleted without a backup. Always take a final snapshot unless you are 100% certain the data is no longer needed.",
+        "suggestion": "--final-db-snapshot-identifier <snapshot-name>"
+      }
+    ]
+  },
+  {
+    "command": "rds restore-db-instance-from-db-snapshot",
+    "checks": [
+      {
+        "type": "forbidden_value",
+        "flag": "--publicly-accessible",
+        "forbidden_value": "true",
+        "severity": "HIGH",
+        "message": "Restoring RDS instance as publicly accessible",
+        "context": "Restored instances should default to private. Exposing a restored database to the internet is rarely intentional and creates immediate risk.",
+        "suggestion": "--no-publicly-accessible"
+      }
+    ]
+  },
+  {
+    "command": "rds create-db-snapshot",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Verify snapshot is not shared publicly after creation",
+        "context": "RDS snapshots shared with 'all' are accessible to any AWS account. After creation, check with `rds describe-db-snapshot-attributes` to confirm the snapshot is private.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "rds create-db-cluster-parameter-group",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Verify audit logging parameters are enabled in the parameter group",
+        "context": "For Aurora MySQL, set server_audit_logging=ON and server_audit_events to include CONNECT and QUERY_DCL. For Aurora PostgreSQL, enable pgaudit. Without audit logging, you have no record of who ran what queries.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "rds failover-db-cluster",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Manual failover causes a brief outage — notify your team first",
+        "context": "Aurora failover typically takes 30-120 seconds. Applications that don't handle connection drops gracefully will error during this window. Ensure your app uses the cluster endpoint (not instance endpoint) and has retry logic.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "rds restore-db-cluster-from-snapshot",
+    "checks": [
+      {
+        "type": "forbidden_value",
+        "flag": "--publicly-accessible",
+        "forbidden_value": "true",
+        "severity": "HIGH",
+        "message": "Restoring Aurora cluster as publicly accessible",
+        "context": "Restored clusters should always be private. Exposing a restored database to the internet is rarely intentional and creates immediate risk.",
+        "suggestion": "--no-publicly-accessible"
+      }
+    ]
+  },
+  {
+    "command": "rds modify-db-cluster",
+    "checks": [
+      {
+        "type": "forbidden_value",
+        "flag": "--deletion-protection",
+        "forbidden_value": "false",
+        "severity": "HIGH",
+        "message": "Disabling deletion protection on Aurora cluster",
+        "context": "Only disable this immediately before a planned deletion. Leaving deletion protection off on a production cluster is an accident waiting to happen.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

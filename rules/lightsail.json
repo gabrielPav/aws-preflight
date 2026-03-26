@@ -1,0 +1,78 @@
+[
+  {
+    "command": "lightsail create-instances",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Lightsail instances get a public IP by default — verify firewall rules are locked down",
+        "context": "Every Lightsail instance is publicly reachable from the internet. The default firewall allows SSH (22) and HTTP (80) from anywhere. Restrict SSH to your IP and close any ports your app doesn't need.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "lightsail open-instance-public-ports",
+    "checks": [
+      {
+        "type": "forbidden_value",
+        "flag": "--port-info",
+        "forbidden_value": "0-65535",
+        "severity": "HIGH",
+        "message": "Opening all ports to the internet",
+        "context": "Exposing every port on a public instance is an immediate compromise waiting to happen. Automated scanners will find open services within minutes. Only open the specific ports your application needs.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "lightsail delete-instance",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Instance deletion destroys the disk unless you create a snapshot first",
+        "context": "Lightsail instance disks are deleted with the instance by default. Take a manual snapshot before deleting if you need to preserve data or be able to recreate the instance.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "lightsail create-relational-database",
+    "checks": [
+      {
+        "type": "forbidden_value",
+        "flag": "--publicly-accessible",
+        "forbidden_value": "true",
+        "severity": "HIGH",
+        "message": "Lightsail database set to publicly accessible",
+        "context": "A publicly accessible database is reachable from the entire internet. Automated scanners will find it and attempt brute-force logins. Databases should only be accessible from within your Lightsail VPC.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "lightsail create-bucket",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify bucket access permissions are set to private",
+        "context": "Lightsail buckets can be set to public, which makes all objects readable by anyone. Unlike S3, there's no Block Public Access setting — you have to explicitly set the access level to private.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "lightsail create-load-balancer",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Attach an SSL/TLS certificate and enable HTTPS",
+        "context": "Lightsail load balancers support free SSL certificates via ACM. Without HTTPS, all traffic between clients and your load balancer is in plaintext. Enable HTTPS and redirect HTTP to HTTPS.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

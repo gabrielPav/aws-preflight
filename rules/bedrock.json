@@ -1,0 +1,89 @@
+[
+  {
+    "command": "bedrock create-guardrail",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the guardrail covers sensitive information filters, not just topic filters",
+        "context": "Guardrails without PII/sensitive data filters will happily return SSNs, credit card numbers, or API keys that appear in model responses. Enable sensitive information filters for any customer-facing application.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "bedrock create-knowledge-base",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the data source IAM role is scoped to only the S3 buckets it needs",
+        "context": "Knowledge base roles with s3:GetObject on * can ingest data from any bucket in your account. Scope the role to the specific bucket ARN and prefix used for the knowledge base.",
+        "suggestion": ""
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--server-side-encryption-configuration",
+        "severity": "MEDIUM",
+        "message": "Knowledge base not encrypted with a customer managed KMS key",
+        "context": "Knowledge bases store embeddings of your data. Without a CMK, you have no audit trail of who accessed the vector store and can't revoke access independently.",
+        "suggestion": "--server-side-encryption-configuration kmsKeyArn=<your-kms-key-arn>"
+      }
+    ]
+  },
+  {
+    "command": "bedrock create-agent",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Scope the agent execution role to only the action groups and knowledge bases it needs",
+        "context": "Agents with broad IAM permissions are a prompt injection risk — a malicious user input can instruct the agent to call AWS APIs it shouldn't. Least privilege is critical here.",
+        "suggestion": ""
+      },
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Associate a guardrail with this agent before exposing it to users",
+        "context": "Agents without guardrails can be manipulated via prompt injection to leak data, bypass instructions, or call unintended action groups. Guardrails are the primary defense layer for production agents.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "bedrock create-model-invocation-logging-configuration",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify logging destination is a secured S3 bucket or CloudWatch log group",
+        "context": "Model invocation logs contain the full prompt and response text. If the destination bucket is public or has overly permissive access, you're logging sensitive user data to an exposed location.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "bedrock delete-guardrail",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Deleting a guardrail removes safety controls from all agents and flows using it",
+        "context": "Any agent or model invocation that referenced this guardrail will lose its content filtering, PII protection, and topic restrictions immediately. Verify no production workloads depend on it before deleting.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "bedrock-agent create-agent-action-group",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the Lambda function backing this action group validates all inputs",
+        "context": "Action group Lambda functions receive parameters extracted from user prompts by the LLM. A prompt injection attack can craft inputs that bypass your intended logic. Treat all action group inputs as untrusted.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

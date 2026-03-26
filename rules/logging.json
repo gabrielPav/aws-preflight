@@ -1,0 +1,116 @@
+[
+  {
+    "command": "cloudtrail create-trail",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--is-multi-region-trail",
+        "severity": "HIGH",
+        "message": "Trail is not multi-region",
+        "context": "A single-region trail misses all API activity in other regions, including global services like IAM. Attackers often operate in regions you don't monitor. Always create multi-region trails.",
+        "suggestion": "--is-multi-region-trail"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--enable-log-file-validation",
+        "severity": "HIGH",
+        "message": "Log file integrity validation not enabled",
+        "context": "Without integrity validation, you cannot prove that CloudTrail logs haven't been tampered with after delivery. This is required for forensic investigations and many compliance frameworks.",
+        "suggestion": "--enable-log-file-validation"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--kms-key-id",
+        "severity": "MEDIUM",
+        "message": "CloudTrail logs not encrypted with KMS",
+        "context": "Encrypting CloudTrail logs with a KMS key ensures that only authorized principals can read your audit logs. Without encryption, anyone with S3 read access to the bucket can read all API activity.",
+        "suggestion": "--kms-key-id alias/<your-cloudtrail-key>"
+      }
+    ]
+  },
+  {
+    "command": "cloudtrail update-trail",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify logging is not being disabled or scope reduced",
+        "context": "Reducing trail scope (e.g. disabling multi-region, removing log validation) creates blind spots in your audit trail. Attackers who gain access often disable CloudTrail first to cover their tracks.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "cloudtrail stop-logging",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Stopping CloudTrail logging creates an audit blind spot",
+        "context": "Disabling CloudTrail is one of the first actions taken by attackers after gaining access. All API activity during the logging gap will be unrecorded. This action itself will be the last event logged.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "cloudtrail delete-trail",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Deleting a CloudTrail trail permanently removes audit logging",
+        "context": "Deleting a trail stops all logging immediately. This is a common attacker technique to cover tracks. Ensure you have an alternative logging mechanism before deleting, and investigate why this deletion is needed.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "logs create-log-group",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--kms-key-id",
+        "severity": "LOW",
+        "message": "CloudWatch log group not encrypted with KMS",
+        "context": "Log groups containing sensitive application data, VPC flow logs, or CloudTrail logs should be encrypted with a KMS key. Without encryption, anyone with CloudWatch Logs read access can view all log data.",
+        "suggestion": "--kms-key-id arn:aws:kms:<region>:<account>:key/<key-id>"
+      }
+    ]
+  },
+  {
+    "command": "logs delete-log-group",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Log group deletion permanently removes all log data",
+        "context": "Deleting a CloudWatch log group destroys all log streams and events within it. This data cannot be recovered. Ensure logs are exported to S3 or archived before deletion if retention is required.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "logs put-retention-policy",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Verify retention period meets your compliance requirements",
+        "context": "Many compliance frameworks (PCI-DSS, HIPAA, SOC 2) require log retention of 1-7 years. Setting a short retention period may cause you to fail audits or lose evidence needed for incident investigations.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "logs delete-log-stream",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Log stream deletion is permanent",
+        "context": "Deleting a log stream removes all events within it. If this stream contains security-relevant logs (VPC flow logs, application errors, access logs), ensure they are archived before deletion.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

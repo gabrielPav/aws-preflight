@@ -1,0 +1,50 @@
+[
+  {
+    "command": "cloudfront create-distribution",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Ensure HTTPS-only and WAF are configured",
+        "context": "Distributions that allow HTTP serve content over an unencrypted connection. Without WAF, your origin is exposed to SQL injection, XSS, and DDoS. Both are easy to enable and significantly reduce your attack surface.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "cloudfront update-distribution",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify HTTPS-only viewer protocol policy is maintained",
+        "context": "Distribution updates can inadvertently change the viewer protocol policy to allow HTTP. Ensure ViewerProtocolPolicy is set to redirect-to-https or https-only on all cache behaviors.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "cloudfront delete-distribution",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Distribution deletion will break all CDN-served content immediately",
+        "context": "Deleting a CloudFront distribution invalidates all cached content and breaks any DNS records pointing to the distribution domain. Ensure DNS is updated before or immediately after deletion.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "cloudfront create-invalidation",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Wildcard invalidations (/*) are expensive and slow — use specific paths when possible",
+        "context": "Invalidating /* forces CloudFront to re-fetch every object from origin, increasing origin load and costs. AWS charges for invalidation requests beyond the free tier. Use specific paths for targeted invalidations.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

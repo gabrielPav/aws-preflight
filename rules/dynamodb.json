@@ -1,0 +1,83 @@
+[
+  {
+    "command": "dynamodb create-table",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--sse-specification",
+        "severity": "MEDIUM",
+        "message": "KMS encryption not explicitly configured",
+        "context": "DynamoDB encrypts at rest by default with an AWS-owned key, but specifying a customer managed KMS key gives you an audit trail of every access via CloudTrail and the ability to revoke access by disabling the key.",
+        "suggestion": "--sse-specification Enabled=true,SSEType=KMS"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--deletion-protection-enabled",
+        "severity": "MEDIUM",
+        "message": "Deletion protection not enabled",
+        "context": "Without deletion protection, a single `dynamodb delete-table` command permanently destroys the table and all its data. Enable this for any table containing production data.",
+        "suggestion": "--deletion-protection-enabled"
+      }
+    ]
+  },
+  {
+    "command": "dynamodb delete-table",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "DynamoDB table deletion is permanent and immediate",
+        "context": "Deleting a DynamoDB table destroys all data, indexes, and streams. There is no recycle bin. Ensure you have a recent backup (on-demand backup or PITR) before proceeding.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "dynamodb update-table",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Table update in progress — some changes are irreversible",
+        "context": "Changing billing mode, removing GSIs, or disabling streams can have irreversible effects on your application. Test changes in a non-production environment first.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "dynamodb put-item",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Verify you are not writing to a production table unintentionally",
+        "context": "Writing directly to a DynamoDB table via CLI bypasses application-level validation and audit trails. Confirm the table name and item content before executing.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "dynamodb delete-item",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Item deletion is permanent if PITR is not enabled",
+        "context": "Without Point-in-Time Recovery enabled, deleted items cannot be restored. Enable PITR on production tables to allow recovery up to 35 days back.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "dynamodb batch-write-item",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Batch write can delete or overwrite up to 25 items at once",
+        "context": "BatchWriteItem supports both PutItem and DeleteRequest operations. A single call can permanently delete up to 25 items. Verify the request payload carefully before executing.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

@@ -1,0 +1,86 @@
+[
+  {
+    "command": "organizations create-account",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "New accounts have a root user with no MFA — secure it immediately",
+        "context": "Every new AWS account gets a root user tied to the email you specified. That root user has no MFA until you set it. Automate baseline security (CloudTrail, Config, GuardDuty, SCPs) via a Landing Zone or account vending pipeline before anyone uses the account.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "organizations create-policy",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Test SCPs in a non-production OU before attaching to production accounts",
+        "context": "A misconfigured SCP can lock out all IAM users and roles in every account it's attached to — including your break-glass admin roles. SCPs override IAM policies and cannot be bypassed from within the account.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "organizations attach-policy",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Attaching an SCP to an OU affects every account in it immediately",
+        "context": "There is no staging or preview for SCP attachment. If the policy denies critical actions (e.g. sts:AssumeRole, iam:PassRole), it can break automation and human access across all member accounts at once.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "organizations detach-policy",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Detaching an SCP removes guardrails from all accounts in the target OU",
+        "context": "If the SCP was preventing dangerous actions (e.g. disabling CloudTrail, creating public S3 buckets), removing it immediately opens those actions up across all member accounts.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "organizations delete-policy",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the policy is detached from all targets before deleting",
+        "context": "You can't delete an attached policy, but verify it's not providing critical guardrails before removing it. Deleting a deny-all-regions SCP, for example, immediately allows activity in all regions.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "organizations move-account",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Moving an account changes which SCPs apply to it immediately",
+        "context": "The destination OU's SCPs take effect the moment the account moves. If the destination OU has more permissive SCPs, the account immediately gains access to previously blocked actions.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "organizations leave-organization",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Leaving an organization removes all SCP guardrails and consolidated billing",
+        "context": "The account immediately loses all SCP protections, AWS Config aggregation, Security Hub integration, and consolidated billing. The root user becomes the only way to access the account until IAM is reconfigured.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

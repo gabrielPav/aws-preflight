@@ -1,0 +1,76 @@
+[
+  {
+    "command": "events create-event-bus",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--kms-key-identifier",
+        "severity": "MEDIUM",
+        "message": "Event bus not encrypted with a customer managed KMS key",
+        "context": "Default encryption uses an AWS-owned key with no audit trail. A CMK gives you CloudTrail logs on every encrypt/decrypt and lets you revoke access instantly by disabling the key.",
+        "suggestion": "--kms-key-identifier alias/<your-key>"
+      }
+    ]
+  },
+  {
+    "command": "events put-rule",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Verify the event pattern is as specific as possible",
+        "context": "Overly broad event patterns (e.g. matching all EC2 events) can trigger rules on unintended events and create noisy or dangerous automation. Scope patterns to the exact source, detail-type, and fields you need.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "events put-targets",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the target has a scoped IAM role — not a wildcard trust policy",
+        "context": "EventBridge assumes the role you specify to invoke the target. If that role has broad permissions (e.g. lambda:* or ecs:*), a misconfigured rule can trigger unintended actions at scale.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "events delete-rule",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Deleting a rule stops all event-driven automation tied to it",
+        "context": "If this rule drives critical workflows (auto-remediation, notifications, pipeline triggers), deleting it silently breaks those flows. Disable the rule first and monitor for impact before deleting.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "events create-archive",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--kms-key-identifier",
+        "severity": "MEDIUM",
+        "message": "Event archive not encrypted with a customer managed KMS key",
+        "context": "Archives can contain sensitive event payloads. Without a CMK, you have no key-level audit trail and can't revoke access to archived events independently of the event bus.",
+        "suggestion": "--kms-key-identifier alias/<your-key>"
+      }
+    ]
+  },
+  {
+    "command": "scheduler create-schedule",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the schedule's execution role is scoped to only what the target needs",
+        "context": "EventBridge Scheduler assumes the role you provide to invoke the target. A broad role here means a misconfigured schedule can trigger destructive actions (e.g. deleting resources, invoking wrong Lambda) on a timer.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

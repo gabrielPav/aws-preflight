@@ -1,0 +1,81 @@
+[
+  {
+    "command": "appsync create-graphql-api",
+    "checks": [
+      {
+        "type": "forbidden_value",
+        "flag": "--authentication-type",
+        "forbidden_value": "API_KEY",
+        "severity": "HIGH",
+        "message": "API key authentication is not suitable for production APIs",
+        "context": "API keys are long-lived, can't be scoped to specific users, and are frequently leaked in client-side code or git repos. AWS Security Hub flags this as a finding. Use Cognito User Pools, IAM, or OIDC instead.",
+        "suggestion": "--authentication-type AMAZON_COGNITO_USER_POOLS"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--log-config",
+        "severity": "HIGH",
+        "message": "Field-level logging not configured",
+        "context": "Without logging you have no visibility into which queries are being executed, by whom, or what errors are occurring. AWS Security Hub flags AppSync APIs without logging as a finding.",
+        "suggestion": "--log-config fieldLogLevel=ERROR,cloudWatchLogsRoleArn=<role-arn>"
+      }
+    ]
+  },
+  {
+    "command": "appsync update-graphql-api",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify you're not downgrading authentication type or disabling logging",
+        "context": "Switching from Cognito/IAM to API_KEY or disabling logging on a production API is a significant security regression. Both are flagged by AWS Security Hub.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "appsync create-api-cache",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--at-rest-encryption-enabled",
+        "severity": "HIGH",
+        "message": "AppSync cache not encrypted at rest",
+        "context": "AppSync caches can contain sensitive query results including PII or financial data. AWS Security Hub flags unencrypted caches as a finding (AppSync.1).",
+        "suggestion": "--at-rest-encryption-enabled"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--transit-encryption-enabled",
+        "severity": "HIGH",
+        "message": "AppSync cache not encrypted in transit",
+        "context": "Without transit encryption, data between AppSync and the cache is transmitted in plaintext. AWS Security Hub flags this as a finding (AppSync.6).",
+        "suggestion": "--transit-encryption-enabled"
+      }
+    ]
+  },
+  {
+    "command": "appsync delete-graphql-api",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Deleting a GraphQL API immediately breaks all clients using it",
+        "context": "All resolvers, data sources, and API keys are destroyed. Any mobile or web app pointing to this API endpoint will fail immediately with no graceful degradation.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "appsync create-resolver",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the resolver's data source IAM role is scoped to only the operations this resolver needs",
+        "context": "Resolvers that use a DynamoDB or Lambda data source with broad permissions can be exploited via GraphQL injection to access data outside the intended scope. Scope each resolver's role to specific table/function ARNs.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

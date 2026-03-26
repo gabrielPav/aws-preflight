@@ -1,0 +1,194 @@
+[
+  {
+    "command": "iam create-user",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Creating a long-lived IAM user",
+        "context": "IAM users with static credentials are a top source of credential leaks — they never expire and are often committed to git repos or hardcoded in apps. Prefer IAM roles or AWS IAM Identity Center (SSO) for human access.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam create-role",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Verify the trust policy follows least-privilege",
+        "context": "A trust policy with a wildcard principal (\"AWS\": \"*\") means any AWS account can assume this role. Always scope the Principal to a specific account, service, or ARN.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam attach-role-policy",
+    "checks": [
+      {
+        "type": "forbidden_value",
+        "flag": "--policy-arn",
+        "forbidden_value": "AdministratorAccess",
+        "severity": "HIGH",
+        "message": "Attaching AdministratorAccess — full AWS access granted",
+        "context": "AdministratorAccess is the most powerful policy in AWS. If this role is ever compromised, the attacker owns your entire account. Grant only the specific actions and resources the role actually needs.",
+        "suggestion": ""
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--policy-arn",
+        "forbidden_value": "PowerUserAccess",
+        "severity": "HIGH",
+        "message": "Attaching PowerUserAccess — near-full AWS access granted",
+        "context": "PowerUserAccess grants access to almost all AWS services except IAM and Organizations. This is still extremely broad and violates least-privilege. Scope permissions to only what is needed.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam attach-user-policy",
+    "checks": [
+      {
+        "type": "forbidden_value",
+        "flag": "--policy-arn",
+        "forbidden_value": "AdministratorAccess",
+        "severity": "HIGH",
+        "message": "Attaching AdministratorAccess directly to a user",
+        "context": "Granting a user full admin access creates a permanent high-privilege identity. If the user's credentials are compromised, the attacker has unrestricted access to your entire AWS account.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam put-user-policy",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Inline policy attached directly to a user",
+        "context": "Inline policies are invisible to most auditing tools and can't be reused or reviewed centrally. Use managed policies so permissions are discoverable, auditable, and consistent across your org.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam put-role-policy",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Inline policy attached directly to a role",
+        "context": "Inline policies bypass centralized policy management and are harder to audit. Use customer managed policies instead so permissions can be reviewed, versioned, and reused.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam create-access-key",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Creating long-lived access key",
+        "context": "Static access keys never expire and are the #1 credential type found in public git repos and data breaches. Use `aws sts assume-role` or IAM Identity Center for short-lived credentials instead.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam create-policy",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Review policy document for wildcards in Action or Resource",
+        "context": "Policies with Action:* or Resource:* grant far more permissions than intended. Use the IAM Access Analyzer policy validator to check for overly permissive statements before attaching.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam update-assume-role-policy",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Trust policy being updated — verify no wildcard principals are introduced",
+        "context": "A trust policy with Principal:* allows any entity in the world to attempt to assume this role. This is a critical misconfiguration that can lead to privilege escalation from outside your account.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam delete-role",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Role deletion is permanent — verify no active workloads depend on it",
+        "context": "Deleting a role used by EC2 instances, Lambda functions, or ECS tasks will immediately break those workloads. AWS does not warn you about active usage before deletion.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam delete-user",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "User deletion is permanent — ensure access keys and MFA devices are removed first",
+        "context": "Deleting a user with active access keys or MFA devices can leave orphaned credentials. Deactivate and delete all access keys and MFA devices before deleting the user.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam create-login-profile",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Console access enabled for IAM user — ensure MFA is enforced",
+        "context": "Console passwords without MFA are a significant risk. Enforce MFA via an IAM policy condition (aws:MultiFactorAuthPresent: true) so the user cannot perform sensitive actions without a second factor.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam deactivate-mfa-device",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "MFA device being deactivated — this reduces account security",
+        "context": "Deactivating MFA removes a critical layer of protection. Ensure this is intentional and that the user will immediately re-enroll a new MFA device. Never deactivate MFA for the root account.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam attach-group-policy",
+    "checks": [
+      {
+        "type": "forbidden_value",
+        "flag": "--policy-arn",
+        "forbidden_value": "AdministratorAccess",
+        "severity": "HIGH",
+        "message": "Attaching AdministratorAccess to an IAM group",
+        "context": "Every user in this group will receive full admin access to your entire AWS account. If any group member's credentials are compromised, the attacker has unrestricted access. Scope permissions to only what is needed.",
+        "suggestion": ""
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--policy-arn",
+        "forbidden_value": "PowerUserAccess",
+        "severity": "HIGH",
+        "message": "Attaching PowerUserAccess to an IAM group",
+        "context": "PowerUserAccess grants access to almost all AWS services except IAM and Organizations. Every user in this group inherits these broad permissions. Scope to specific services and actions.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

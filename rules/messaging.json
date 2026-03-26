@@ -1,0 +1,102 @@
+[
+  {
+    "command": "sns create-topic",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--attributes",
+        "severity": "MEDIUM",
+        "message": "KMS encryption not configured for SNS topic",
+        "context": "SNS topics without KMS encryption store messages in plaintext. For topics carrying sensitive data (PII, financial records), enable server-side encryption with a customer managed KMS key.",
+        "suggestion": "--attributes KmsMasterKeyId=alias/aws/sns"
+      }
+    ]
+  },
+  {
+    "command": "sns set-topic-attributes",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Review topic policy for wildcard principals",
+        "context": "An SNS topic policy with Principal:* allows any AWS account to publish or subscribe. This can be exploited to inject malicious messages or subscribe to sensitive notifications.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "sns subscribe",
+    "checks": [
+      {
+        "type": "forbidden_value",
+        "flag": "--protocol",
+        "forbidden_value": "http",
+        "severity": "HIGH",
+        "message": "SNS subscription using unencrypted HTTP endpoint",
+        "context": "HTTP subscriptions transmit SNS messages in plaintext, exposing message content and enabling man-in-the-middle attacks. Use HTTPS endpoints only.",
+        "suggestion": "--protocol https"
+      }
+    ]
+  },
+  {
+    "command": "sns delete-topic",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Topic deletion removes all subscriptions permanently",
+        "context": "Deleting an SNS topic immediately removes all subscriptions. Any publishers sending to this topic ARN will receive errors. Subscribers will stop receiving notifications without warning.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "sqs create-queue",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--attributes",
+        "severity": "MEDIUM",
+        "message": "KMS encryption not configured for SQS queue",
+        "context": "SQS queues without server-side encryption store messages in plaintext. For queues carrying sensitive data, enable SSE with a KMS key using the KmsMasterKeyId attribute.",
+        "suggestion": "--attributes KmsMasterKeyId=alias/aws/sqs"
+      }
+    ]
+  },
+  {
+    "command": "sqs set-queue-attributes",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Review queue policy for wildcard principals",
+        "context": "An SQS queue policy with Principal:* allows any AWS account to send or receive messages. This can be exploited to inject malicious messages or drain the queue. Scope access to specific principals.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "sqs delete-queue",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Queue deletion is permanent — all unprocessed messages will be lost",
+        "context": "Deleting an SQS queue destroys all messages in it, including those not yet processed. There is a 60-second delay before deletion completes, but it cannot be cancelled once initiated.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "sqs purge-queue",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Queue purge deletes ALL messages permanently",
+        "context": "PurgeQueue deletes every message in the queue immediately. This cannot be undone. Ensure this is intentional and that no critical unprocessed messages will be lost.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

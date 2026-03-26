@@ -1,0 +1,70 @@
+[
+  {
+    "command": "backup create-backup-plan",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the backup plan includes cross-region or cross-account copies for DR",
+        "context": "A backup in the same region as the source doesn't protect against regional failures or ransomware that has access to your account. Add a copy rule to a separate region or account.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "backup create-backup-vault",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--encryption-key-arn",
+        "severity": "HIGH",
+        "message": "Backup vault not encrypted with a customer managed KMS key",
+        "context": "Backup vaults use an AWS-managed key by default. A CMK lets you control who can decrypt backups independently of who has access to the vault, and gives you a CloudTrail audit trail of every restore.",
+        "suggestion": "--encryption-key-arn arn:aws:kms:<region>:<account>:key/<key-id>"
+      },
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Configure a vault lock policy to prevent backup deletion",
+        "context": "Without vault lock, anyone with backup:DeleteRecoveryPoint can delete your backups — including ransomware or a compromised admin account. Vault lock (WORM) makes backups immutable for a defined period.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "backup delete-backup-vault",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Vault deletion destroys all recovery points in it",
+        "context": "All backups stored in this vault are permanently deleted. You cannot delete a vault that contains recovery points — you must delete each recovery point first, which is itself a destructive operation.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "backup delete-recovery-point",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Recovery point deletion is permanent — verify this is not your only backup",
+        "context": "Deleting a recovery point removes that backup permanently. If this is the only backup of a resource and the resource is later corrupted or deleted, there is no recovery path.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "backup start-restore-job",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the restore target is isolated from production until validation is complete",
+        "context": "Restoring directly into a production environment can overwrite live data or cause conflicts. Restore to a separate account or VPC, validate the data, then cut over.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

@@ -1,0 +1,86 @@
+[
+  {
+    "command": "eks create-cluster",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--logging",
+        "severity": "HIGH",
+        "message": "EKS control plane logging not enabled",
+        "context": "Without control plane logs (api, audit, authenticator, controllerManager, scheduler), you have no visibility into who accessed the Kubernetes API or what changes were made. These logs are critical for incident response.",
+        "suggestion": "--logging '{\"clusterLogging\":[{\"types\":[\"api\",\"audit\",\"authenticator\",\"controllerManager\",\"scheduler\"],\"enabled\":true}]}'"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--encryption-config",
+        "severity": "HIGH",
+        "message": "EKS secrets encryption not configured",
+        "context": "Without envelope encryption, Kubernetes secrets (which often contain database passwords, API keys, and TLS certs) are stored in etcd in base64 only — not encrypted. Use a KMS key to encrypt secrets at rest.",
+        "suggestion": "--encryption-config '[{\"resources\":[\"secrets\"],\"provider\":{\"keyArn\":\"<your-kms-key-arn>\"}}]'"
+      },
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the cluster endpoint is not publicly accessible without IP restrictions",
+        "context": "By default, the EKS API server endpoint is publicly accessible. Restrict access using --resources-vpc-config endpointPublicAccess=true,publicAccessCidrs=<your-ip>/32 or disable public access entirely.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "eks update-cluster-config",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify endpoint access settings are not being made more permissive",
+        "context": "Enabling public endpoint access without IP restrictions exposes the Kubernetes API server to the entire internet. Brute-force and credential stuffing attacks against the API server are common.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "eks create-nodegroup",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Ensure node IAM role follows least-privilege",
+        "context": "Node group IAM roles are attached to every EC2 instance in the group. Overly permissive roles mean a compromised pod can access the instance metadata service and steal the node's credentials.",
+        "suggestion": ""
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--disk-size",
+        "severity": "LOW",
+        "message": "Disk size not specified — default may be insufficient for workloads",
+        "context": "Nodes running out of disk space can cause pod evictions and cluster instability. Specify an appropriate disk size for your workloads.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "eks delete-cluster",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "EKS cluster deletion is permanent — all workloads will be terminated",
+        "context": "Deleting an EKS cluster terminates all node groups and running pods. Persistent volumes (EBS) may be deleted depending on the reclaim policy. Ensure all critical data is backed up before proceeding.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "eks associate-identity-provider-config",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify OIDC provider configuration before associating",
+        "context": "Misconfigured OIDC identity providers can allow unintended principals to authenticate to your cluster. Verify the issuer URL, client ID, and username/groups claims are correctly scoped.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

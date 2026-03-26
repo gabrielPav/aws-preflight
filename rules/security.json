@@ -1,0 +1,106 @@
+[
+  {
+    "command": "secretsmanager create-secret",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--kms-key-id",
+        "severity": "MEDIUM",
+        "message": "Secret not encrypted with a customer managed KMS key",
+        "context": "By default, Secrets Manager uses the AWS managed key (aws/secretsmanager). Using a customer managed KMS key gives you full control over key rotation, access policies, and an audit trail of every decryption via CloudTrail.",
+        "suggestion": "--kms-key-id alias/<your-key-alias>"
+      }
+    ]
+  },
+  {
+    "command": "secretsmanager put-secret-value",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify you are not storing plaintext credentials in --secret-string",
+        "context": "The --secret-string value is logged in CloudTrail and shell history. Use a JSON structure for structured secrets and avoid passing raw passwords directly on the command line.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "secretsmanager delete-secret",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Secret deletion has a recovery window — verify no applications depend on it",
+        "context": "By default, secrets are scheduled for deletion after 30 days. Applications still referencing this secret will fail immediately. Use --recovery-window-in-days 0 only if you are certain the secret is unused.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "secretsmanager rotate-secret",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Ensure all applications are updated to fetch the new secret value after rotation",
+        "context": "Secret rotation changes the secret value immediately. Applications that cache credentials will fail until they refresh. Ensure your rotation Lambda function handles the AWSPENDING, AWSCURRENT, and AWSPREVIOUS stages correctly.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "kms create-key",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Enable automatic key rotation after creation with `aws kms enable-key-rotation`",
+        "context": "Key rotation is not a flag on create-key — it requires a separate API call. AWS recommends enabling automatic annual rotation for all customer managed KMS keys. Key rotation limits the blast radius if a key is ever compromised, and is required by many compliance frameworks.",
+        "suggestion": ""
+      },
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Review the key policy for wildcard principals",
+        "context": "A KMS key policy with Principal:* grants any AWS principal access to the key. This can allow unintended decryption of encrypted data. Always scope key policies to specific accounts, roles, or users.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "kms schedule-key-deletion",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "KMS key deletion is permanent — all data encrypted with this key will be unrecoverable",
+        "context": "Once a KMS key is deleted, any data encrypted with it (S3 objects, RDS databases, EBS volumes, Secrets Manager secrets) becomes permanently inaccessible. There is no way to recover the key or the data. Use the maximum waiting period (30 days) to allow time to identify dependencies.",
+        "suggestion": "--pending-window-in-days 30"
+      }
+    ]
+  },
+  {
+    "command": "kms disable-key",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Disabling a KMS key will immediately break all services using it",
+        "context": "Disabling a KMS key prevents all encrypt/decrypt operations. Any service using this key (S3, RDS, EBS, Secrets Manager) will fail immediately. Identify all key users before disabling.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "kms put-key-policy",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the new key policy does not lock out all administrators",
+        "context": "A misconfigured KMS key policy can lock out all IAM users and roles, making the key permanently unmanageable. Always ensure the key policy includes at least one admin principal with kms:PutKeyPolicy permission.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

@@ -1,0 +1,65 @@
+[
+  {
+    "command": "batch create-compute-environment",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--compute-resources",
+        "severity": "HIGH",
+        "message": "Verify compute resources use a private subnet — not a public one",
+        "context": "Batch jobs running in public subnets get public IPs and are directly reachable from the internet. Always run compute environments in private subnets with a NAT gateway for outbound access.",
+        "suggestion": ""
+      },
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the instance role is scoped to only what your jobs need",
+        "context": "The EC2 instance role is attached to every node in the compute environment. Jobs running on those nodes can access the instance metadata service and steal those credentials. Scope the role tightly.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "batch create-job-definition",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the job role is scoped to only the AWS resources this job actually touches",
+        "context": "Job roles are passed directly to the container. A job with s3:* or dynamodb:* can access every bucket or table in your account. Scope to specific resource ARNs.",
+        "suggestion": ""
+      },
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Never pass secrets as environment variables in the job definition",
+        "context": "Environment variables in job definitions are stored in plaintext and visible to anyone with batch:DescribeJobDefinitions. Use Secrets Manager or SSM Parameter Store references instead.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "batch submit-job",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the job queue targets the correct compute environment",
+        "context": "Submitting to the wrong queue can run jobs in a production compute environment when you intended dev, or vice versa. Double-check the queue name before submitting long-running or expensive jobs.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "batch delete-compute-environment",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Disable the compute environment and drain all jobs before deleting",
+        "context": "You can't delete a compute environment that's associated with a job queue. Disable it first, wait for running jobs to complete or terminate them, then disassociate from queues before deleting.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

@@ -1,0 +1,160 @@
+[
+  {
+    "command": "sagemaker create-notebook-instance",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--kms-key-id",
+        "severity": "HIGH",
+        "message": "Notebook instance storage not encrypted with a KMS key",
+        "context": "Notebook instances store model code, training data, and credentials on EBS. Without a KMS key, that storage is encrypted with an AWS-managed key with no audit trail.",
+        "suggestion": "--kms-key-id alias/<your-key>"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--subnet-id",
+        "severity": "HIGH",
+        "message": "No subnet specified — notebook may be deployed with direct internet access",
+        "context": "Without a subnet, SageMaker deploys the notebook with a public IP. Notebooks should run in private subnets with internet access via NAT, not directly exposed.",
+        "suggestion": "--subnet-id subnet-<your-private-subnet>"
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--direct-internet-access",
+        "forbidden_value": "Enabled",
+        "severity": "HIGH",
+        "message": "Direct internet access enabled on notebook instance",
+        "context": "A notebook with direct internet access is reachable from the public internet and can exfiltrate data or download malicious packages without going through your VPC controls. Disable it and use NAT.",
+        "suggestion": "--direct-internet-access Disabled"
+      }
+    ]
+  },
+  {
+    "command": "sagemaker create-training-job",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--output-data-config",
+        "severity": "MEDIUM",
+        "message": "Verify output S3 bucket has encryption and access controls configured",
+        "context": "Training job output (model artifacts) is written to S3. If that bucket is misconfigured, your trained models — which may encode sensitive training data — are exposed.",
+        "suggestion": ""
+      },
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the execution role is scoped to only the S3 buckets and resources this job needs",
+        "context": "Training job roles with s3:* can read every bucket in your account. If your training data includes PII, a misconfigured role can expose it to other jobs or services.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "sagemaker create-endpoint",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the endpoint has authentication — SageMaker endpoints require IAM auth by default but can be misconfigured",
+        "context": "SageMaker real-time endpoints require AWS SigV4 signing by default. If you're fronting the endpoint with API Gateway or Lambda, ensure those layers enforce authentication before passing requests through.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "sagemaker delete-endpoint",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Endpoint deletion is immediate — any application calling it will fail instantly",
+        "context": "There is no graceful drain for SageMaker endpoints. All in-flight requests fail immediately. Update your application to stop sending traffic before deleting.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "rekognition create-collection",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Face collections store biometric data — verify your data handling complies with GDPR, CCPA, and BIPA",
+        "context": "Facial recognition data is biometric PII under most privacy laws. Storing faces without explicit consent and a documented retention/deletion policy is a legal liability in many jurisdictions.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "rekognition delete-collection",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Deleting a collection permanently removes all indexed faces",
+        "context": "All face vectors stored in the collection are destroyed. Any application using this collection for face search or verification will fail immediately.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "comprehend create-document-classifier",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify training data in S3 doesn't contain unredacted PII",
+        "context": "Comprehend training jobs read from S3. If your training documents contain names, SSNs, or medical data, that data is processed by the service and stored in the output bucket. Redact PII before training.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "lex create-bot",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the bot doesn't log sensitive user inputs to CloudWatch",
+        "context": "Lex conversation logs capture everything users say to the bot, including passwords, credit card numbers, and PII if users type them. Enable PII redaction in conversation logs or disable logging for sensitive bots.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "polly start-speech-synthesis-task",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the output S3 bucket is private and the text input doesn't contain sensitive data",
+        "context": "Polly writes audio files to S3. If the input text contains PII or confidential content and the output bucket is public, that content is exposed as an audio file.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "translate translate-text",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Text sent to Translate may be used to improve AWS models unless you opt out",
+        "context": "By default, AWS may use your data to improve services. If you're translating confidential documents or PII, enable data privacy settings or use a custom terminology endpoint in an isolated environment.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "forecast create-dataset",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the dataset import role is scoped to only the S3 bucket containing forecast data",
+        "context": "Forecast assumes the IAM role you provide to read training data from S3. A role with s3:* can read every bucket in your account. Scope it to the specific bucket and prefix.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

@@ -1,0 +1,159 @@
+[
+  {
+    "command": "elbv2 create-load-balancer",
+    "checks": [
+      {
+        "type": "forbidden_value",
+        "flag": "--scheme",
+        "forbidden_value": "internet-facing",
+        "severity": "MEDIUM",
+        "message": "Creating an internet-facing load balancer",
+        "context": "Internet-facing load balancers are directly reachable from the public internet. Ensure security groups restrict access to only required ports (80, 443) and that WAF is attached for application load balancers.",
+        "suggestion": ""
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--type",
+        "severity": "INFO",
+        "message": "Load balancer type not specified",
+        "context": "Defaulting to Classic Load Balancer is deprecated. Use Application Load Balancer (ALB) for HTTP/HTTPS traffic or Network Load Balancer (NLB) for TCP/UDP. ALB supports WAF integration for security.",
+        "suggestion": "--type application"
+      }
+    ]
+  },
+  {
+    "command": "elbv2 create-listener",
+    "checks": [
+      {
+        "type": "forbidden_value",
+        "flag": "--protocol",
+        "forbidden_value": "HTTP",
+        "severity": "MEDIUM",
+        "message": "Listener using unencrypted HTTP",
+        "context": "HTTP listeners transmit all traffic in plaintext. Create an HTTPS listener with a valid SSL certificate and add an HTTP listener only to redirect traffic to HTTPS.",
+        "suggestion": "--protocol HTTPS"
+      }
+    ]
+  },
+  {
+    "command": "elbv2 delete-load-balancer",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Load balancer deletion will immediately drop all traffic",
+        "context": "Deleting a load balancer causes an immediate outage for all services behind it. Ensure DNS records are updated and traffic is drained before deletion.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "elbv2 modify-listener",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify SSL/TLS policy is not being downgraded",
+        "context": "Changing the SSL policy to an older version (e.g. ELBSecurityPolicy-2016-08) enables weak ciphers and older TLS versions. Use ELBSecurityPolicy-TLS13-1-2-2021-06 or newer.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "apigateway create-rest-api",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Ensure API authentication and throttling are configured",
+        "context": "APIs without authentication are publicly accessible. Without throttling, a single client can overwhelm your backend. Configure API keys, Cognito authorizers, or IAM auth, and set usage plans with rate limits.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "apigateway create-deployment",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Verify the stage has access logging and X-Ray tracing enabled",
+        "context": "Without access logging, you have no record of who called your API and with what parameters. Without X-Ray, you cannot trace requests through your backend. Both are critical for security monitoring.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "apigateway delete-rest-api",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "API deletion is permanent and immediately breaks all clients",
+        "context": "Deleting a REST API removes all resources, methods, stages, and deployments. All clients using this API will receive errors immediately. This action cannot be undone.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "apigatewayv2 create-api",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify authentication is configured — HTTP APIs have no auth by default",
+        "context": "HTTP APIs (v2) are publicly accessible with no authentication unless you explicitly add a JWT authorizer or IAM auth. Unlike REST APIs, there's no API key support — use JWT authorizers with Cognito or a custom OIDC provider.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "apigatewayv2 create-stage",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--access-log-settings",
+        "severity": "HIGH",
+        "message": "Access logging not configured for this stage",
+        "context": "Without access logs you have no record of who called your API, what they sent, or what errors occurred. This is required for incident response and most compliance frameworks.",
+        "suggestion": "--access-log-settings destinationArn=arn:aws:logs:<region>:<account>:log-group:<group>"
+      }
+    ]
+  },
+  {
+    "command": "apigatewayv2 delete-api",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "HTTP API deletion immediately breaks all clients",
+        "context": "All routes, integrations, authorizers, and stages are destroyed. Any client using this API endpoint will fail immediately.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "wafv2 create-web-acl",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Verify the default action is BLOCK, not ALLOW, for security-sensitive APIs",
+        "context": "A WAF ACL with a default ALLOW action only blocks traffic that matches your rules. For APIs handling sensitive data, consider a default BLOCK with explicit ALLOW rules for known-good traffic patterns.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "wafv2 delete-web-acl",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Deleting a WAF ACL removes all protection from associated resources",
+        "context": "Any CloudFront distribution, ALB, API Gateway, or AppSync API associated with this ACL immediately loses WAF protection. Disassociate the ACL from all resources before deleting.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

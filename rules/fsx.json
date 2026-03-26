@@ -1,0 +1,46 @@
+[
+  {
+    "command": "fsx create-file-system",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--kms-key-id",
+        "severity": "HIGH",
+        "message": "FSx file system not encrypted with a customer managed KMS key",
+        "context": "FSx for Windows and Lustre support KMS encryption. Without a CMK, you're using an AWS-managed key with no audit trail. For file systems storing sensitive data, use a CMK so you can track and revoke access.",
+        "suggestion": "--kms-key-id alias/<your-key>"
+      },
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the file system is deployed in private subnets only",
+        "context": "FSx file systems should never be in public subnets. The associated security group must restrict SMB (445) or Lustre (988) to only the specific CIDR ranges or security groups that need access.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "fsx delete-file-system",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "FSx deletion is permanent — create a final backup first",
+        "context": "All data on the file system is destroyed. For FSx for Windows, take a final backup before deleting. For Lustre, ensure all data has been copied out — Lustre has no native backup.",
+        "suggestion": "--final-backup-tags Key=reason,Value=pre-deletion-backup"
+      }
+    ]
+  },
+  {
+    "command": "fsx create-backup",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Verify backup retention and cross-region copy are configured for DR",
+        "context": "A single-region backup doesn't protect against regional outages. For critical file systems, configure cross-region backup copies and verify restore procedures work before you need them.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

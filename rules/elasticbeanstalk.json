@@ -1,0 +1,69 @@
+[
+  {
+    "command": "elasticbeanstalk create-environment",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the environment is not using the default service role — it has broad permissions",
+        "context": "The default Elastic Beanstalk service role has AdministratorAccess-like permissions. Create a scoped role with only the permissions your environment actually needs.",
+        "suggestion": ""
+      },
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify HTTPS is configured — Beanstalk serves HTTP by default",
+        "context": "Default Beanstalk environments serve traffic over HTTP. Configure an HTTPS listener on the load balancer and redirect HTTP to HTTPS. Never serve production traffic unencrypted.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "elasticbeanstalk update-environment",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify environment variables don't contain plaintext secrets",
+        "context": "Beanstalk environment variables are visible in the console and stored in plaintext. Anyone with elasticbeanstalk:DescribeConfigurationSettings can read them. Use Secrets Manager references instead.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "elasticbeanstalk terminate-environment",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Termination deletes all environment resources including RDS if created by Beanstalk",
+        "context": "If you created an RDS instance through Beanstalk, terminating the environment deletes the database. Decouple your RDS from Beanstalk before terminating if you need to keep the data.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "elasticbeanstalk delete-application",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Deleting an application removes all versions and environments permanently",
+        "context": "All application versions stored in S3 and all associated environments are destroyed. This cannot be undone. Terminate all environments first and verify no active traffic before deleting.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "elasticbeanstalk create-application-version",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the source bundle doesn't contain hardcoded credentials or .env files",
+        "context": "Application bundles uploaded to S3 are accessible to anyone with S3 read access to that bucket. Scan your bundle for secrets before uploading — git history, .env files, and config files are common culprits.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

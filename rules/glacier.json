@@ -1,0 +1,50 @@
+[
+  {
+    "command": "glacier create-vault",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Enable vault lock for compliance workloads requiring WORM storage",
+        "context": "Glacier vaults without vault lock can have archives deleted at any time. For compliance use cases (HIPAA, SEC 17a-4, FINRA), initiate a vault lock policy to make archives immutable.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "glacier set-vault-access-policy",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the vault policy doesn't grant public access",
+        "context": "A vault access policy with Principal: * makes your archived data accessible to any AWS principal. Glacier archives often contain sensitive long-term data — scope access to specific IAM roles.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "glacier delete-vault",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Vault must be empty before deletion — all archives must be deleted first",
+        "context": "You can't delete a vault that contains archives. Deleting archives from Glacier is a multi-step async process (initiate job, wait up to 24h, then delete). Plan this operation well in advance.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "s3api put-bucket-lifecycle-configuration",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Lifecycle rules that expire objects are permanent — verify the scope before applying",
+        "context": "A lifecycle rule with Expiration on a prefix that's too broad will silently delete objects that match. Test with a narrow prefix first and verify the rule targets exactly what you intend.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

@@ -1,0 +1,67 @@
+[
+  {
+    "command": "elasticache create-replication-group",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--at-rest-encryption-enabled",
+        "severity": "HIGH",
+        "message": "ElastiCache at-rest encryption not enabled",
+        "context": "Without at-rest encryption, cache data (which often includes session tokens, user data, or query results) is stored in plaintext. Encryption must be enabled at creation time and cannot be added later.",
+        "suggestion": "--at-rest-encryption-enabled"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--transit-encryption-enabled",
+        "severity": "HIGH",
+        "message": "ElastiCache in-transit encryption not enabled",
+        "context": "Without TLS, all data between your application and the cache is transmitted in plaintext. This exposes session data, cached credentials, and application data to network interception.",
+        "suggestion": "--transit-encryption-enabled"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--auth-token",
+        "severity": "MEDIUM",
+        "message": "Redis AUTH token not configured",
+        "context": "Without an AUTH token, any client that can reach the Redis endpoint can read and write all cached data. Always configure an AUTH token for Redis clusters, especially in shared VPCs.",
+        "suggestion": "--auth-token <strong-random-token>"
+      }
+    ]
+  },
+  {
+    "command": "elasticache create-cache-cluster",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Prefer replication groups over standalone clusters for production",
+        "context": "Standalone cache clusters have no failover capability. A single node failure causes complete cache loss. Use replication groups with Multi-AZ for production workloads.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "elasticache delete-replication-group",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Replication group deletion will cause immediate cache loss",
+        "context": "Deleting a replication group destroys all cached data immediately. Applications will experience a cold cache and increased database load. Ensure this is planned and that the database can handle the surge.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "elasticache modify-replication-group",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify modifications do not disable encryption or authentication",
+        "context": "Modifying a replication group can change security settings. Ensure transit encryption and AUTH token settings are not being weakened.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

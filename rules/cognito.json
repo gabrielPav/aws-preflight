@@ -1,0 +1,107 @@
+[
+  {
+    "command": "cognito-idp create-user-pool",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify MFA is enforced — not just optional",
+        "context": "Setting MFA to OPTIONAL means users can skip it entirely. For any pool handling real users, set it to ON (TOTP) or use adaptive authentication. AWS Config flags pools without MFA as NON_COMPLIANT.",
+        "suggestion": ""
+      },
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Enable advanced security / threat protection",
+        "context": "Without threat protection, Cognito won't detect compromised credentials, block suspicious sign-ins, or flag account takeover attempts. This is the single most impactful security setting in Cognito.",
+        "suggestion": ""
+      },
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Set a strong password policy — minimum 12 chars, require uppercase, lowercase, numbers, symbols",
+        "context": "Default Cognito password policy allows 8-char passwords with minimal complexity. Weak passwords are the #1 vector for account takeover in user pools exposed to the internet.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "cognito-idp create-user-pool-client",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify token expiry is not set too long",
+        "context": "Long-lived access tokens (default is 1 hour, refresh tokens default to 30 days) increase the window for token theft. Set access token validity to 15-60 minutes and refresh tokens to the minimum your app needs.",
+        "suggestion": ""
+      },
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Disable unused OAuth flows — especially implicit grant",
+        "context": "The implicit grant flow returns tokens in the URL fragment, which gets logged in browser history, server logs, and referrer headers. Only enable authorization_code flow for web apps.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "cognito-idp admin-create-user",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Temporary passwords expire after 7 days by default",
+        "context": "If the user doesn't sign in within 7 days, the account goes into FORCE_CHANGE_PASSWORD state permanently. You'll need to resend the invitation. Consider setting a shorter expiry for security-sensitive pools.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "cognito-idp admin-set-user-password",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Setting a permanent password bypasses the forced-change flow",
+        "context": "Using --permanent skips the requirement for the user to set their own password on first login. Only use this for service accounts or automated testing — never for real user accounts.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "cognito-idp delete-user-pool",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "User pool deletion is permanent — all users, groups, and app clients are destroyed",
+        "context": "There is no export or recovery option. All user accounts, attributes, and credentials are gone. Any application using this pool's client IDs will break immediately.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "cognito-idp update-user-pool",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify you're not weakening MFA or password policy settings",
+        "context": "Pool updates can silently downgrade security settings. Changing MFA from ON to OPTIONAL or relaxing password complexity affects all existing and future users immediately.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "cognito-idp create-identity-pool",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify unauthenticated access is disabled unless explicitly required",
+        "context": "Enabling unauthenticated identities grants AWS credentials to anyone — no login required. The unauthenticated IAM role must be locked down to the absolute minimum. Most apps don't need this at all.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

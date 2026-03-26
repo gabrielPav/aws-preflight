@@ -1,0 +1,225 @@
+[
+  {
+    "command": "s3api create-bucket",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "New S3 bucket — verify Block Public Access is enabled",
+        "context": "Public S3 buckets are the #1 cause of AWS data breaches. Billions of records have been exposed this way. Run `aws s3api put-public-access-block` immediately after creation.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "s3api put-public-access-block",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Verify all four Block Public Access settings are set to true",
+        "context": "There are four independent Block Public Access settings. Setting only some of them still leaves gaps. All four should be true: BlockPublicAcls, IgnorePublicAcls, BlockPublicPolicy, RestrictPublicBuckets.",
+        "suggestion": "--public-access-block-configuration BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
+      }
+    ]
+  },
+  {
+    "command": "s3api put-bucket-acl",
+    "checks": [
+      {
+        "type": "forbidden_value",
+        "flag": "--acl",
+        "forbidden_value": "public-read",
+        "severity": "HIGH",
+        "message": "Bucket ACL set to public-read",
+        "context": "This makes every object in the bucket readable by anyone on the internet — no credentials required. If you need to share files publicly, use a CloudFront distribution with an Origin Access Identity instead.",
+        "suggestion": "--acl private"
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--acl",
+        "forbidden_value": "public-read-write",
+        "severity": "HIGH",
+        "message": "Bucket ACL set to public-read-write",
+        "context": "Anyone on the internet can read AND write to this bucket. This is almost never intentional and can lead to data injection, ransomware uploads, or massive egress charges from abuse.",
+        "suggestion": "--acl private"
+      }
+    ]
+  },
+  {
+    "command": "s3api put-bucket-encryption",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Prefer SSE-KMS over SSE-S3 for stronger key control",
+        "context": "SSE-S3 uses a key managed entirely by AWS with no audit trail. SSE-KMS gives you key rotation, CloudTrail logs of every decryption, and the ability to revoke access instantly by disabling the key.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "s3api put-bucket-versioning",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Ensure MFA Delete is also enabled for critical buckets",
+        "context": "Versioning alone doesn't prevent deletion — it just keeps old versions. MFA Delete requires a second factor to permanently delete versions, protecting against both accidental deletion and ransomware.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "s3api put-bucket-policy",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Review bucket policy for wildcard principals or actions",
+        "context": "Bucket policies with Principal:* or Action:s3:* can expose your bucket to the entire internet or grant excessive permissions. Always scope to specific principals, actions, and resources.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "s3api delete-bucket",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Bucket deletion is permanent and irreversible",
+        "context": "Deleting an S3 bucket removes all objects and cannot be undone. Bucket names are globally unique — once deleted, another AWS account could claim the same name, potentially breaking application references.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "s3api delete-objects",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Bulk object deletion — verify bucket has versioning enabled",
+        "context": "Without versioning, deleted objects are permanently gone. This operation can delete thousands of objects in a single call. Run with a dry-run or list the objects first to confirm the scope.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "s3 cp",
+    "checks": [
+      {
+        "type": "forbidden_value",
+        "flag": "--acl",
+        "forbidden_value": "public-read",
+        "severity": "HIGH",
+        "message": "File uploaded with public-read ACL",
+        "context": "This object will be accessible to anyone with the URL — no AWS credentials needed. A common mistake when testing that gets forgotten and left public. Use a pre-signed URL for temporary sharing instead.",
+        "suggestion": "--acl private"
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--no-verify-ssl",
+        "forbidden_value": "",
+        "severity": "HIGH",
+        "message": "SSL verification disabled",
+        "context": "Disabling SSL verification exposes your data and credentials to man-in-the-middle attacks. If you're hitting a proxy or cert error, fix the certificate trust chain — don't bypass it.",
+        "suggestion": ""
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--sse",
+        "severity": "LOW",
+        "message": "Server-side encryption not explicitly specified for upload",
+        "context": "While S3 default encryption may be configured at the bucket level, explicitly specifying --sse aws:kms ensures the object is encrypted with KMS regardless of bucket defaults.",
+        "suggestion": "--sse aws:kms"
+      }
+    ]
+  },
+  {
+    "command": "s3 sync",
+    "checks": [
+      {
+        "type": "forbidden_value",
+        "flag": "--acl",
+        "forbidden_value": "public-read",
+        "severity": "HIGH",
+        "message": "Syncing with public-read ACL — all synced objects will be publicly accessible",
+        "context": "Every file in this sync operation will be readable by anyone on the internet. A single sync of the wrong directory can expose source code, credentials, or customer data.",
+        "suggestion": "--acl private"
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--delete",
+        "forbidden_value": "",
+        "severity": "MEDIUM",
+        "message": "--delete flag will permanently remove files not present in the source",
+        "context": "This is a common cause of accidental data loss. Files deleted from S3 without versioning enabled are unrecoverable. Run with --dryrun first to preview what will be deleted.",
+        "suggestion": "--dryrun"
+      }
+    ]
+  },
+  {
+    "command": "s3 rm",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "S3 delete operation — this may be irreversible",
+        "context": "If the bucket does not have versioning enabled, deleted objects are gone permanently. There is no recycle bin. Run `aws s3 ls` first to confirm the target, and consider --dryrun if available.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "s3api put-object",
+    "checks": [
+      {
+        "type": "forbidden_value",
+        "flag": "--acl",
+        "forbidden_value": "public-read",
+        "severity": "HIGH",
+        "message": "Object uploaded with public-read ACL",
+        "context": "This object is readable by anyone on the internet without authentication. Use pre-signed URLs for temporary access instead of making objects permanently public.",
+        "suggestion": "--acl private"
+      }
+    ]
+  },
+  {
+    "command": "s3api get-object",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Ensure you are not downloading sensitive data to an insecure location",
+        "context": "Downloading secrets, credentials, or PII to a local machine or shared filesystem can inadvertently expose sensitive data. Verify the destination path is appropriate.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "s3api delete-public-access-block",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Removing Block Public Access — bucket may become publicly accessible",
+        "context": "Deleting the public access block removes all four protections (BlockPublicAcls, IgnorePublicAcls, BlockPublicPolicy, RestrictPublicBuckets). Any existing public ACLs or bucket policies will immediately take effect, potentially exposing data to the internet.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "s3api delete-bucket-encryption",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Removing default bucket encryption — new objects will be unencrypted",
+        "context": "Deleting the default encryption configuration means new objects uploaded without explicit encryption will be stored unencrypted. Existing encrypted objects remain encrypted, but this creates a gap for future uploads.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

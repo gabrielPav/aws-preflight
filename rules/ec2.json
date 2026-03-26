@@ -1,0 +1,244 @@
+[
+  {
+    "command": "ec2 run-instances",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--metadata-options",
+        "expected_value": "HttpTokens=required",
+        "severity": "HIGH",
+        "message": "IMDSv2 not enforced",
+        "context": "Without this, any process running on the instance (including malware) can steal the attached IAM role credentials with a single curl command — no authentication required.",
+        "suggestion": "--metadata-options HttpTokens=required"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--block-device-mappings",
+        "severity": "HIGH",
+        "message": "Root volume encryption not specified",
+        "context": "Unencrypted EBS volumes can be detached and mounted on another instance, exposing all data at rest. Encryption is free and has no performance impact on modern instance types.",
+        "suggestion": "--block-device-mappings '[{\"DeviceName\":\"/dev/xvda\",\"Ebs\":{\"Encrypted\":true}}]'"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--monitoring",
+        "severity": "LOW",
+        "message": "Detailed monitoring not enabled",
+        "context": "Without detailed monitoring, CloudWatch metrics are only available at 5-minute intervals. Detailed monitoring provides 1-minute granularity, critical for detecting and responding to security incidents quickly.",
+        "suggestion": "--monitoring Enabled=true"
+      }
+    ]
+  },
+  {
+    "command": "ec2 authorize-security-group-ingress",
+    "checks": [
+      {
+        "type": "forbidden_value",
+        "flag": "--cidr",
+        "forbidden_value": "0.0.0.0/0",
+        "severity": "HIGH",
+        "message": "Port open to the entire internet (0.0.0.0/0)",
+        "context": "Exposing ports to the world is one of the most common causes of breaches. Automated scanners find open ports within minutes of creation. Restrict to your IP or a known CIDR range.",
+        "suggestion": "--cidr <your-ip>/32"
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--cidr",
+        "forbidden_value": "::/0",
+        "severity": "HIGH",
+        "message": "Port open to the entire internet via IPv6 (::/0)",
+        "context": "IPv6 wildcard rules are often overlooked but equally dangerous as 0.0.0.0/0. Any host on the internet can reach this port.",
+        "suggestion": "--cidr <your-ipv6>/128"
+      }
+    ]
+  },
+  {
+    "command": "ec2 authorize-security-group-egress",
+    "checks": [
+      {
+        "type": "forbidden_value",
+        "flag": "--cidr",
+        "forbidden_value": "0.0.0.0/0",
+        "severity": "MEDIUM",
+        "message": "Unrestricted outbound traffic allowed",
+        "context": "Allowing all outbound traffic makes it trivial for malware or a compromised instance to exfiltrate data or communicate with command-and-control servers. Restrict egress to only required destinations and ports.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ec2 create-volume",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--encrypted",
+        "severity": "HIGH",
+        "message": "EBS volume created without encryption",
+        "context": "An unencrypted volume can be detached from a stopped instance and mounted elsewhere, giving full access to its contents. AWS KMS encryption adds no latency and costs nothing extra.",
+        "suggestion": "--encrypted"
+      }
+    ]
+  },
+  {
+    "command": "ec2 create-snapshot",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify snapshot is not shared publicly after creation",
+        "context": "Snapshots shared with 'all' are publicly accessible to any AWS account. Run `ec2 describe-snapshot-attribute` after creation to confirm the snapshot is private.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ec2 modify-snapshot-attribute",
+    "checks": [
+      {
+        "type": "forbidden_value",
+        "flag": "--group-names",
+        "forbidden_value": "all",
+        "severity": "HIGH",
+        "message": "Snapshot being shared publicly with all AWS accounts",
+        "context": "A public snapshot exposes your disk image — including any secrets, credentials, or sensitive data on the volume — to every AWS account in the world.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ec2 create-security-group",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "New security group created — ingress rules not yet defined",
+        "context": "Security groups are deny-by-default until you add rules. When you do, avoid 0.0.0.0/0 on sensitive ports (22, 3389, 3306). Use security group references instead of CIDRs where possible.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ec2 create-key-pair",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Long-lived SSH key pair created",
+        "context": "Private keys committed to git repos or left in Downloads folders are a leading cause of cloud breaches. Consider EC2 Instance Connect or SSM Session Manager for SSH-free access instead.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ec2 create-launch-template",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Ensure launch template enforces IMDSv2 and encrypted volumes",
+        "context": "Launch templates are reused at scale — a single insecure template can spawn hundreds of vulnerable instances. Bake in HttpTokens=required and EBS encryption now so every instance inherits them automatically.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ec2 create-vpc",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Enable VPC Flow Logs after creation",
+        "context": "Without flow logs you have zero visibility into network traffic — making it impossible to detect lateral movement, data exfiltration, or port scanning inside your VPC.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ec2 create-subnet",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Verify this subnet is not unintentionally public",
+        "context": "Subnets with auto-assign public IP enabled will expose every instance launched into them directly to the internet. Keep application and data tiers in private subnets behind a load balancer.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ec2 create-internet-gateway",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Internet gateway created — ensure only public subnets route to it",
+        "context": "Attaching an IGW to a VPC and adding a default route in a subnet makes that subnet public. Verify your route tables so private subnets (databases, app servers) never have a 0.0.0.0/0 route pointing to this IGW.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ec2 allocate-address",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "LOW",
+        "message": "Elastic IP allocated — associate it promptly to avoid charges and exposure",
+        "context": "Unassociated Elastic IPs incur charges. More importantly, an EIP attached to a public instance bypasses NAT and exposes the instance directly. Ensure it's associated only to resources that genuinely need direct internet access.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ec2 create-network-acl",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "New NACL created — default allows all traffic until rules are added",
+        "context": "A newly created NACL denies all traffic by default. Ensure you add both inbound and outbound rules before associating it with a subnet, or you will break connectivity.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ec2 create-flow-logs",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Ensure flow logs capture REJECT traffic for security analysis",
+        "context": "Flow logs set to ACCEPT-only miss blocked connection attempts — exactly the traffic that indicates port scanning or brute-force attacks. Use ALL or REJECT traffic type for security monitoring.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ec2 modify-instance-attribute",
+    "checks": [
+      {
+        "type": "forbidden_value",
+        "flag": "--no-disable-api-termination",
+        "forbidden_value": "",
+        "severity": "HIGH",
+        "message": "Disabling termination protection on EC2 instance",
+        "context": "Removing termination protection makes the instance vulnerable to accidental or malicious deletion via terminate-instances. Only disable this immediately before a planned termination.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ec2 modify-image-attribute",
+    "checks": [
+      {
+        "type": "forbidden_value",
+        "flag": "--launch-permission",
+        "forbidden_value": "all",
+        "severity": "HIGH",
+        "message": "AMI being shared publicly with all AWS accounts",
+        "context": "A public AMI exposes your machine image — including any baked-in secrets, application code, or configuration — to every AWS account in the world. Share only with specific trusted account IDs.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

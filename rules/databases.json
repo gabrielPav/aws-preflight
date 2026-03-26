@@ -1,0 +1,109 @@
+[
+  {
+    "command": "neptune create-db-cluster",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--storage-encrypted",
+        "severity": "HIGH",
+        "message": "Neptune cluster storage not encrypted",
+        "context": "Encryption must be set at creation time — you can't enable it later. Neptune stores graph data that often includes sensitive relationship and identity data.",
+        "suggestion": "--storage-encrypted"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--deletion-protection",
+        "severity": "MEDIUM",
+        "message": "Deletion protection not enabled",
+        "context": "Without it, the entire cluster can be destroyed with one command. Enable it on any cluster holding production data.",
+        "suggestion": "--deletion-protection"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--enable-cloudwatch-logs-exports",
+        "severity": "MEDIUM",
+        "message": "Audit logging not configured",
+        "context": "Without audit logs you have no record of who queried the graph or what data was accessed. Required for compliance and incident response.",
+        "suggestion": "--enable-cloudwatch-logs-exports '[\"audit\"]'"
+      }
+    ]
+  },
+  {
+    "command": "neptune delete-db-cluster",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Take a final snapshot before deleting",
+        "context": "Neptune cluster deletion is permanent. Use --final-db-snapshot-identifier to preserve the graph data.",
+        "suggestion": "--final-db-snapshot-identifier <snapshot-name>"
+      }
+    ]
+  },
+  {
+    "command": "docdb create-db-cluster",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--storage-encrypted",
+        "severity": "HIGH",
+        "message": "DocumentDB cluster storage not encrypted",
+        "context": "Encryption must be set at creation time. DocumentDB clusters often store application data including user records — encrypt at rest.",
+        "suggestion": "--storage-encrypted"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--deletion-protection",
+        "severity": "MEDIUM",
+        "message": "Deletion protection not enabled",
+        "context": "A single delete command can wipe the entire cluster. Enable it on any cluster holding production data.",
+        "suggestion": "--deletion-protection"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--enable-cloudwatch-logs-exports",
+        "severity": "MEDIUM",
+        "message": "Audit logging not configured",
+        "context": "Without audit and profiler logs you have no record of who connected or what operations ran.",
+        "suggestion": "--enable-cloudwatch-logs-exports '[\"audit\",\"profiler\"]'"
+      }
+    ]
+  },
+  {
+    "command": "docdb delete-db-cluster",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Take a final snapshot before deleting",
+        "context": "DocumentDB cluster deletion is permanent. Specify --final-db-snapshot-identifier to preserve the data.",
+        "suggestion": "--final-db-snapshot-identifier <snapshot-name>"
+      }
+    ]
+  },
+  {
+    "command": "qldb create-ledger",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--kms-key",
+        "severity": "MEDIUM",
+        "message": "QLDB ledger not encrypted with a customer managed KMS key",
+        "context": "QLDB uses an AWS-owned key by default. For ledgers storing financial or compliance data, use a CMK so you have an audit trail of every access and can revoke access independently.",
+        "suggestion": "--kms-key alias/<your-key>"
+      }
+    ]
+  },
+  {
+    "command": "qldb delete-ledger",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "QLDB ledger deletion destroys the entire immutable transaction history",
+        "context": "The audit log is QLDB's entire value. Export the journal to S3 before deleting if you need to retain the history for compliance.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

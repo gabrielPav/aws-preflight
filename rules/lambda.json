@@ -1,0 +1,96 @@
+[
+  {
+    "command": "lambda create-function",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Ensure the execution role follows least-privilege",
+        "context": "Lambda functions are a common pivot point in cloud attacks. A function with broad IAM permissions (e.g. s3:* or iam:*) can be exploited via event injection to exfiltrate data or escalate privileges.",
+        "suggestion": ""
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--tracing-config",
+        "severity": "LOW",
+        "message": "X-Ray tracing not enabled",
+        "context": "Without tracing, it's difficult to detect anomalous invocation patterns or trace the path of a security incident through your serverless architecture.",
+        "suggestion": "--tracing-config Mode=Active"
+      }
+    ]
+  },
+  {
+    "command": "lambda add-permission",
+    "checks": [
+      {
+        "type": "forbidden_value",
+        "flag": "--principal",
+        "forbidden_value": "*",
+        "severity": "HIGH",
+        "message": "Lambda permission granted to wildcard principal (*)",
+        "context": "Any AWS account in the world can invoke this function. This is almost never intentional. Scope the principal to a specific AWS account ID, service (e.g. apigateway.amazonaws.com), or ARN.",
+        "suggestion": "--principal <specific-account-or-service>"
+      }
+    ]
+  },
+  {
+    "command": "lambda update-function-configuration",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Verify environment variables do not contain plaintext secrets",
+        "context": "Lambda environment variables are visible in the console and CLI to anyone with lambda:GetFunctionConfiguration. Store secrets in AWS Secrets Manager or SSM Parameter Store and retrieve them at runtime.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "lambda create-event-source-mapping",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Verify the event source is trusted and the function handles malformed input safely",
+        "context": "Event source mappings can be exploited via event injection if the Lambda function doesn't validate input. Ensure the function sanitizes all incoming data, especially from SQS or Kinesis.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "lambda put-function-concurrency",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "LOW",
+        "message": "Setting reserved concurrency to 0 will disable the function",
+        "context": "A reserved concurrency of 0 throttles all invocations, effectively disabling the function. This can be used as a denial-of-service vector if an attacker gains write access to Lambda configuration.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "lambda delete-function",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Lambda function deletion is permanent",
+        "context": "Deleting a Lambda function removes all versions and aliases. If the function is referenced by event source mappings, API Gateway, or other triggers, those integrations will break silently.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "lambda update-function-code",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Deploying new function code — ensure it has been reviewed for secrets and vulnerabilities",
+        "context": "Deploying code with hardcoded credentials, insecure dependencies, or injection vulnerabilities can compromise your entire serverless architecture. Use a CI/CD pipeline with security scanning before deployment.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

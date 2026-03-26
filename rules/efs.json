@@ -1,0 +1,58 @@
+[
+  {
+    "command": "efs create-file-system",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--encrypted",
+        "severity": "HIGH",
+        "message": "EFS file system not encrypted at rest",
+        "context": "Encryption must be set at creation time — you can't enable it on an existing file system. An unencrypted EFS volume containing application data, configs, or secrets is a compliance failure waiting to happen.",
+        "suggestion": "--encrypted"
+      },
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the file system policy restricts access to specific VPCs or IAM principals",
+        "context": "Without a resource policy, any EC2 instance that can reach the mount target can mount the file system. Lock it down with a policy that requires specific IAM roles or VPC conditions.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "efs create-mount-target",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the mount target security group restricts NFS (port 2049) to only trusted sources",
+        "context": "NFS has no built-in authentication. If port 2049 is open to 0.0.0.0/0 or a broad CIDR, any host that can reach the mount target can mount your file system and read all data.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "efs delete-file-system",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "EFS deletion is permanent — all data is destroyed",
+        "context": "There is no recycle bin for EFS. All files, directories, and metadata are gone. You must delete all mount targets before you can delete the file system.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "efs put-file-system-policy",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the policy doesn't grant public access via Principal: *",
+        "context": "An EFS resource policy with Principal: * allows any AWS principal to mount the file system. This is almost never intentional and exposes all file system data.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

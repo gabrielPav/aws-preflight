@@ -1,0 +1,119 @@
+[
+  {
+    "command": "ecr create-repository",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--image-scanning-configuration",
+        "severity": "MEDIUM",
+        "message": "Image scanning on push not enabled",
+        "context": "Without scan-on-push, vulnerable base images silently accumulate in your registry. A single compromised container image can give an attacker a foothold in every environment it's deployed to.",
+        "suggestion": "--image-scanning-configuration scanOnPush=true"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--encryption-configuration",
+        "severity": "MEDIUM",
+        "message": "ECR repository encryption not explicitly configured",
+        "context": "By default ECR uses AES-256 managed by AWS. Specifying KMS gives you an audit trail of every image pull via CloudTrail and the ability to revoke access by disabling the key.",
+        "suggestion": "--encryption-configuration encryptionType=KMS"
+      }
+    ]
+  },
+  {
+    "command": "ecr set-repository-policy",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Review repository policy for wildcard principals",
+        "context": "A repository policy with Principal:* allows any AWS account to pull images. This can expose proprietary code or be used to distribute malicious images. Scope access to specific account IDs or IAM roles.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ecr delete-repository",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Repository deletion removes all images permanently",
+        "context": "Deleting an ECR repository destroys all container images and tags. Any ECS tasks, EKS pods, or Lambda functions referencing images in this repository will fail to pull on next deployment.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ecr batch-delete-image",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Batch image deletion is permanent",
+        "context": "Deleted images cannot be recovered. Ensure no running workloads depend on the images being deleted, and that you are not deleting the only copy of a production image.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ecs create-cluster",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Enable Container Insights for this cluster",
+        "context": "Without Container Insights you have no visibility into container-level CPU, memory, or network anomalies — making it very hard to detect a compromised container or a cryptominer running in your cluster.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ecs register-task-definition",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify task definition does not use privileged containers",
+        "context": "A privileged ECS container has root access to the underlying host. If compromised, an attacker can escape the container and access every other task on the same EC2 instance, including their credentials.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ecs create-service",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Ensure the task role follows least-privilege",
+        "context": "ECS task roles are attached to every container in the service. Overly permissive task roles mean a compromised container can access AWS services far beyond what the application needs.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ecs update-service",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Verify the new task definition does not introduce privileged containers or excessive permissions",
+        "context": "Service updates deploy new task definitions to running containers. A malicious or misconfigured task definition update can compromise the entire service.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ecs delete-service",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Service deletion will terminate all running tasks",
+        "context": "Deleting an ECS service stops all running tasks immediately. If the service handles live traffic, this causes an outage. Use --force only when you are certain the service should be stopped.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

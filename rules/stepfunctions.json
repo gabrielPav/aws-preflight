@@ -1,0 +1,78 @@
+[
+  {
+    "command": "stepfunctions create-state-machine",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--logging-configuration",
+        "severity": "HIGH",
+        "message": "Execution logging not configured",
+        "context": "Without logging, you have zero visibility into execution history, failed states, or what data was passed between steps. AWS Security Hub flags this as a finding. Set level to ERROR at minimum, ALL for sensitive workflows.",
+        "suggestion": "--logging-configuration level=ERROR,includeExecutionData=false,destinations=[{cloudWatchLogsLogGroup:{logGroupArn:<arn>}}]"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--tracing-configuration",
+        "severity": "MEDIUM",
+        "message": "X-Ray tracing not enabled",
+        "context": "Without tracing you can't see latency breakdowns or trace a security incident through the execution graph. Especially important for workflows that touch multiple services.",
+        "suggestion": "--tracing-configuration enabled=true"
+      },
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the execution role is scoped to only the services this workflow actually calls",
+        "context": "State machine roles with broad permissions (e.g. lambda:*, ecs:*) mean a compromised or misconfigured workflow can trigger unintended actions. Scope to specific resource ARNs.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "stepfunctions update-state-machine",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "In-flight executions are not affected by the update — verify behavior for long-running workflows",
+        "context": "Running executions continue using the previous definition. If you're fixing a bug, in-flight executions will still hit the broken path. You may need to abort and restart them manually.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "stepfunctions delete-state-machine",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Deletion stops all future executions but does not abort in-flight ones",
+        "context": "In-flight executions continue running until they complete or fail. Deleting the state machine while executions are running can leave orphaned resources (e.g. ECS tasks, Lambda invocations) with no parent to track them.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "stepfunctions start-execution",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Verify input does not contain plaintext secrets or PII",
+        "context": "Execution input is stored in execution history and visible to anyone with stepfunctions:DescribeExecution. Pass references (e.g. Secrets Manager ARNs) rather than actual secret values.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "stepfunctions stop-execution",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Stopping an execution does not roll back resources already created",
+        "context": "If the workflow already created RDS instances, ECS tasks, or S3 objects before being stopped, those resources remain. You'll need to clean them up manually.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

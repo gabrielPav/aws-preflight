@@ -1,0 +1,50 @@
+[
+  {
+    "command": "ec2 attach-volume",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Verify the volume is not crossing environment boundaries",
+        "context": "Attaching a volume from a production instance to a dev instance exposes sensitive data across environment boundaries. Confirm the target instance is in the correct environment.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ec2 delete-volume",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "EBS volume deletion is permanent — snapshot first if the data matters",
+        "context": "Deleted EBS volumes cannot be recovered. AWS does not guarantee data is wiped before storage is reallocated. If the volume contained sensitive data, create a final snapshot for compliance purposes.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ec2 modify-volume",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Volume modifications have a 6-hour cooldown — you can't modify again until it expires",
+        "context": "After modifying a volume, you must wait 6 hours before modifying it again. Plan capacity changes carefully — you can't immediately undo an accidental size increase.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ec2 enable-ebs-encryption-by-default",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "This only applies to new volumes — existing unencrypted volumes are not affected",
+        "context": "Enabling default encryption doesn't retroactively encrypt existing volumes. Snapshot each existing unencrypted volume and restore it with encryption enabled to cover your full EBS footprint.",
+        "suggestion": ""
+      }
+    ]
+  }
+]
