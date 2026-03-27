@@ -1,8 +1,8 @@
 # aws-preflight
 
-![AWS](https://img.shields.io/badge/AWS_Services-79-FF9900.svg?style=flat&logo=amazon-aws&logoColor=white)
-![Checks](https://img.shields.io/badge/Security_Checks-426-00C853.svg?style=flat)
+![AWS](https://img.shields.io/badge/AWS_Services-80-FF8C00.svg?style=flat&logo=amazon-aws&logoColor=white)
 ![Commands](https://img.shields.io/badge/Commands-367-1A73E8.svg?style=flat)
+![Checks](https://img.shields.io/badge/Security_Checks-426-00C853.svg?style=flat)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB.svg?style=flat&logo=python&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat)
 
@@ -70,7 +70,9 @@ chmod +x aws-preflight
 ./aws-preflight
 ```
 
-**Requirements:** Python 3.10+. No pip install. No external packages.
+**Requirements:** Python 3.10+. No pip install. No external packages. No build step.
+
+Zero install. Zero dependencies. Zero supply chain risk. Just clone and run it.
 
 ---
 
@@ -201,7 +203,7 @@ security-lint:
 
 ## Coverage
 
-**367 commands | 426 checks | 51 rule files | 0 dependencies**
+**367 commands | 426 checks | 80 AWS services | 0 dependencies**
 
 | Category | Services | Key Checks |
 |---|---|---|

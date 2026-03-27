@@ -11,7 +11,7 @@ try:
 except ImportError:
     pass
 
-from parser import parse_command
+from cli_parser import parse_command
 from engine import analyze
 from formatter import (
     format_result,
@@ -52,7 +52,17 @@ def execute(command: str):
     except ValueError as e:
         print(f"\n⚠️  Invalid command: {e}")
         return
-    result = subprocess.run(parts)
+    if not parts or parts[0] != "aws":
+        print("\n⚠️  Only AWS CLI commands can be executed. Use: run aws <command>")
+        return
+    try:
+        result = subprocess.run(parts)
+    except FileNotFoundError:
+        print(f"\n⚠️  Command not found: {parts[0]}")
+        return
+    except OSError as e:
+        print(f"\n⚠️  Failed to execute command: {e}")
+        return
     if result.returncode != 0:
         print(f"\n⚠️  Command exited with code {result.returncode}")
 

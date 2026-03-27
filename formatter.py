@@ -1,17 +1,37 @@
 import json
 
 SEVERITY_ICON = {"HIGH": "🔴", "MEDIUM": "🟡", "LOW": "🔵", "INFO": "ℹ️ "}
-SEVERITY_EXIT = {"HIGH": 2, "MEDIUM": 1, "LOW": 0, "INFO": 0}
 
 
 def _build_suggested(parsed: dict, findings: list[dict]) -> str:
-    parts = ["aws", parsed["service"], parsed["operation"]]
-    for flag, val in parsed["flags"].items():
-        parts.append(flag)
-        if val is not True:
-            parts.append(val)
+    # Collect flags that should be removed (forbidden_value detections)
+    forbidden_flags = {f["_forbidden_flag"] for f in findings if "_forbidden_flag" in f}
 
-    existing_flags = set(parsed["flags"].keys())
+    # Collect flag replacements (suggestion targets an existing flag)
+    replace_flags = {}
+    for f in findings:
+        suggestion = f.get("suggestion", "")
+        if not suggestion:
+            continue
+        flag = suggestion.split()[0]
+        replace_flags[flag] = suggestion
+
+    parts = ["aws", parsed["service"], parsed["operation"]]
+    existing_flags = set()
+    for flag, val in parsed["flags"].items():
+        if flag in forbidden_flags:
+            # Drop the forbidden flag entirely (replacement added below if available)
+            continue
+        if flag in replace_flags:
+            parts.append(replace_flags.pop(flag))
+            existing_flags.add(flag)
+        else:
+            parts.append(flag)
+            if val is not True:
+                parts.append(val)
+            existing_flags.add(flag)
+
+    # Append suggestions (missing flags + replacements for forbidden flags)
     for f in findings:
         suggestion = f.get("suggestion", "")
         if not suggestion:
@@ -68,7 +88,7 @@ def format_result_json(parsed: dict, findings: list[dict]) -> str:
         "service": parsed["service"],
         "operation": parsed["operation"],
         "passed": len(findings) == 0,
-        "findings": findings,
+        "findings": [{k: v for k, v in f.items() if not k.startswith("_")} for f in findings],
         "summary": {
             "total": len(findings),
             "high": sum(1 for f in findings if f["severity"] == "HIGH"),

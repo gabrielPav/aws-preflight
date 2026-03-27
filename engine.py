@@ -10,7 +10,12 @@ _rules_cache: dict = {}
 def _load_rules() -> dict:
     if _rules_cache:
         return _rules_cache
-    for fname in sorted(os.listdir(RULES_DIR)):
+    try:
+        filenames = sorted(os.listdir(RULES_DIR))
+    except (FileNotFoundError, PermissionError) as e:
+        print(f"Error: cannot read rules directory {RULES_DIR}: {e}", file=sys.stderr)
+        return _rules_cache
+    for fname in filenames:
         if fname.endswith(".json"):
             try:
                 with open(os.path.join(RULES_DIR, fname)) as f:
@@ -20,7 +25,7 @@ def _load_rules() -> dict:
                             _rules_cache[key].extend(rule["checks"])
                         else:
                             _rules_cache[key] = rule["checks"]
-            except (json.JSONDecodeError, KeyError) as e:
+            except (json.JSONDecodeError, KeyError, IOError) as e:
                 print(f"Warning: skipping malformed rule file {fname}: {e}", file=sys.stderr)
     return _rules_cache
 
@@ -67,11 +72,14 @@ def analyze(parsed: dict) -> list[dict]:
             finding = check
 
         if finding:
-            findings.append({
+            entry = {
                 "severity": finding["severity"],
                 "message": finding["message"],
                 "context": finding.get("context", ""),
                 "suggestion": finding.get("suggestion", ""),
-            })
+            }
+            if ctype == "forbidden_value":
+                entry["_forbidden_flag"] = check["flag"]
+            findings.append(entry)
 
     return findings
