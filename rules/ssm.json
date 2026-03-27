@@ -1,0 +1,38 @@
+[
+  {
+    "command": "ssm create-association",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Associations run automatically on a schedule \u2014 verify the document and targets are correct",
+        "context": "A State Manager association applies an SSM document to target instances on a recurring schedule. A misconfigured association can repeatedly run unintended commands across your fleet.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ssm send-command",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Send-command executes arbitrary commands on target instances \u2014 verify the document and targets",
+        "context": "SSM Run Command can execute shell commands as root/administrator on any managed instance. A wrong target filter can run commands on production instances. Verify the instance IDs or tags carefully.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ssm terminate-session",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Terminating a session immediately disconnects the user",
+        "context": "If a user is performing critical work through the session, terminating it can leave operations incomplete. Session Manager logs the session history for audit.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

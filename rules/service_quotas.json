@@ -1,0 +1,14 @@
+[
+  {
+    "command": "service-quotas request-service-quota-increase",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Quota increases expand your account's blast radius \u2014 verify the increase is justified",
+        "context": "Higher service quotas mean more resources can be launched, increasing potential cost exposure from compromised credentials or runaway automation. Request only what you need.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

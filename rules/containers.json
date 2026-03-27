@@ -63,7 +63,7 @@
         "type": "always_warn",
         "severity": "INFO",
         "message": "Enable Container Insights for this cluster",
-        "context": "Without Container Insights you have no visibility into container-level CPU, memory, or network anomalies — making it very hard to detect a compromised container or a cryptominer running in your cluster.",
+        "context": "Without Container Insights you have no visibility into container-level CPU, memory, or network anomalies \u2014 making it very hard to detect a compromised container or a cryptominer running in your cluster.",
         "suggestion": ""
       }
     ]
@@ -112,6 +112,18 @@
         "severity": "HIGH",
         "message": "Service deletion will terminate all running tasks",
         "context": "Deleting an ECS service stops all running tasks immediately. If the service handles live traffic, this causes an outage. Use --force only when you are certain the service should be stopped.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ecs update-container-agent",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Container agent update may briefly interrupt task placement on this instance",
+        "context": "During the update, the agent restarts and the instance temporarily stops accepting new task placements. Existing running tasks are not affected, but ensure other instances can handle the load.",
         "suggestion": ""
       }
     ]

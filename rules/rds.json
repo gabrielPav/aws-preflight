@@ -7,7 +7,7 @@
         "flag": "--storage-encrypted",
         "severity": "HIGH",
         "message": "RDS storage encryption not enabled",
-        "context": "Unencrypted RDS snapshots can be shared or copied to another account, exposing your entire database. Encryption cannot be enabled after creation — you'd need to snapshot, restore, and migrate.",
+        "context": "Unencrypted RDS snapshots can be shared or copied to another account, exposing your entire database. Encryption cannot be enabled after creation \u2014 you'd need to snapshot, restore, and migrate.",
         "suggestion": "--storage-encrypted"
       },
       {
@@ -15,7 +15,7 @@
         "flag": "--deletion-protection",
         "severity": "MEDIUM",
         "message": "Deletion protection not enabled",
-        "context": "Without this, a single `rds delete-db-instance` command — accidental or malicious — permanently destroys your database. This is a one-line safeguard that has saved countless production databases.",
+        "context": "Without this, a single `rds delete-db-instance` command \u2014 accidental or malicious \u2014 permanently destroys your database. This is a one-line safeguard that has saved countless production databases.",
         "suggestion": "--deletion-protection"
       },
       {
@@ -40,8 +40,8 @@
         "flag": "--enable-cloudwatch-logs-exports",
         "severity": "MEDIUM",
         "message": "CloudWatch log exports not configured",
-        "context": "Without log exports, you have no visibility into slow queries, errors, or suspicious login attempts. Enable audit, error, and general logs for security monitoring and incident response.",
-        "suggestion": "--enable-cloudwatch-logs-exports '[\"audit\",\"error\",\"general\"]'"
+        "context": "Without log exports, you have no visibility into slow queries, errors, or suspicious login attempts. Log types vary by engine: MySQL/MariaDB (audit, error, general, slowquery), PostgreSQL (postgresql, upgrade), Oracle (alert, audit, listener, trace), SQL Server (agent, error).",
+        "suggestion": "--enable-cloudwatch-logs-exports '[\"audit\",\"error\"]'"
       }
     ]
   },
@@ -54,7 +54,7 @@
         "forbidden_value": "true",
         "severity": "HIGH",
         "message": "Making RDS instance publicly accessible",
-        "context": "You are about to expose a database directly to the internet. If this is for debugging, use an SSH tunnel or SSM port forwarding instead — then revert this change immediately after.",
+        "context": "You are about to expose a database directly to the internet. If this is for debugging, use an SSH tunnel or SSM port forwarding instead \u2014 then revert this change immediately after.",
         "suggestion": "--no-publicly-accessible"
       },
       {
@@ -103,7 +103,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "RDS instance deletion — ensure a final snapshot is taken",
+        "message": "RDS instance deletion \u2014 ensure a final snapshot is taken",
         "context": "Without --final-db-snapshot-identifier, the database is deleted without a backup. Always take a final snapshot unless you are 100% certain the data is no longer needed.",
         "suggestion": "--final-db-snapshot-identifier <snapshot-name>"
       }
@@ -153,7 +153,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Manual failover causes a brief outage — notify your team first",
+        "message": "Manual failover causes a brief outage \u2014 notify your team first",
         "context": "Aurora failover typically takes 30-120 seconds. Applications that don't handle connection drops gracefully will error during this window. Ensure your app uses the cluster endpoint (not instance endpoint) and has retry logic.",
         "suggestion": ""
       }
@@ -163,13 +163,11 @@
     "command": "rds restore-db-cluster-from-snapshot",
     "checks": [
       {
-        "type": "forbidden_value",
-        "flag": "--publicly-accessible",
-        "forbidden_value": "true",
-        "severity": "HIGH",
-        "message": "Restoring Aurora cluster as publicly accessible",
-        "context": "Restored clusters should always be private. Exposing a restored database to the internet is rarely intentional and creates immediate risk.",
-        "suggestion": "--no-publicly-accessible"
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Ensure instances added to the restored cluster are not publicly accessible",
+        "context": "Public accessibility is set at the DB instance level, not the cluster level. When you add instances to this restored cluster, explicitly set --no-publicly-accessible on each instance to prevent internet exposure.",
+        "suggestion": ""
       }
     ]
   },
@@ -183,6 +181,30 @@
         "severity": "HIGH",
         "message": "Disabling deletion protection on Aurora cluster",
         "context": "Only disable this immediately before a planned deletion. Leaving deletion protection off on a production cluster is an accident waiting to happen.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "rds modify-db-parameter-group",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Parameter changes affect all instances using this group \u2014 verify you're not weakening SSL or logging",
+        "context": "Disabling require_secure_transport (MySQL) or rds.force_ssl (PostgreSQL) allows unencrypted database connections. Disabling audit logging removes compliance visibility. Changes may require a reboot.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "rds modify-db-snapshot-attribute",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Sharing a snapshot with 'all' makes your entire database publicly accessible",
+        "context": "A public RDS snapshot allows any AWS account to copy and restore your database. This exposes all data in the snapshot. Only share with specific trusted account IDs.",
         "suggestion": ""
       }
     ]

@@ -54,7 +54,7 @@
         "type": "always_warn",
         "severity": "HIGH",
         "message": "Disable the accelerator before deleting — update DNS records pointing to its static IPs first",
-        "context": "The two static Anycast IPs assigned to the accelerator are released on deletion. Any DNS records pointing to those IPs will stop resolving. Update DNS before or immediately after deletion.",
+        "context": "The two static Anycast IPs assigned to the accelerator are released on deletion. Any DNS records pointing to those IPs will route to released addresses that no longer serve your traffic. Update DNS before deletion.",
         "suggestion": ""
       }
     ]

@@ -1,0 +1,14 @@
+[
+  {
+    "command": "appmesh update-mesh",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify egress filter is set to DROP_ALL unless specific external access is required",
+        "context": "Changing the mesh egress filter to ALLOW_ALL lets any service in the mesh communicate with any external endpoint, bypassing network isolation. Use DROP_ALL with explicit virtual services for external access.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

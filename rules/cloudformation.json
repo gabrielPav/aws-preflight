@@ -7,14 +7,14 @@
         "flag": "--enable-termination-protection",
         "severity": "HIGH",
         "message": "Termination protection not enabled",
-        "context": "Without this, a single `cloudformation delete-stack` wipes out every resource in the stack. AWS Config flags this as NON_COMPLIANT. Enable it on every production stack — you can always disable it before a planned teardown.",
+        "context": "Without this, a single `cloudformation delete-stack` wipes out every resource in the stack. AWS Config flags this as NON_COMPLIANT. Enable it on every production stack \u2014 you can always disable it before a planned teardown.",
         "suggestion": "--enable-termination-protection"
       },
       {
         "type": "missing_flag",
         "flag": "--role-arn",
         "severity": "MEDIUM",
-        "message": "No service role specified — CloudFormation will use your caller credentials",
+        "message": "No service role specified \u2014 CloudFormation will use your caller credentials",
         "context": "Without a dedicated service role, CloudFormation inherits your IAM permissions. This makes it hard to audit what CloudFormation did vs what you did directly, and can grant more permissions than the stack actually needs.",
         "suggestion": "--role-arn arn:aws:iam::<account>:role/<cfn-service-role>"
       },
@@ -33,7 +33,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Run a change set first — direct updates skip the review step",
+        "message": "Run a change set first \u2014 direct updates skip the review step",
         "context": "Direct stack updates apply changes immediately with no preview. Change sets show you exactly what will be added, modified, or replaced (including resources that require replacement, which means deletion + recreation).",
         "suggestion": ""
       }
@@ -46,7 +46,7 @@
         "type": "always_warn",
         "severity": "HIGH",
         "message": "Stack deletion destroys all resources that don't have DeletionPolicy: Retain",
-        "context": "RDS instances, S3 buckets, DynamoDB tables — all gone unless you've set DeletionPolicy: Retain or Snapshot. Check the template before proceeding. This is one of the most common causes of production data loss.",
+        "context": "RDS instances, S3 buckets, DynamoDB tables \u2014 all gone unless you've set DeletionPolicy: Retain or Snapshot. Check the template before proceeding. This is one of the most common causes of production data loss.",
         "suggestion": ""
       }
     ]
@@ -57,7 +57,7 @@
       {
         "type": "always_warn",
         "severity": "INFO",
-        "message": "Review the change set output carefully before executing — pay attention to replacements",
+        "message": "Review the change set output carefully before executing \u2014 pay attention to replacements",
         "context": "A 'Replacement: True' in the change set means the resource will be deleted and recreated. For stateful resources (RDS, EBS, DynamoDB) this means data loss unless DeletionPolicy is set.",
         "suggestion": ""
       }
@@ -70,7 +70,7 @@
         "type": "always_warn",
         "severity": "HIGH",
         "message": "Executing a change set is irreversible once started",
-        "context": "Once execution begins, CloudFormation processes changes in order. If it fails mid-way, rollback may not restore everything cleanly — especially for resources with DeletionPolicy: Retain or custom resources.",
+        "context": "Once execution begins, CloudFormation processes changes in order. If it fails mid-way, rollback may not restore everything cleanly \u2014 especially for custom resources or stateful resources that were replaced (deleted and recreated) during the update.",
         "suggestion": ""
       }
     ]
@@ -93,7 +93,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "StackSets deploy to multiple accounts/regions simultaneously — test in one account first",
+        "message": "StackSets deploy to multiple accounts/regions simultaneously \u2014 test in one account first",
         "context": "A misconfigured StackSet can simultaneously break infrastructure across dozens of accounts. Always deploy to a single test account first, verify, then expand the deployment targets.",
         "suggestion": ""
       }
@@ -105,9 +105,21 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "StackSet updates propagate to all target accounts — use deployment preferences to limit blast radius",
-        "context": "Without --deployment-preferences, updates roll out to all accounts at once. Set MaxConcurrentPercentage and FailureTolerancePercentage to control rollout speed and stop on failures.",
-        "suggestion": "--deployment-preferences MaxConcurrentPercentage=10,FailureTolerancePercentage=10"
+        "message": "StackSet updates propagate to all target accounts \u2014 use operation preferences to limit blast radius",
+        "context": "Without --operation-preferences, updates roll out to all accounts at once. Set MaxConcurrentPercentage and FailureTolerancePercentage to control rollout speed and stop on failures.",
+        "suggestion": "--operation-preferences MaxConcurrentPercentage=10,FailureTolerancePercentage=10"
+      }
+    ]
+  },
+  {
+    "command": "cloudformation update-termination-protection",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Disabling termination protection exposes the stack to accidental deletion",
+        "context": "Once disabled, a single delete-stack command destroys all resources managed by the stack. Only disable temporarily if you intend to delete, and re-enable immediately if you change your mind.",
+        "suggestion": ""
       }
     ]
   }

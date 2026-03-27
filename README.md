@@ -1,14 +1,14 @@
 # aws-preflight
 
-![AWS](https://img.shields.io/badge/AWS_CLI-Security_Linter-FF9900.svg?style=flat&logo=amazon-aws&logoColor=white)
+![AWS](https://img.shields.io/badge/AWS_Services-79-FF9900.svg?style=flat&logo=amazon-aws&logoColor=white)
+![Checks](https://img.shields.io/badge/Security_Checks-426-00C853.svg?style=flat)
+![Commands](https://img.shields.io/badge/Commands-367-1A73E8.svg?style=flat)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB.svg?style=flat&logo=python&logoColor=white)
-![Checks](https://img.shields.io/badge/Security_Checks-317-00C853.svg?style=flat)
-![Services](https://img.shields.io/badge/AWS_Services-36-1A73E8.svg?style=flat)
 ![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat)
 
 **Lint AWS CLI commands before they run. Stop security leaks, policy violations, and accidental deletions before they hit your cloud.**
 
-aws-preflight parses your commands locally, evaluates them against 300+ security checks mapped to AWS best practices, and returns actionable findings with severity ratings and remediated command suggestions. Nothing is ever executed. No credentials required. Fully offline.
+aws-preflight parses your commands locally, evaluates them against 425+ security checks mapped to AWS best practices, and returns actionable findings with severity ratings and remediated command suggestions. Nothing is ever executed. No credentials required. Fully offline.
 
 ```
 aws-preflight> aws rds create-db-instance --db-instance-identifier prod-db --engine mysql
@@ -201,21 +201,21 @@ security-lint:
 
 ## Coverage
 
-**260 commands | 317 checks | 36 rule files | 0 dependencies**
+**367 commands | 426 checks | 51 rule files | 0 dependencies**
 
 | Category | Services | Key Checks |
 |---|---|---|
-| **Compute** | EC2, Lambda, Batch, Lightsail, Elastic Beanstalk | IMDSv2, EBS encryption, SG open ports, execution role scoping |
-| **Storage** | S3, EBS, EFS, FSx, Glacier, Backup | Block Public Access, ACL restrictions, encryption at rest, MFA Delete |
-| **Databases** | RDS, Aurora, DynamoDB, ElastiCache, Redshift, Neptune, DocumentDB, QLDB | Storage encryption, public access, deletion protection, backup retention |
-| **Networking** | VPC, ALB/NLB, API Gateway v1/v2, CloudFront, WAF, Direct Connect, Transit Gateway, Global Accelerator, Route 53 | HTTPS enforcement, 0.0.0.0/0 rules, TLS policy, access logging |
-| **Security** | IAM, KMS, Secrets Manager, Cognito, ACM, GuardDuty, Shield | Admin policy detection, wildcard principals, key rotation, MFA enforcement |
-| **AI/ML** | Bedrock, SageMaker, Rekognition, Comprehend, Lex, Polly, Translate, Forecast | KMS encryption, VPC deployment, direct internet access, PII handling |
+| **Compute** | EC2, Lambda, Batch, Lightsail, Elastic Beanstalk, Auto Scaling, WorkSpaces | IMDSv2, EBS encryption, SG open ports, execution role scoping, instance lifecycle |
+| **Storage** | S3, S3 Access Points, EBS, EFS, FSx, Glacier, Backup | Block Public Access, ACL restrictions, encryption at rest, MFA Delete, access point policies |
+| **Databases** | RDS, Aurora, DynamoDB, ElastiCache, Redshift, Neptune, DocumentDB, QLDB, DMS | Storage encryption, public access, deletion protection, backup retention, parameter groups |
+| **Networking** | VPC, ALB/NLB/CLB, API Gateway v1/v2, CloudFront, WAF, Direct Connect, Transit Gateway, Global Accelerator, Route 53, Network Firewall, App Mesh | HTTPS enforcement, 0.0.0.0/0 rules, TLS policy, access logging, route table safety |
+| **Security** | IAM, KMS, Secrets Manager, Cognito, ACM, GuardDuty, Shield, Inspector, RAM | Admin policy detection, wildcard principals, key rotation, MFA enforcement, resource sharing |
+| **AI/ML** | Bedrock, SageMaker, Rekognition, Comprehend, Lex, Polly, Translate, Forecast | KMS encryption, VPC deployment, direct internet access, PII handling, model customization |
 | **Containers** | ECR, ECS, EKS | Image scanning, secrets encryption, control plane logging, privileged mode |
-| **Serverless** | Lambda, Step Functions, EventBridge, AppSync | Tracing, execution logging, wildcard invocation, auth type validation |
-| **Management** | CloudFormation, CloudTrail, CloudWatch, Organizations | Multi-region trails, log integrity, termination protection, SCP governance |
-| **Messaging** | SNS, SQS | KMS encryption, policy wildcard detection, HTTPS enforcement |
-| **Analytics** | Athena, EMR, Kinesis, Firehose, Glue | Query encryption, security configs, stream encryption, role scoping |
+| **Serverless** | Lambda, Step Functions, EventBridge, AppSync | Tracing, execution logging, wildcard invocation, auth type validation, function URLs |
+| **Management** | CloudFormation, CloudTrail, CloudWatch, Organizations, SSM, Transfer, Proton | Multi-region trails, log integrity, termination protection, SCP governance, Run Command |
+| **Messaging** | SNS, SQS, MQ | KMS encryption, policy wildcard detection, HTTPS enforcement, broker security |
+| **Analytics** | Athena, EMR, Kinesis, Firehose, Glue, Elasticsearch | Query encryption, security configs, stream encryption, role scoping, domain access policies |
 
 ---
 
@@ -233,10 +233,10 @@ security-lint:
 
 | Level | Icon | Meaning |
 |---|---|---|
-| `HIGH` | 🔴 | Immediate security exposure or irreversible data loss. 179 checks |
-| `MEDIUM` | 🟡 | Significant risk that should be addressed before production. 90 checks |
+| `HIGH` | 🔴 | Immediate security exposure or irreversible data loss. 229 checks |
+| `MEDIUM` | 🟡 | Significant risk that should be addressed before production. 136 checks |
 | `LOW` | 🔵 | Best-practice gap with low immediate impact. 7 checks |
-| `INFO` | ℹ️ | Advisory guidance. Worth reviewing, not blocking. 41 checks |
+| `INFO` | ℹ️ | Advisory guidance. Worth reviewing, not blocking. 54 checks |
 
 ---
 
@@ -343,15 +343,15 @@ aws-preflight/
 ├── parser.py           # shlex-based tokenizer. Handles --flag value and --flag=value
 ├── engine.py           # Rule loader + evaluator (missing_flag, forbidden_value, always_warn)
 ├── formatter.py        # Human-readable + JSON formatters, exit code logic
-├── rules/              # 36 JSON rule files, one per service group
-│   ├── ec2.json        #   17 commands, 20 checks
-│   ├── s3.json         #   15 commands, 19 checks
-│   ├── iam.json        #   14 commands, 16 checks
-│   ├── rds.json        #   10 commands, 17 checks
-│   ├── networking.json #   12 commands, 13 checks
-│   ├── security.json   #    8 commands,  9 checks
-│   ├── logging.json    #    8 commands, 10 checks
-│   └── ... (29 more)
+├── rules/              # 51 JSON rule files, one per service group
+│   ├── ec2.json        #   36 commands, 39 checks
+│   ├── iam.json        #   26 commands, 28 checks
+│   ├── s3.json         #   16 commands, 20 checks
+│   ├── networking.json #   16 commands, 17 checks
+│   ├── rds.json        #   12 commands, 19 checks
+│   ├── ml.json         #   16 commands, 17 checks
+│   ├── lightsail.json  #   13 commands, 14 checks
+│   └── ... (44 more)
 └── README.md
 ```
 

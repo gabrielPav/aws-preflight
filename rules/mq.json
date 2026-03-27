@@ -1,0 +1,14 @@
+[
+  {
+    "command": "mq update-broker",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Broker updates may require a maintenance window and cause brief message delivery delays",
+        "context": "Some changes (instance type, engine version) trigger a broker restart. In-flight messages are preserved but new connections are refused during the restart. Schedule changes during low-traffic periods.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

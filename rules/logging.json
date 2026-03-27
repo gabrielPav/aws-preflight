@@ -112,5 +112,41 @@
         "suggestion": ""
       }
     ]
+  },
+  {
+    "command": "logs create-log-stream",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Verify the log group has appropriate retention and KMS encryption configured",
+        "context": "Log streams inherit the log group's retention and encryption settings. If the log group has no retention policy, logs are kept indefinitely, increasing storage costs and compliance exposure.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "logs put-metric-filter",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the metric filter pattern is specific enough to avoid false positives",
+        "context": "Overly broad filter patterns can generate excessive CloudWatch metrics and trigger false alarms. Overly narrow patterns miss real events. Test the pattern against sample log data first.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "logs put-resource-policy",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the resource policy does not grant PutLogEvents to untrusted accounts",
+        "context": "A CloudWatch Logs resource policy controls which services and accounts can write to your log groups. A permissive policy allows attackers to inject false log entries or fill your log groups with junk data.",
+        "suggestion": ""
+      }
+    ]
   }
 ]

@@ -1,0 +1,14 @@
+[
+  {
+    "command": "dms modify-replication-instance",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the replication instance is not being made publicly accessible",
+        "context": "DMS replication instances handle data migration between databases. A publicly accessible instance exposes your database traffic path to the internet. Keep replication instances in private subnets.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

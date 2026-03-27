@@ -17,7 +17,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Verify the query has a partition filter — full table scans on large datasets cost real money",
+        "message": "Verify the query has a partition filter \u2014 full table scans on large datasets cost real money",
         "context": "A full scan on a multi-TB S3 dataset can cost hundreds of dollars in a single query. Always filter on partition columns and use LIMIT during development.",
         "suggestion": ""
       }
@@ -30,14 +30,14 @@
         "type": "missing_flag",
         "flag": "--security-configuration",
         "severity": "HIGH",
-        "message": "No security configuration — encryption and Kerberos are disabled by default",
+        "message": "No security configuration \u2014 encryption and Kerberos are disabled by default",
         "context": "Without a security configuration, EMR has no at-rest encryption, no in-transit encryption, and no Kerberos auth. Any node in the cluster can read all HDFS data. Create a security configuration with encryption enabled before running production workloads.",
         "suggestion": "--security-configuration <your-security-config-name>"
       },
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Verify the cluster is in private subnets — EMR master nodes in public subnets are internet-reachable",
+        "message": "Verify the cluster is in private subnets \u2014 EMR master nodes in public subnets are internet-reachable",
         "context": "The Hadoop web UIs (HDFS NameNode on 50070, YARN on 8088) have no authentication by default. A public master node exposes your entire cluster to the internet.",
         "suggestion": ""
       }
@@ -62,7 +62,7 @@
         "type": "always_warn",
         "severity": "MEDIUM",
         "message": "Verify the stream has server-side encryption enabled",
-        "context": "Kinesis Data Streams supports SSE with KMS. Without it, records are stored in plaintext in the stream. Enable encryption especially for streams carrying PII, financial data, or security events.",
+        "context": "Kinesis Data Streams supports SSE with KMS. Without it, records are stored in plaintext in the stream. Encryption is enabled via a separate `kinesis start-stream-encryption` call after stream creation \u2014 not at create time.",
         "suggestion": ""
       }
     ]
@@ -84,11 +84,11 @@
     "checks": [
       {
         "type": "missing_flag",
-        "flag": "--server-side-encryption-configuration",
+        "flag": "--delivery-stream-encryption-configuration-input",
         "severity": "MEDIUM",
         "message": "Firehose delivery stream not encrypted",
         "context": "Firehose buffers data before delivering to S3, Redshift, or OpenSearch. Without SSE, that buffered data is in plaintext. Enable encryption for streams carrying PII or financial data.",
-        "suggestion": "--server-side-encryption-configuration Enabled=true,KeyType=CUSTOMER_MANAGED_CMK,KeyARN=<key-arn>"
+        "suggestion": "--delivery-stream-encryption-configuration-input KeyType=CUSTOMER_MANAGED_CMK,KeyARN=<key-arn>"
       }
     ]
   },
@@ -119,6 +119,30 @@
         "severity": "MEDIUM",
         "message": "Verify no active runs or triggers depend on this job before deleting",
         "context": "Deleting a running Glue job terminates it immediately. Triggers and workflows that reference this job will fail on their next execution.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "kinesis increase-stream-retention-period",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Extended retention incurs additional charges per shard-hour",
+        "context": "Default retention is 24 hours (included). Extended retention up to 7 days and long-term retention up to 365 days incur per-shard-hour charges. Verify the cost impact for high-shard-count streams.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "kinesisanalyticsv2 update-application",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the application IAM role is not being broadened beyond required resources",
+        "context": "Kinesis Analytics applications process streaming data and need access to source and destination resources. A role with overly broad permissions can be exploited to access unrelated data streams or S3 buckets.",
         "suggestion": ""
       }
     ]

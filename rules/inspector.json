@@ -1,0 +1,26 @@
+[
+  {
+    "command": "inspector create-assessment-template",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Verify the assessment target and rules packages match your compliance requirements",
+        "context": "Inspector assessments run agents on your EC2 instances to scan for vulnerabilities. Ensure the target includes all relevant instances and the rules packages cover your required standards (CIS, CVE, network reachability).",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "inspector update-assessment-target",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify you are not narrowing the scope to exclude production instances",
+        "context": "Removing resource groups from an assessment target means those instances are no longer scanned for vulnerabilities. Any new vulnerabilities on excluded instances will go undetected.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

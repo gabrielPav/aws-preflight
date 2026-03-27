@@ -93,7 +93,7 @@
     ]
   },
   {
-    "command": "cognito-idp create-identity-pool",
+    "command": "cognito-identity create-identity-pool",
     "checks": [
       {
         "type": "always_warn",

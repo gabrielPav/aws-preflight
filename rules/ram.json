@@ -1,0 +1,14 @@
+[
+  {
+    "command": "ram update-resource-share",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify you are not sharing resources with untrusted accounts or making them publicly shareable",
+        "context": "RAM resource shares can grant access to subnets, transit gateways, and other network resources. Sharing with the wrong account allows them to deploy resources in your network.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

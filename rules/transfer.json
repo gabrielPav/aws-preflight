@@ -1,0 +1,26 @@
+[
+  {
+    "command": "transfer stop-server",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Stopping the server immediately rejects all SFTP/FTPS/FTP connections",
+        "context": "Any ongoing file transfers are interrupted and clients will receive connection refused errors. Verify no automated processes or business partners are actively transferring files.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "transfer update-server",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the update doesn't change the identity provider or expose the endpoint publicly",
+        "context": "Changing the identity provider affects authentication for all users. Switching from VPC to PUBLIC endpoint type exposes the SFTP server to the internet.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

@@ -81,8 +81,8 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Queue deletion is permanent — all unprocessed messages will be lost",
-        "context": "Deleting an SQS queue destroys all messages in it, including those not yet processed. There is a 60-second delay before deletion completes, but it cannot be cancelled once initiated.",
+        "message": "Queue deletion is permanent \u2014 all unprocessed messages will be lost",
+        "context": "Deleting an SQS queue is immediate and irreversible \u2014 all messages in it are destroyed, including those not yet processed. You must wait 60 seconds before creating a new queue with the same name.",
         "suggestion": ""
       }
     ]
@@ -95,6 +95,18 @@
         "severity": "HIGH",
         "message": "Queue purge deletes ALL messages permanently",
         "context": "PurgeQueue deletes every message in the queue immediately. This cannot be undone. Ensure this is intentional and that no critical unprocessed messages will be lost.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "sns unsubscribe",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Removing a subscription silently stops notifications to that endpoint",
+        "context": "If the subscription delivers security alerts, billing notifications, or operational alarms, removing it creates a blind spot. Verify no critical monitoring depends on this subscription.",
         "suggestion": ""
       }
     ]

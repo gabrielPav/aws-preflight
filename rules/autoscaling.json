@@ -1,0 +1,50 @@
+[
+  {
+    "command": "application-autoscaling register-scalable-target",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify min and max capacity limits prevent runaway scaling and unexpected costs",
+        "context": "A misconfigured scalable target with no max limit can scale to hundreds of instances during a traffic spike or attack, causing massive unexpected charges.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "autoscaling delete-auto-scaling-group",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "All instances in the group will be terminated on deletion",
+        "context": "Deleting an Auto Scaling group terminates all EC2 instances it manages unless you detach them first with --force-delete. Running instances, their EBS volumes, and any in-progress scaling activities are affected.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "autoscaling resume-processes",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Resuming scaling processes may trigger immediate scaling actions",
+        "context": "If the group's desired capacity diverged while processes were suspended, resuming may immediately launch or terminate instances to reconcile. Verify desired vs actual count before resuming.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "autoscaling update-auto-scaling-group",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify min-size is not being set to 0 \u2014 this terminates all instances",
+        "context": "Setting min-size=0 and desired-capacity=0 immediately terminates all instances in the group. For production workloads this causes a complete outage. Double-check the values before applying.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

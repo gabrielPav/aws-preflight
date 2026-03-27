@@ -1,0 +1,33 @@
+[
+  {
+    "command": "es delete-elasticsearch-domain",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Domain deletion permanently destroys all indices and data \u2014 create a snapshot first",
+        "context": "There is no undo. All Elasticsearch indices, Kibana dashboards, and configurations are permanently deleted. Take a manual snapshot to S3 before deleting if you need to retain any data.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "es update-elasticsearch-domain-config",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify you are not disabling encryption at rest, node-to-node encryption, or HTTPS enforcement",
+        "context": "Configuration changes to an Elasticsearch domain take effect during a blue/green deployment. Disabling security features like encryption or HTTPS exposes your search data to interception and unauthorized access.",
+        "suggestion": ""
+      },
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the access policy is not being opened to public access",
+        "context": "An Elasticsearch domain with a permissive access policy (Principal: *) and no VPC is publicly accessible. Verify the access policy restricts to specific IAM roles or IP ranges.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

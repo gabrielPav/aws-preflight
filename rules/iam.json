@@ -6,7 +6,7 @@
         "type": "always_warn",
         "severity": "MEDIUM",
         "message": "Creating a long-lived IAM user",
-        "context": "IAM users with static credentials are a top source of credential leaks — they never expire and are often committed to git repos or hardcoded in apps. Prefer IAM roles or AWS IAM Identity Center (SSO) for human access.",
+        "context": "IAM users with static credentials are a top source of credential leaks \u2014 they never expire and are often committed to git repos or hardcoded in apps. Prefer IAM roles or AWS IAM Identity Center (SSO) for human access.",
         "suggestion": ""
       }
     ]
@@ -31,7 +31,7 @@
         "flag": "--policy-arn",
         "forbidden_value": "AdministratorAccess",
         "severity": "HIGH",
-        "message": "Attaching AdministratorAccess — full AWS access granted",
+        "message": "Attaching AdministratorAccess \u2014 full AWS access granted",
         "context": "AdministratorAccess is the most powerful policy in AWS. If this role is ever compromised, the attacker owns your entire account. Grant only the specific actions and resources the role actually needs.",
         "suggestion": ""
       },
@@ -40,7 +40,7 @@
         "flag": "--policy-arn",
         "forbidden_value": "PowerUserAccess",
         "severity": "HIGH",
-        "message": "Attaching PowerUserAccess — near-full AWS access granted",
+        "message": "Attaching PowerUserAccess \u2014 near-full AWS access granted",
         "context": "PowerUserAccess grants access to almost all AWS services except IAM and Organizations. This is still extremely broad and violates least-privilege. Scope permissions to only what is needed.",
         "suggestion": ""
       }
@@ -114,7 +114,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Trust policy being updated — verify no wildcard principals are introduced",
+        "message": "Trust policy being updated \u2014 verify no wildcard principals are introduced",
         "context": "A trust policy with Principal:* allows any entity in the world to attempt to assume this role. This is a critical misconfiguration that can lead to privilege escalation from outside your account.",
         "suggestion": ""
       }
@@ -126,7 +126,7 @@
       {
         "type": "always_warn",
         "severity": "MEDIUM",
-        "message": "Role deletion is permanent — verify no active workloads depend on it",
+        "message": "Role deletion is permanent \u2014 verify no active workloads depend on it",
         "context": "Deleting a role used by EC2 instances, Lambda functions, or ECS tasks will immediately break those workloads. AWS does not warn you about active usage before deletion.",
         "suggestion": ""
       }
@@ -138,7 +138,7 @@
       {
         "type": "always_warn",
         "severity": "MEDIUM",
-        "message": "User deletion is permanent — ensure access keys and MFA devices are removed first",
+        "message": "User deletion is permanent \u2014 ensure access keys and MFA devices are removed first",
         "context": "Deleting a user with active access keys or MFA devices can leave orphaned credentials. Deactivate and delete all access keys and MFA devices before deleting the user.",
         "suggestion": ""
       }
@@ -150,7 +150,7 @@
       {
         "type": "always_warn",
         "severity": "MEDIUM",
-        "message": "Console access enabled for IAM user — ensure MFA is enforced",
+        "message": "Console access enabled for IAM user \u2014 ensure MFA is enforced",
         "context": "Console passwords without MFA are a significant risk. Enforce MFA via an IAM policy condition (aws:MultiFactorAuthPresent: true) so the user cannot perform sensitive actions without a second factor.",
         "suggestion": ""
       }
@@ -162,7 +162,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "MFA device being deactivated — this reduces account security",
+        "message": "MFA device being deactivated \u2014 this reduces account security",
         "context": "Deactivating MFA removes a critical layer of protection. Ensure this is intentional and that the user will immediately re-enroll a new MFA device. Never deactivate MFA for the root account.",
         "suggestion": ""
       }
@@ -187,6 +187,150 @@
         "severity": "HIGH",
         "message": "Attaching PowerUserAccess to an IAM group",
         "context": "PowerUserAccess grants access to almost all AWS services except IAM and Organizations. Every user in this group inherits these broad permissions. Scope to specific services and actions.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam add-user-to-group",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the group's policies don't grant more permissions than this user needs",
+        "context": "Adding a user to a group instantly grants all policies attached to that group. If the group has admin or broad permissions, the user inherits them immediately.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam create-policy-version",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "New policy versions take effect immediately if set as default \u2014 review the policy document carefully",
+        "context": "A new default policy version changes permissions for every user, role, and group that has this policy attached. A typo granting s3:* or iam:* can expose your entire account.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam create-virtual-mfa-device",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Store the MFA seed securely \u2014 do not save the QR code or secret key in plaintext",
+        "context": "The virtual MFA seed is the secret used to generate TOTP codes. If it's stored in plaintext, S3, or a git repo, anyone with access can generate valid MFA codes and bypass your second factor.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam delete-server-certificate",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify no ELBs or CloudFront distributions reference this certificate",
+        "context": "Deleting a server certificate that's in use by a load balancer or CloudFront causes HTTPS to fail immediately. AWS may prevent deletion if in use, but verify manually.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam put-role-permissions-boundary",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Permissions boundary restricts the maximum permissions \u2014 verify it doesn't break existing access",
+        "context": "A permissions boundary acts as a ceiling. Any existing permissions that exceed the boundary are silently denied. This can break working applications if the boundary is too restrictive.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam put-user-permissions-boundary",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Permissions boundary restricts the maximum permissions \u2014 verify it doesn't break existing access",
+        "context": "A permissions boundary acts as a ceiling. Any existing permissions that exceed the boundary are silently denied. This can break the user's access to resources they currently use.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam update-access-key",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Deactivating an access key immediately breaks any application using it",
+        "context": "If an application, CI/CD pipeline, or script uses this access key, setting it to Inactive causes immediate authentication failures. Verify the key is not in use or that a replacement key is configured.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam update-account-password-policy",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify you are not weakening the password policy \u2014 minimum length, complexity, and rotation should meet your compliance requirements",
+        "context": "Weakening the password policy (shorter passwords, no complexity, no rotation) creates a compliance violation and makes brute-force attacks easier. CIS Benchmark requires minimum 14 characters with complexity.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam update-login-profile",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Updating a login profile sets a new console password \u2014 verify this is authorized",
+        "context": "Anyone who can call update-login-profile can reset another user's console password without knowing the old one. This is effectively a privilege escalation path if not audited.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam update-saml-provider",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Updating the SAML metadata changes the trust relationship for federated access",
+        "context": "An incorrect or malicious SAML metadata document can redirect authentication to an attacker-controlled IdP, allowing unauthorized access to your AWS account via federation.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam upload-server-certificate",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "The private key is passed on the command line \u2014 ensure it's not logged in shell history",
+        "context": "The private key appears in your shell history, process list, and potentially in CloudTrail data events. Clear your shell history after uploading and consider using ACM instead, which manages keys securely.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam upload-ssh-public-key",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the SSH public key is for CodeCommit access only \u2014 not a general-purpose key",
+        "context": "IAM SSH keys are used for CodeCommit authentication. Using a key that's also used for EC2 or other systems increases the blast radius if the key is compromised.",
         "suggestion": ""
       }
     ]

@@ -7,7 +7,7 @@
         "flag": "--encrypted",
         "severity": "HIGH",
         "message": "Redshift cluster not encrypted at rest",
-        "context": "Encryption must be set at creation time — enabling it later requires a cluster restore. An unencrypted Redshift cluster storing PII or financial data is a compliance failure.",
+        "context": "Encryption must be set at creation time \u2014 enabling it later requires a cluster restore. An unencrypted Redshift cluster storing PII or financial data is a compliance failure.",
         "suggestion": "--encrypted"
       },
       {
@@ -28,12 +28,11 @@
         "suggestion": "--enhanced-vpc-routing"
       },
       {
-        "type": "missing_flag",
-        "flag": "--logging-properties",
+        "type": "always_warn",
         "severity": "MEDIUM",
-        "message": "Audit logging not configured",
-        "context": "Without audit logging you have no record of who connected, what queries ran, or what data was accessed. Required for PCI-DSS, HIPAA, and SOC 2.",
-        "suggestion": "--logging-properties BucketName=<your-log-bucket>,S3KeyPrefix=redshift/"
+        "message": "Audit logging must be enabled separately via 'redshift enable-logging'",
+        "context": "Audit logging is not a create-cluster flag \u2014 it's a separate API call. Without it you have no record of who connected, what queries ran, or what data was accessed. Required for PCI-DSS, HIPAA, and SOC 2.",
+        "suggestion": ""
       }
     ]
   },
@@ -71,6 +70,30 @@
         "severity": "INFO",
         "message": "Verify the snapshot is not shared publicly after creation",
         "context": "Redshift snapshots shared with 'all' expose your entire data warehouse to any AWS account. Check snapshot access after creation.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "redshift enable-snapshot-copy",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the destination region and KMS key for cross-region snapshot copies",
+        "context": "Snapshot copies to another region use the specified KMS key. If no key is specified, the default key in the destination region is used. Verify the destination region meets your data residency requirements.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "redshift resize-cluster",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Classic resize causes cluster downtime \u2014 consider elastic resize for minimal disruption",
+        "context": "Classic resize makes the cluster read-only and may take hours. Elastic resize completes in minutes with brief unavailability. Verify the resize type and schedule during a maintenance window.",
         "suggestion": ""
       }
     ]

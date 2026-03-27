@@ -41,7 +41,7 @@
         "flag": "--at-rest-encryption-enabled",
         "severity": "HIGH",
         "message": "AppSync cache not encrypted at rest",
-        "context": "AppSync caches can contain sensitive query results including PII or financial data. AWS Security Hub flags unencrypted caches as a finding (AppSync.1).",
+        "context": "AppSync caches can contain sensitive query results including PII or financial data. AWS Security Hub flags unencrypted caches as a finding (AppSync.5).",
         "suggestion": "--at-rest-encryption-enabled"
       },
       {

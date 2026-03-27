@@ -1,0 +1,38 @@
+[
+  {
+    "command": "s3control create-access-point",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the access point policy restricts access to specific VPCs or IAM principals",
+        "context": "S3 access points provide named network endpoints with their own access policies. A permissive access point policy can bypass the bucket policy and expose data to unintended consumers.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "s3control delete-access-point",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Any application using this access point ARN will immediately lose access",
+        "context": "Applications referencing the access point ARN in their SDK configuration or IAM policies will fail. Verify all consumers have been migrated to a different access point or direct bucket access.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "s3control put-public-access-block",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify you are enabling (not disabling) public access block at the account level",
+        "context": "Account-level S3 Block Public Access overrides all bucket-level settings. Setting all four options to true is the strongest protection. Setting any to false opens the door for individual buckets to become public.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

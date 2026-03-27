@@ -3,11 +3,10 @@
     "command": "batch create-compute-environment",
     "checks": [
       {
-        "type": "missing_flag",
-        "flag": "--compute-resources",
+        "type": "always_warn",
         "severity": "HIGH",
         "message": "Verify compute resources use a private subnet — not a public one",
-        "context": "Batch jobs running in public subnets get public IPs and are directly reachable from the internet. Always run compute environments in private subnets with a NAT gateway for outbound access.",
+        "context": "Batch jobs running in public subnets get public IPs and are directly reachable from the internet. Always specify private subnets in --compute-resources with a NAT gateway for outbound access.",
         "suggestion": ""
       },
       {

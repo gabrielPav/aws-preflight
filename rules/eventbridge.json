@@ -30,7 +30,7 @@
       {
         "type": "always_warn",
         "severity": "MEDIUM",
-        "message": "Verify the target has a scoped IAM role — not a wildcard trust policy",
+        "message": "Verify the target has a scoped IAM role \u2014 not a wildcard trust policy",
         "context": "EventBridge assumes the role you specify to invoke the target. If that role has broad permissions (e.g. lambda:* or ecs:*), a misconfigured rule can trigger unintended actions at scale.",
         "suggestion": ""
       }
@@ -52,12 +52,11 @@
     "command": "events create-archive",
     "checks": [
       {
-        "type": "missing_flag",
-        "flag": "--kms-key-identifier",
+        "type": "always_warn",
         "severity": "MEDIUM",
-        "message": "Event archive not encrypted with a customer managed KMS key",
-        "context": "Archives can contain sensitive event payloads. Without a CMK, you have no key-level audit trail and can't revoke access to archived events independently of the event bus.",
-        "suggestion": "--kms-key-identifier alias/<your-key>"
+        "message": "Event archive inherits encryption from the source event bus",
+        "context": "Archives can contain sensitive event payloads. Encryption is inherited from the event bus \u2014 there is no separate KMS key parameter for archives. Ensure the source event bus has CMK encryption configured before creating an archive.",
+        "suggestion": ""
       }
     ]
   },
@@ -69,6 +68,30 @@
         "severity": "MEDIUM",
         "message": "Verify the schedule's execution role is scoped to only what the target needs",
         "context": "EventBridge Scheduler assumes the role you provide to invoke the target. A broad role here means a misconfigured schedule can trigger destructive actions (e.g. deleting resources, invoking wrong Lambda) on a timer.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "events put-permission",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify you are not granting PutEvents access to untrusted accounts or organizations",
+        "context": "EventBridge resource policies control who can put events on your event bus. A policy granting access to * or a broad organization allows any account to inject events that trigger your rules.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "events remove-permission",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Removing a permission may break cross-account event delivery",
+        "context": "If partner accounts or other AWS accounts send events to this bus, removing their permission immediately stops event delivery. Verify no active integrations depend on this permission.",
         "suggestion": ""
       }
     ]

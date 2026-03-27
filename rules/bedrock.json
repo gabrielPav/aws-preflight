@@ -12,7 +12,7 @@
     ]
   },
   {
-    "command": "bedrock create-knowledge-base",
+    "command": "bedrock-agent create-knowledge-base",
     "checks": [
       {
         "type": "always_warn",
@@ -22,23 +22,22 @@
         "suggestion": ""
       },
       {
-        "type": "missing_flag",
-        "flag": "--server-side-encryption-configuration",
+        "type": "always_warn",
         "severity": "MEDIUM",
-        "message": "Knowledge base not encrypted with a customer managed KMS key",
-        "context": "Knowledge bases store embeddings of your data. Without a CMK, you have no audit trail of who accessed the vector store and can't revoke access independently.",
-        "suggestion": "--server-side-encryption-configuration kmsKeyArn=<your-kms-key-arn>"
+        "message": "Verify the underlying vector store is encrypted with a customer managed KMS key",
+        "context": "Knowledge bases store embeddings of your data in the configured vector store (OpenSearch, Pinecone, RDS, etc.). Encryption is configured at the storage layer, not on the knowledge base itself. Ensure your vector store uses a CMK for audit trail and independent access revocation.",
+        "suggestion": ""
       }
     ]
   },
   {
-    "command": "bedrock create-agent",
+    "command": "bedrock-agent create-agent",
     "checks": [
       {
         "type": "always_warn",
         "severity": "HIGH",
         "message": "Scope the agent execution role to only the action groups and knowledge bases it needs",
-        "context": "Agents with broad IAM permissions are a prompt injection risk — a malicious user input can instruct the agent to call AWS APIs it shouldn't. Least privilege is critical here.",
+        "context": "Agents with broad IAM permissions are a prompt injection risk \u2014 a malicious user input can instruct the agent to call AWS APIs it shouldn't. Least privilege is critical here.",
         "suggestion": ""
       },
       {
@@ -51,7 +50,7 @@
     ]
   },
   {
-    "command": "bedrock create-model-invocation-logging-configuration",
+    "command": "bedrock put-model-invocation-logging-configuration",
     "checks": [
       {
         "type": "always_warn",
@@ -82,6 +81,37 @@
         "severity": "HIGH",
         "message": "Verify the Lambda function backing this action group validates all inputs",
         "context": "Action group Lambda functions receive parameters extracted from user prompts by the LLM. A prompt injection attack can craft inputs that bypass your intended logic. Treat all action group inputs as untrusted.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "bedrock create-model-customization-job",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify training data in S3 does not contain unredacted PII or confidential information",
+        "context": "Fine-tuning data is processed and stored by the service. If training data contains PII, credentials, or proprietary information, it becomes embedded in the model weights and can be extracted through inference.",
+        "suggestion": ""
+      },
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the IAM role is scoped to only the S3 buckets containing training and output data",
+        "context": "The customization job assumes the role you provide to read training data and write model artifacts. A role with s3:* can access every bucket in your account.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "bedrock update-guardrail",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify you are not weakening content filters or removing PII protections",
+        "context": "Updating a guardrail affects all agents and model invocations using it in real time. Removing a denied topic or sensitive information filter immediately exposes those gaps to users.",
         "suggestion": ""
       }
     ]

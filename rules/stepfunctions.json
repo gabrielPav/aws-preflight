@@ -8,7 +8,7 @@
         "severity": "HIGH",
         "message": "Execution logging not configured",
         "context": "Without logging, you have zero visibility into execution history, failed states, or what data was passed between steps. AWS Security Hub flags this as a finding. Set level to ERROR at minimum, ALL for sensitive workflows.",
-        "suggestion": "--logging-configuration level=ERROR,includeExecutionData=false,destinations=[{cloudWatchLogsLogGroup:{logGroupArn:<arn>}}]"
+        "suggestion": "--logging-configuration '{\"level\":\"ERROR\",\"includeExecutionData\":false,\"destinations\":[{\"cloudWatchLogsLogGroup\":{\"logGroupArn\":\"<arn>\"}}]}'"
       },
       {
         "type": "missing_flag",

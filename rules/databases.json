@@ -7,7 +7,7 @@
         "flag": "--storage-encrypted",
         "severity": "HIGH",
         "message": "Neptune cluster storage not encrypted",
-        "context": "Encryption must be set at creation time — you can't enable it later. Neptune stores graph data that often includes sensitive relationship and identity data.",
+        "context": "Encryption must be set at creation time \u2014 you can't enable it later. Neptune stores graph data that often includes sensitive relationship and identity data.",
         "suggestion": "--storage-encrypted"
       },
       {
@@ -24,7 +24,7 @@
         "severity": "MEDIUM",
         "message": "Audit logging not configured",
         "context": "Without audit logs you have no record of who queried the graph or what data was accessed. Required for compliance and incident response.",
-        "suggestion": "--enable-cloudwatch-logs-exports '[\"audit\"]'"
+        "suggestion": "--enable-cloudwatch-logs-exports audit"
       }
     ]
   },
@@ -48,7 +48,7 @@
         "flag": "--storage-encrypted",
         "severity": "HIGH",
         "message": "DocumentDB cluster storage not encrypted",
-        "context": "Encryption must be set at creation time. DocumentDB clusters often store application data including user records — encrypt at rest.",
+        "context": "Encryption must be set at creation time. DocumentDB clusters often store application data including user records \u2014 encrypt at rest.",
         "suggestion": "--storage-encrypted"
       },
       {
@@ -65,7 +65,7 @@
         "severity": "MEDIUM",
         "message": "Audit logging not configured",
         "context": "Without audit and profiler logs you have no record of who connected or what operations ran.",
-        "suggestion": "--enable-cloudwatch-logs-exports '[\"audit\",\"profiler\"]'"
+        "suggestion": "--enable-cloudwatch-logs-exports audit profiler"
       }
     ]
   },
@@ -85,12 +85,11 @@
     "command": "qldb create-ledger",
     "checks": [
       {
-        "type": "missing_flag",
-        "flag": "--kms-key",
+        "type": "always_warn",
         "severity": "MEDIUM",
         "message": "QLDB ledger not encrypted with a customer managed KMS key",
-        "context": "QLDB uses an AWS-owned key by default. For ledgers storing financial or compliance data, use a CMK so you have an audit trail of every access and can revoke access independently.",
-        "suggestion": "--kms-key alias/<your-key>"
+        "context": "QLDB uses an AWS-owned key by default. For ledgers storing financial or compliance data, specify --kms-key with a CMK ARN so you have an audit trail of every access and can revoke access independently. Note: QLDB is deprecated (end of life July 2025) \u2014 migrate to other services.",
+        "suggestion": ""
       }
     ]
   },
@@ -102,6 +101,54 @@
         "severity": "HIGH",
         "message": "QLDB ledger deletion destroys the entire immutable transaction history",
         "context": "The audit log is QLDB's entire value. Export the journal to S3 before deleting if you need to retain the history for compliance.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "docdb modify-db-instance",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the instance is not being made publicly accessible or moved to a public subnet",
+        "context": "DocumentDB instances should remain in private subnets. Making them publicly accessible exposes your document database to internet-based attacks.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "neptune modify-db-cluster",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify you are not disabling deletion protection or audit logging",
+        "context": "Disabling deletion protection on a production Neptune cluster exposes it to accidental deletion. Disabling audit logs removes visibility into graph queries and access patterns.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "neptune modify-db-cluster-parameter-group",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Parameter changes may weaken audit logging or security settings",
+        "context": "Modifying parameters like neptune_enforce_ssl or audit log settings affects all clusters using this parameter group. Disabling SSL enforcement allows unencrypted connections to your graph database.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "neptune modify-db-instance",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the instance class change doesn't cause performance degradation during modification",
+        "context": "Instance class changes trigger a brief failover. If modifying the writer instance, all write operations fail during the switchover. Schedule changes during maintenance windows.",
         "suggestion": ""
       }
     ]

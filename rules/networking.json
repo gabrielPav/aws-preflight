@@ -15,9 +15,9 @@
         "type": "missing_flag",
         "flag": "--type",
         "severity": "INFO",
-        "message": "Load balancer type not specified",
-        "context": "Defaulting to Classic Load Balancer is deprecated. Use Application Load Balancer (ALB) for HTTP/HTTPS traffic or Network Load Balancer (NLB) for TCP/UDP. ALB supports WAF integration for security.",
-        "suggestion": "--type application"
+        "message": "Load balancer type not specified \u2014 defaults to 'application'",
+        "context": "The elbv2 API defaults to Application Load Balancer (ALB) when --type is omitted. Specify --type explicitly if you need a Network Load Balancer (NLB) for TCP/UDP or Gateway Load Balancer (GWLB). Classic Load Balancers use the separate 'elb' CLI namespace.",
+        "suggestion": ""
       }
     ]
   },
@@ -101,8 +101,8 @@
       {
         "type": "always_warn",
         "severity": "MEDIUM",
-        "message": "Verify authentication is configured — HTTP APIs have no auth by default",
-        "context": "HTTP APIs (v2) are publicly accessible with no authentication unless you explicitly add a JWT authorizer or IAM auth. Unlike REST APIs, there's no API key support — use JWT authorizers with Cognito or a custom OIDC provider.",
+        "message": "Verify authentication is configured \u2014 HTTP APIs have no auth by default",
+        "context": "HTTP APIs (v2) are publicly accessible with no authentication unless you explicitly add a JWT authorizer or IAM auth. Unlike REST APIs, there's no API key support \u2014 use JWT authorizers with Cognito or a custom OIDC provider.",
         "suggestion": ""
       }
     ]
@@ -116,7 +116,7 @@
         "severity": "HIGH",
         "message": "Access logging not configured for this stage",
         "context": "Without access logs you have no record of who called your API, what they sent, or what errors occurred. This is required for incident response and most compliance frameworks.",
-        "suggestion": "--access-log-settings destinationArn=arn:aws:logs:<region>:<account>:log-group:<group>"
+        "suggestion": "--access-log-settings DestinationArn=arn:aws:logs:<region>:<account>:log-group:<group>"
       }
     ]
   },
@@ -152,6 +152,54 @@
         "severity": "HIGH",
         "message": "Deleting a WAF ACL removes all protection from associated resources",
         "context": "Any CloudFront distribution, ALB, API Gateway, or AppSync API associated with this ACL immediately loses WAF protection. Disassociate the ACL from all resources before deleting.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "apigateway create-authorizer",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the authorizer validates tokens correctly \u2014 misconfigured authorizers silently allow all requests",
+        "context": "A Lambda or Cognito authorizer that returns an allow policy without proper validation effectively makes the API public. Test with invalid tokens to confirm denials work.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "apigateway generate-client-certificate",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Store the client certificate private key securely \u2014 it authenticates your API Gateway to backends",
+        "context": "Client certificates enable mutual TLS between API Gateway and your backend. If the private key is exposed, anyone can impersonate API Gateway to your backend services.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "elbv2 set-subnets",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Changing subnets can cause brief connectivity disruption during reprovisioning",
+        "context": "The load balancer provisions new nodes in the new subnets and drains connections from old ones. If the new subnets lack proper route tables or NAT access, traffic will fail.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "wafv2 associate-web-acl",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the web ACL rules are tested and won't block legitimate traffic",
+        "context": "Associating a WAF web ACL with a resource (ALB, CloudFront, API Gateway) immediately starts filtering traffic. Misconfigured rules can block legitimate users. Test in count mode before enforcing.",
         "suggestion": ""
       }
     ]

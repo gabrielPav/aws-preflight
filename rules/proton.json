@@ -1,0 +1,26 @@
+[
+  {
+    "command": "proton-preview update-environment",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Environment updates can modify infrastructure across all services deployed in it",
+        "context": "Proton environments define shared infrastructure. Updating the template version or parameters can trigger changes to VPCs, subnets, and security groups that affect all services in the environment.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "proton-preview update-service-instance",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Service instance updates trigger infrastructure changes that may cause brief downtime",
+        "context": "Proton applies the updated template via CloudFormation. If the template changes compute resources or networking, the service instance may experience brief disruption.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

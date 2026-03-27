@@ -38,7 +38,7 @@
       {
         "type": "always_warn",
         "severity": "INFO",
-        "message": "Table update in progress — some changes are irreversible",
+        "message": "Table update in progress \u2014 some changes are irreversible",
         "context": "Changing billing mode, removing GSIs, or disabling streams can have irreversible effects on your application. Test changes in a non-production environment first.",
         "suggestion": ""
       }
@@ -76,6 +76,18 @@
         "severity": "HIGH",
         "message": "Batch write can delete or overwrite up to 25 items at once",
         "context": "BatchWriteItem supports both PutItem and DeleteRequest operations. A single call can permanently delete up to 25 items. Verify the request payload carefully before executing.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "dynamodb create-backup",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Verify backup encryption inherits from the source table's KMS key",
+        "context": "DynamoDB backups are encrypted with the same key as the source table. If using a CMK, ensure the key policy allows the backup service to encrypt/decrypt. Backups made with AWS-owned keys cannot be copied cross-account.",
         "suggestion": ""
       }
     ]

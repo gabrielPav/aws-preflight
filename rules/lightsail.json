@@ -5,7 +5,7 @@
       {
         "type": "always_warn",
         "severity": "MEDIUM",
-        "message": "Lightsail instances get a public IP by default — verify firewall rules are locked down",
+        "message": "Lightsail instances get a public IP by default \u2014 verify firewall rules are locked down",
         "context": "Every Lightsail instance is publicly reachable from the internet. The default firewall allows SSH (22) and HTTP (80) from anywhere. Restrict SSH to your IP and close any ports your app doesn't need.",
         "suggestion": ""
       }
@@ -58,7 +58,7 @@
         "type": "always_warn",
         "severity": "HIGH",
         "message": "Verify bucket access permissions are set to private",
-        "context": "Lightsail buckets can be set to public, which makes all objects readable by anyone. Unlike S3, there's no Block Public Access setting — you have to explicitly set the access level to private.",
+        "context": "Lightsail buckets can be set to public, which makes all objects readable by anyone. Unlike S3, there's no Block Public Access setting \u2014 you have to explicitly set the access level to private.",
         "suggestion": ""
       }
     ]
@@ -71,6 +71,90 @@
         "severity": "MEDIUM",
         "message": "Attach an SSL/TLS certificate and enable HTTPS",
         "context": "Lightsail load balancers support free SSL certificates via ACM. Without HTTPS, all traffic between clients and your load balancer is in plaintext. Enable HTTPS and redirect HTTP to HTTPS.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "lightsail close-instance-public-ports",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Verify closing this port doesn't break SSH access or application connectivity",
+        "context": "Closing port 22 locks you out of SSH access. Closing application ports (80, 443, etc.) immediately stops serving traffic. Verify you have an alternative access path before closing.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "lightsail create-key-pair",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Store the private key securely \u2014 it's displayed only once and cannot be retrieved later",
+        "context": "The private key is returned in the API response and never stored by AWS. If lost, you cannot recover it and must create a new key pair. Store it in a secrets manager, not in plaintext files.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "lightsail create-load-balancer-tls-certificate",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "The certificate requires DNS or email validation before it becomes active",
+        "context": "The TLS certificate is issued by ACM but requires domain validation. Traffic remains unencrypted until validation completes. Monitor the validation status and complete it promptly.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "lightsail create-relational-database-snapshot",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Verify snapshot encryption and access controls match your data classification",
+        "context": "Database snapshots contain a full copy of your database. If the snapshot is shared or the access controls are permissive, all data in the database is exposed.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "lightsail unpeer-vpc",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Unpeering immediately cuts connectivity between Lightsail and your VPC resources",
+        "context": "Any Lightsail instances communicating with EC2, RDS, or other VPC resources will lose connectivity immediately. Verify no active traffic depends on this peering before removing.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "lightsail update-relational-database",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the database is not being made publicly accessible",
+        "context": "Lightsail relational databases support a publicly-accessible setting. Enabling it exposes the database to the internet. Keep databases private and access them through Lightsail instances.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "lightsail update-relational-database-parameters",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Parameter changes may require a database reboot to take effect",
+        "context": "Some parameter changes are applied immediately while others require a reboot. Verify which parameters are pending reboot and schedule maintenance accordingly to avoid unexpected downtime.",
         "suggestion": ""
       }
     ]

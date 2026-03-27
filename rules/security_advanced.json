@@ -5,7 +5,7 @@
       {
         "type": "always_warn",
         "severity": "INFO",
-        "message": "Shield Advanced is $3,000/month with a 1-year commitment — verify this is intentional",
+        "message": "Shield Advanced is $3,000/month with a 1-year commitment \u2014 verify this is intentional",
         "context": "Evaluate your actual DDoS risk profile before subscribing. For most workloads, Shield Standard (free) plus WAF is sufficient. Shield Advanced makes sense for high-profile public-facing services.",
         "suggestion": ""
       }
@@ -29,7 +29,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Enable all data sources — S3 protection, EKS audit logs, and malware protection are off by default",
+        "message": "Enable all data sources \u2014 S3 protection, EKS audit logs, and malware protection are off by default",
         "context": "A detector with only CloudTrail and VPC flow logs misses S3 data events, Kubernetes API activity, and malware on EC2. Enable all data sources for complete coverage.",
         "suggestion": ""
       }
@@ -48,7 +48,7 @@
     ]
   },
   {
-    "command": "guardduty disassociate-from-master-account",
+    "command": "guardduty disassociate-from-administrator-account",
     "checks": [
       {
         "type": "always_warn",
@@ -65,7 +65,7 @@
       {
         "type": "always_warn",
         "severity": "MEDIUM",
-        "message": "Use DNS validation — email validation is fragile and doesn't auto-renew",
+        "message": "Use DNS validation \u2014 email validation is fragile and doesn't auto-renew",
         "context": "Email validation sends to WHOIS contacts that are often wrong or outdated. DNS validation is automated, doesn't expire, and auto-renews without manual intervention.",
         "suggestion": "--validation-method DNS"
       }
@@ -90,7 +90,31 @@
         "type": "always_warn",
         "severity": "MEDIUM",
         "message": "The private key must never be stored in git, S3 without encryption, or shared via chat",
-        "context": "Importing a certificate requires the private key on the command line. That key must be stored in Secrets Manager or KMS-encrypted storage — not in your shell history or a text file.",
+        "context": "Importing a certificate requires the private key on the command line. That key must be stored in Secrets Manager or KMS-encrypted storage \u2014 not in your shell history or a text file.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "acm resend-validation-email",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Validation emails are sent to WHOIS contacts \u2014 verify the domain owner will receive them",
+        "context": "If the WHOIS contacts are outdated or incorrect, the validation email will go to the wrong person. Consider switching to DNS validation for automated, reliable certificate issuance.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "guardduty start-malware-scan",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Malware scan creates a snapshot of the EBS volume \u2014 verify the instance is in a supported region",
+        "context": "GuardDuty malware protection creates an EBS snapshot for scanning. This incurs snapshot storage costs. Scans can take minutes to hours depending on volume size.",
         "suggestion": ""
       }
     ]

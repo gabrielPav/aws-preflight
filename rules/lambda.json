@@ -87,8 +87,32 @@
       {
         "type": "always_warn",
         "severity": "MEDIUM",
-        "message": "Deploying new function code — ensure it has been reviewed for secrets and vulnerabilities",
+        "message": "Deploying new function code \u2014 ensure it has been reviewed for secrets and vulnerabilities",
         "context": "Deploying code with hardcoded credentials, insecure dependencies, or injection vulnerabilities can compromise your entire serverless architecture. Use a CI/CD pipeline with security scanning before deployment.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "lambda delete-function-url-config",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Deleting the function URL immediately breaks any application or webhook calling it",
+        "context": "Function URLs provide a direct HTTPS endpoint. Any external service, webhook, or application using this URL will get connection errors immediately. Update callers before deleting.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "lambda update-function-url-config",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify you are not changing auth type from AWS_IAM to NONE \u2014 this makes the endpoint public",
+        "context": "Switching auth type to NONE allows anyone on the internet to invoke the function. If the function processes sensitive data or has broad IAM permissions, this is a critical exposure.",
         "suggestion": ""
       }
     ]

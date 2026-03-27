@@ -5,7 +5,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "New accounts have a root user with no MFA — secure it immediately",
+        "message": "New accounts have a root user with no MFA \u2014 secure it immediately",
         "context": "Every new AWS account gets a root user tied to the email you specified. That root user has no MFA until you set it. Automate baseline security (CloudTrail, Config, GuardDuty, SCPs) via a Landing Zone or account vending pipeline before anyone uses the account.",
         "suggestion": ""
       }
@@ -18,7 +18,7 @@
         "type": "always_warn",
         "severity": "HIGH",
         "message": "Test SCPs in a non-production OU before attaching to production accounts",
-        "context": "A misconfigured SCP can lock out all IAM users and roles in every account it's attached to — including your break-glass admin roles. SCPs override IAM policies and cannot be bypassed from within the account.",
+        "context": "A misconfigured SCP can lock out all IAM users and roles in every account it's attached to \u2014 including your break-glass admin roles. SCPs override IAM policies and cannot be bypassed from within the account.",
         "suggestion": ""
       }
     ]
@@ -79,6 +79,30 @@
         "severity": "HIGH",
         "message": "Leaving an organization removes all SCP guardrails and consolidated billing",
         "context": "The account immediately loses all SCP protections, AWS Config aggregation, Security Hub integration, and consolidated billing. The root user becomes the only way to access the account until IAM is reconfigured.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "organizations create-organization",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Creating an organization makes this account the management account \u2014 this is irreversible",
+        "context": "The management account has unrestricted access to all member accounts. It cannot be changed later without dissolving the organization. Choose this account carefully \u2014 it should be a dedicated management account, not a workload account.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "organizations disable-aws-service-access",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Disabling service access may break security services across all member accounts",
+        "context": "Services like GuardDuty, Security Hub, CloudTrail, and Config depend on organization service access. Disabling access for these services immediately stops centralized security monitoring.",
         "suggestion": ""
       }
     ]

@@ -14,8 +14,8 @@
         "type": "missing_flag",
         "flag": "--subnet-id",
         "severity": "HIGH",
-        "message": "No subnet specified — notebook may be deployed with direct internet access",
-        "context": "Without a subnet, SageMaker deploys the notebook with a public IP. Notebooks should run in private subnets with internet access via NAT, not directly exposed.",
+        "message": "No subnet specified \u2014 notebook may be deployed with direct internet access",
+        "context": "Without a subnet, SageMaker gives the notebook direct outbound internet access, bypassing your VPC network controls. Notebooks should run in private subnets with internet access via NAT.",
         "suggestion": "--subnet-id subnet-<your-private-subnet>"
       },
       {
@@ -33,11 +33,10 @@
     "command": "sagemaker create-training-job",
     "checks": [
       {
-        "type": "missing_flag",
-        "flag": "--output-data-config",
+        "type": "always_warn",
         "severity": "MEDIUM",
         "message": "Verify output S3 bucket has encryption and access controls configured",
-        "context": "Training job output (model artifacts) is written to S3. If that bucket is misconfigured, your trained models — which may encode sensitive training data — are exposed.",
+        "context": "Training job output (model artifacts) is written to the S3 location specified in --output-data-config. If that bucket is misconfigured, your trained models \u2014 which may encode sensitive training data \u2014 are exposed.",
         "suggestion": ""
       },
       {
@@ -55,7 +54,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Verify the endpoint has authentication — SageMaker endpoints require IAM auth by default but can be misconfigured",
+        "message": "Verify the endpoint has authentication \u2014 SageMaker endpoints require IAM auth by default but can be misconfigured",
         "context": "SageMaker real-time endpoints require AWS SigV4 signing by default. If you're fronting the endpoint with API Gateway or Lambda, ensure those layers enforce authentication before passing requests through.",
         "suggestion": ""
       }
@@ -67,7 +66,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Endpoint deletion is immediate — any application calling it will fail instantly",
+        "message": "Endpoint deletion is immediate \u2014 any application calling it will fail instantly",
         "context": "There is no graceful drain for SageMaker endpoints. All in-flight requests fail immediately. Update your application to stop sending traffic before deleting.",
         "suggestion": ""
       }
@@ -79,7 +78,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Face collections store biometric data — verify your data handling complies with GDPR, CCPA, and BIPA",
+        "message": "Face collections store biometric data \u2014 verify your data handling complies with GDPR, CCPA, and BIPA",
         "context": "Facial recognition data is biometric PII under most privacy laws. Storing faces without explicit consent and a documented retention/deletion policy is a legal liability in many jurisdictions.",
         "suggestion": ""
       }
@@ -110,7 +109,7 @@
     ]
   },
   {
-    "command": "lex create-bot",
+    "command": "lexv2-models create-bot",
     "checks": [
       {
         "type": "always_warn",
@@ -139,8 +138,8 @@
       {
         "type": "always_warn",
         "severity": "MEDIUM",
-        "message": "Text sent to Translate may be used to improve AWS models unless you opt out",
-        "context": "By default, AWS may use your data to improve services. If you're translating confidential documents or PII, enable data privacy settings or use a custom terminology endpoint in an isolated environment.",
+        "message": "Review data privacy settings before translating sensitive content",
+        "context": "AWS AI services have an opt-out policy configurable via Organizations AI services opt-out policies. If you're translating confidential documents or PII, verify your organization's opt-out settings and consider using a custom terminology endpoint.",
         "suggestion": ""
       }
     ]
@@ -153,6 +152,66 @@
         "severity": "MEDIUM",
         "message": "Verify the dataset import role is scoped to only the S3 bucket containing forecast data",
         "context": "Forecast assumes the IAM role you provide to read training data from S3. A role with s3:* can read every bucket in your account. Scope it to the specific bucket and prefix.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "sagemaker create-endpoint-config",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the endpoint config uses a KMS key for model data encryption",
+        "context": "Endpoint configurations define how models are deployed. Without a KMS key, model artifacts are encrypted with an AWS-managed key with no audit trail. For sensitive models, specify a CMK.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "sagemaker create-model",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the execution role is scoped to only the S3 buckets containing model artifacts",
+        "context": "The model execution role is used at inference time. A role with broad S3 or network access could be exploited if the model container is compromised. Scope to specific resource ARNs.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "sagemaker start-notebook-instance",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the notebook instance has internet access disabled if it doesn't need it",
+        "context": "Starting a notebook with direct internet access allows it to download packages and exfiltrate data. If the notebook doesn't need outbound internet, ensure it's in a private subnet.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "sagemaker stop-notebook-instance",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Stopping preserves data on the attached EBS volume but terminates the ML compute instance",
+        "context": "Any running processes, unsaved work in memory, and active kernel sessions are lost. Data saved to the EBS volume (/home/ec2-user/SageMaker) is preserved.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "sagemaker update-notebook-instance",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the update doesn't enable direct internet access or change the KMS key",
+        "context": "Updating a notebook can change its network configuration, instance type, and IAM role. Enabling direct internet access or switching to a less restricted role weakens the notebook's security posture.",
         "suggestion": ""
       }
     ]

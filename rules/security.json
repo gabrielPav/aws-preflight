@@ -31,7 +31,7 @@
         "type": "always_warn",
         "severity": "HIGH",
         "message": "Secret deletion has a recovery window — verify no applications depend on it",
-        "context": "By default, secrets are scheduled for deletion after 30 days. Applications still referencing this secret will fail immediately. Use --recovery-window-in-days 0 only if you are certain the secret is unused.",
+        "context": "By default, secrets are scheduled for deletion after 7 days (configurable up to 30). Applications still referencing this secret will fail immediately. Use --force-delete-without-recovery only if you are certain the secret is unused.",
         "suggestion": ""
       }
     ]

@@ -1,0 +1,38 @@
+[
+  {
+    "command": "elb delete-load-balancer",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Load balancer deletion immediately drops all traffic \u2014 update DNS first",
+        "context": "All registered instances stop receiving traffic immediately. Any DNS records (CNAME or Alias) pointing to this load balancer will resolve to nothing. Update DNS before deleting.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "elb delete-load-balancer-listeners",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Deleting a listener immediately stops traffic on that port",
+        "context": "If this is the HTTPS listener (port 443), all secure traffic stops. If it's the only listener, the load balancer accepts no traffic at all. Verify before removing.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "elb register-instances-with-load-balancer",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the instance's security group allows traffic from the load balancer",
+        "context": "Registering an instance doesn't automatically configure security groups. The instance must allow inbound traffic from the load balancer's security group on the listener port, or health checks will fail.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

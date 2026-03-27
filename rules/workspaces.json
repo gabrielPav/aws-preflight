@@ -1,0 +1,26 @@
+[
+  {
+    "command": "workspaces reboot-workspaces",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Rebooting disconnects active users and any unsaved work is lost",
+        "context": "Active desktop sessions are terminated immediately. Users must reconnect after the reboot completes. Notify users before rebooting to avoid data loss.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "workspaces terminate-workspaces",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Termination permanently destroys the WorkSpace and all user data on it",
+        "context": "All data on the user volume (D: drive) is permanently deleted. The root volume is also destroyed. There is no undo. Create a snapshot or backup before terminating.",
+        "suggestion": ""
+      }
+    ]
+  }
+]
