@@ -20,6 +20,13 @@
         "message": "Verify the trust policy follows least-privilege",
         "context": "A trust policy with a wildcard principal (\"AWS\": \"*\") means any AWS account can assume this role. Always scope the Principal to a specific account, service, or ARN.",
         "suggestion": ""
+      },
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify --max-session-duration is not set higher than necessary",
+        "context": "The default max session duration is 1 hour (3600s). Setting it up to 12 hours (43200s) means a stolen session token remains valid for up to 12 hours with no way to invalidate it short of deleting the role. Set the shortest duration your workload can tolerate.",
+        "suggestion": ""
       }
     ]
   },

@@ -1,9 +1,9 @@
 # aws-preflight
 
+![Checks](https://img.shields.io/badge/Security_Checks-434-00C853.svg?style=flat)
+![Commands](https://img.shields.io/badge/Commands-369-1A73E8.svg?style=flat)
 ![AWS](https://img.shields.io/badge/AWS_Services-80-FF8C00.svg?style=flat&logo=amazon-aws&logoColor=white)
-![Commands](https://img.shields.io/badge/Commands-367-1A73E8.svg?style=flat)
-![Checks](https://img.shields.io/badge/Security_Checks-426-00C853.svg?style=flat)
-![Python](https://img.shields.io/badge/Python-3.10+-3776AB.svg?style=flat&logo=python&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.10+-5B86B3.svg?style=flat&logo=python&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat)
 
 **Lint AWS CLI commands before they run. Stop security leaks, policy violations, and accidental deletions before they hit your cloud.**
@@ -203,7 +203,7 @@ security-lint:
 
 ## Coverage
 
-**367 commands | 426 checks | 80 AWS services | 0 dependencies**
+**369 commands | 434 checks | 80 AWS services | 0 dependencies**
 
 | Category | Services | Key Checks |
 |---|---|---|

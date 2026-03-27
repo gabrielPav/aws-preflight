@@ -1,6 +1,6 @@
 [
   {
-    "command": "proton-preview update-environment",
+    "command": "proton update-environment",
     "checks": [
       {
         "type": "always_warn",
@@ -12,7 +12,7 @@
     ]
   },
   {
-    "command": "proton-preview update-service-instance",
+    "command": "proton update-service-instance",
     "checks": [
       {
         "type": "always_warn",

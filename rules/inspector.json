@@ -1,24 +1,24 @@
 [
   {
-    "command": "inspector create-assessment-template",
+    "command": "inspector2 enable",
     "checks": [
       {
         "type": "always_warn",
         "severity": "INFO",
-        "message": "Verify the assessment target and rules packages match your compliance requirements",
-        "context": "Inspector assessments run agents on your EC2 instances to scan for vulnerabilities. Ensure the target includes all relevant instances and the rules packages cover your required standards (CIS, CVE, network reachability).",
+        "message": "Verify Inspector v2 is enabled for all required scan types",
+        "context": "Inspector v2 supports EC2, ECR, and Lambda scan types. Omitting a scan type from --resource-types means those resources are never scanned for vulnerabilities. Enable all relevant types: EC2, ECR, LAMBDA.",
         "suggestion": ""
       }
     ]
   },
   {
-    "command": "inspector update-assessment-target",
+    "command": "inspector2 update-filter",
     "checks": [
       {
         "type": "always_warn",
         "severity": "MEDIUM",
-        "message": "Verify you are not narrowing the scope to exclude production instances",
-        "context": "Removing resource groups from an assessment target means those instances are no longer scanned for vulnerabilities. Any new vulnerabilities on excluded instances will go undetected.",
+        "message": "Verify you are not suppressing findings that cover production resources",
+        "context": "Inspector v2 suppression filters can silently hide active vulnerabilities. Narrowing filter criteria (by account, region, or resource tag) means matching findings are suppressed and will not appear in your dashboard or trigger alerts.",
         "suggestion": ""
       }
     ]

@@ -28,9 +28,9 @@
         "type": "forbidden_value",
         "flag": "--protocol",
         "forbidden_value": "HTTP",
-        "severity": "MEDIUM",
+        "severity": "INFO",
         "message": "Listener using unencrypted HTTP",
-        "context": "HTTP listeners transmit all traffic in plaintext. Create an HTTPS listener with a valid SSL certificate and add an HTTP listener only to redirect traffic to HTTPS.",
+        "context": "HTTP listeners transmit all traffic in plaintext. If this is a redirect listener (HTTP \u2192 HTTPS), this is expected and correct. Otherwise, create an HTTPS listener with a valid SSL certificate. Never terminate TLS at the load balancer with HTTP forwarding to backends over the public internet.",
         "suggestion": "--protocol HTTPS"
       }
     ]

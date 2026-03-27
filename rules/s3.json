@@ -8,6 +8,14 @@
         "message": "New S3 bucket \u2014 verify Block Public Access is enabled",
         "context": "Public S3 buckets are the #1 cause of AWS data breaches. Billions of records have been exposed this way. Run `aws s3api put-public-access-block` immediately after creation.",
         "suggestion": ""
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--object-lock-enabled-for-bucket",
+        "severity": "LOW",
+        "message": "Object Lock not enabled — bucket objects can be overwritten or deleted immediately",
+        "context": "Object Lock provides WORM (write-once-read-many) protection. Without it, ransomware or a compromised credential can delete or overwrite all objects instantly. Required by many compliance frameworks (SEC 17a-4, HIPAA, CJIS). Note: Object Lock must be enabled at bucket creation and cannot be added later.",
+        "suggestion": "--object-lock-enabled-for-bucket"
       }
     ]
   },

@@ -25,6 +25,15 @@
         "message": "CloudTrail logs not encrypted with KMS",
         "context": "Encrypting CloudTrail logs with a KMS key ensures that only authorized principals can read your audit logs. Without encryption, anyone with S3 read access to the bucket can read all API activity.",
         "suggestion": "--kms-key-id alias/<your-cloudtrail-key>"
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--no-include-global-service-events",
+        "forbidden_value": "true",
+        "severity": "HIGH",
+        "message": "Global service events excluded — IAM activity will not be logged",
+        "context": "IAM, STS, and CloudFront are global services. Using --no-include-global-service-events means all IAM API calls (CreateUser, AttachRolePolicy, AssumeRole, etc.) are invisible in this trail. This is a critical audit gap — IAM activity is exactly what attackers try to hide.",
+        "suggestion": "--include-global-service-events"
       }
     ]
   },

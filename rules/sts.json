@@ -1,0 +1,27 @@
+[
+  {
+    "command": "sts assume-role",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify --duration-seconds is set to the minimum required",
+        "context": "The default max session duration for assumed roles is 1 hour, but roles can be configured to allow up to 12 hours (43200s). Attackers who compromise credentials frequently use sts assume-role with maximum duration to maintain persistence even after the original credentials are rotated. Always use the shortest duration your workload needs.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "sts get-session-token",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--serial-number",
+        "severity": "MEDIUM",
+        "message": "MFA device not specified \u2014 session token will have no MFA context",
+        "context": "Session tokens generated without --serial-number and --token-code have no MFA context. Any IAM policy conditions using aws:MultiFactorAuthPresent will deny requests made with this token. More importantly, without MFA the token provides no stronger security guarantee than the long-lived credentials it was generated from.",
+        "suggestion": "--serial-number arn:aws:iam::<account-id>:mfa/<device-name> --token-code <code>"
+      }
+    ]
+  }
+]

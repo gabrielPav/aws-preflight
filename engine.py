@@ -7,6 +7,22 @@ RULES_DIR = os.path.join(os.path.dirname(__file__), "rules")
 _rules_cache: dict = {}
 
 
+_FLAG_REQUIRED_TYPES = {"missing_flag", "forbidden_value"}
+_REQUIRED_CHECK_FIELDS = {"type", "severity", "message"}
+
+
+def _validate_check(check: dict, fname: str) -> str | None:
+    """Return an error string if the check is malformed, else None."""
+    missing = _REQUIRED_CHECK_FIELDS - check.keys()
+    if missing:
+        return f"check missing fields {missing}"
+    if check["type"] in _FLAG_REQUIRED_TYPES and "flag" not in check:
+        return f"check of type '{check['type']}' missing 'flag'"
+    if check["type"] == "forbidden_value" and "forbidden_value" not in check and check.get("flag", "").startswith("-"):
+        return f"check of type 'forbidden_value' missing 'forbidden_value'"
+    return None
+
+
 def _load_rules() -> dict:
     if _rules_cache:
         return _rules_cache
@@ -18,13 +34,21 @@ def _load_rules() -> dict:
     for fname in filenames:
         if fname.endswith(".json"):
             try:
-                with open(os.path.join(RULES_DIR, fname)) as f:
+                with open(os.path.join(RULES_DIR, fname), encoding="utf-8") as f:
                     for rule in json.load(f):
                         key = rule["command"]
-                        if key in _rules_cache:
-                            _rules_cache[key].extend(rule["checks"])
-                        else:
-                            _rules_cache[key] = rule["checks"]
+                        valid_checks = []
+                        for check in rule["checks"]:
+                            err = _validate_check(check, fname)
+                            if err:
+                                print(f"Warning: skipping invalid check in {fname} ({key}): {err}", file=sys.stderr)
+                            else:
+                                valid_checks.append(check)
+                        if valid_checks:
+                            if key in _rules_cache:
+                                _rules_cache[key].extend(valid_checks)
+                            else:
+                                _rules_cache[key] = valid_checks
             except (json.JSONDecodeError, KeyError, IOError) as e:
                 print(f"Warning: skipping malformed rule file {fname}: {e}", file=sys.stderr)
     return _rules_cache

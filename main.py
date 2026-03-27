@@ -56,9 +56,12 @@ def execute(command: str):
         print("\n⚠️  Only AWS CLI commands can be executed. Use: run aws <command>")
         return
     try:
-        result = subprocess.run(parts)
+        result = subprocess.run(parts, timeout=30)
     except FileNotFoundError:
         print(f"\n⚠️  Command not found: {parts[0]}")
+        return
+    except subprocess.TimeoutExpired:
+        print("\n⚠️  Command timed out after 30 seconds")
         return
     except OSError as e:
         print(f"\n⚠️  Failed to execute command: {e}")
@@ -114,7 +117,7 @@ def main():
     ap.add_argument(
         "--min-severity", choices=["HIGH", "MEDIUM", "LOW", "INFO"],
         default="MEDIUM", metavar="LEVEL",
-        help="Minimum severity to trigger non-zero exit code (default: MEDIUM)",
+        help="Minimum severity level that triggers a non-zero exit code (default: MEDIUM). All findings are always displayed regardless of this setting.",
     )
     args = ap.parse_args()
 
