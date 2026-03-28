@@ -55,7 +55,7 @@
         "severity": "LOW",
         "message": "Disk size not specified \u2014 default may be insufficient for workloads",
         "context": "Nodes running out of disk space can cause pod evictions and cluster instability. Specify an appropriate disk size for your workloads.",
-        "suggestion": ""
+        "suggestion": "--disk-size 80"
       }
     ]
   },

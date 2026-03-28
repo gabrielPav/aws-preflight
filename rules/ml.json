@@ -160,11 +160,12 @@
     "command": "sagemaker create-endpoint-config",
     "checks": [
       {
-        "type": "always_warn",
+        "type": "missing_flag",
+        "flag": "--kms-key-id",
         "severity": "MEDIUM",
-        "message": "Verify the endpoint config uses a KMS key for model data encryption",
-        "context": "Endpoint configurations define how models are deployed. Without a KMS key, model artifacts are encrypted with an AWS-managed key with no audit trail. For sensitive models, specify a CMK.",
-        "suggestion": ""
+        "message": "Endpoint config not encrypted with a customer managed KMS key",
+        "context": "Without a KMS key, model artifacts are encrypted with an AWS-managed key with no audit trail. For sensitive models, specify a CMK for full control over access and rotation.",
+        "suggestion": "--kms-key-id alias/<your-key>"
       }
     ]
   },

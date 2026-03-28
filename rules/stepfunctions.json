@@ -33,7 +33,7 @@
       {
         "type": "always_warn",
         "severity": "MEDIUM",
-        "message": "In-flight executions are not affected by the update — verify behavior for long-running workflows",
+        "message": "In-flight executions are not affected by the update. Verify behavior for long-running workflows",
         "context": "Running executions continue using the previous definition. If you're fixing a bug, in-flight executions will still hit the broken path. You may need to abort and restart them manually.",
         "suggestion": ""
       }

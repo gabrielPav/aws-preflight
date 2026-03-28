@@ -6,7 +6,7 @@
         "type": "missing_flag",
         "flag": "--alarm-actions",
         "severity": "MEDIUM",
-        "message": "Alarm has no actions configured — it will fire silently",
+        "message": "Alarm has no actions configured, so it will fire silently",
         "context": "An alarm without actions just changes state in the console. Nobody gets notified, no auto-remediation runs. Wire it to an SNS topic at minimum so someone actually knows when it triggers.",
         "suggestion": "--alarm-actions arn:aws:sns:<region>:<account>:<topic>"
       }
@@ -18,7 +18,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Deleting alarms removes monitoring coverage — verify nothing critical depends on them",
+        "message": "Deleting alarms removes monitoring coverage. Verify nothing critical depends on them",
         "context": "If these alarms were triggering auto-scaling, auto-remediation, or on-call notifications, deleting them silently removes that coverage. Document what each alarm does before removing it.",
         "suggestion": ""
       }
@@ -42,7 +42,7 @@
       {
         "type": "always_warn",
         "severity": "INFO",
-        "message": "Contributor Insights rules incur per-event charges — scope the rule to avoid unexpected costs",
+        "message": "Contributor Insights rules incur per-event charges, so scope the rule to avoid unexpected costs",
         "context": "Rules that match high-volume log groups (e.g. VPC flow logs, ALB access logs) can generate millions of events per hour. Scope the rule with a specific log group and filter pattern.",
         "suggestion": ""
       }
@@ -55,7 +55,7 @@
         "type": "always_warn",
         "severity": "HIGH",
         "message": "Manually setting alarm state can suppress real alerts",
-        "context": "Setting an alarm to OK manually while the underlying condition is still breached will suppress notifications until the next evaluation cycle. Only use this for testing — never to silence a real alert.",
+        "context": "Setting an alarm to OK manually while the underlying condition is still breached will suppress notifications until the next evaluation cycle. Only use this for testing and never to silence a real alert.",
         "suggestion": ""
       }
     ]
@@ -67,7 +67,7 @@
         "type": "always_warn",
         "severity": "HIGH",
         "message": "Disabling alarm actions stops all auto-remediation and notifications",
-        "context": "This is a common attacker technique after gaining access — disable alarms so that subsequent malicious activity doesn't trigger alerts. Ensure this is intentional and re-enable actions as soon as possible.",
+        "context": "This is a common attacker technique after gaining access: disable alarms so that subsequent malicious activity doesn't trigger alerts. Ensure this is intentional and re-enable actions as soon as possible.",
         "suggestion": ""
       }
     ]

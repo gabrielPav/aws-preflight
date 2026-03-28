@@ -31,8 +31,8 @@
         "flag": "--no-include-global-service-events",
         "forbidden_value": "true",
         "severity": "HIGH",
-        "message": "Global service events excluded — IAM activity will not be logged",
-        "context": "IAM, STS, and CloudFront are global services. Using --no-include-global-service-events means all IAM API calls (CreateUser, AttachRolePolicy, AssumeRole, etc.) are invisible in this trail. This is a critical audit gap — IAM activity is exactly what attackers try to hide.",
+        "message": "Global service events excluded, so IAM activity will not be logged",
+        "context": "IAM, STS, and CloudFront are global services. Using --no-include-global-service-events means all IAM API calls (CreateUser, AttachRolePolicy, AssumeRole, etc.) are invisible in this trail. This is a critical audit gap because IAM activity is exactly what attackers try to hide.",
         "suggestion": "--include-global-service-events"
       }
     ]
@@ -41,11 +41,31 @@
     "command": "cloudtrail update-trail",
     "checks": [
       {
-        "type": "always_warn",
+        "type": "forbidden_value",
+        "flag": "--no-is-multi-region-trail",
+        "forbidden_value": "true",
         "severity": "HIGH",
-        "message": "Verify logging is not being disabled or scope reduced",
-        "context": "Reducing trail scope (e.g. disabling multi-region, removing log validation) creates blind spots in your audit trail. Attackers who gain access often disable CloudTrail first to cover their tracks.",
-        "suggestion": ""
+        "message": "Disabling multi-region trail. API activity in other regions will be invisible",
+        "context": "A single-region trail misses all API activity in other regions, including IAM. Attackers often operate in regions you don't monitor.",
+        "suggestion": "--is-multi-region-trail"
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--no-enable-log-file-validation",
+        "forbidden_value": "true",
+        "severity": "HIGH",
+        "message": "Disabling log file integrity validation",
+        "context": "Without integrity validation, you cannot prove that CloudTrail logs haven't been tampered with. This is required for forensic investigations and compliance.",
+        "suggestion": "--enable-log-file-validation"
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--no-include-global-service-events",
+        "forbidden_value": "true",
+        "severity": "HIGH",
+        "message": "Excluding global service events, so IAM activity will not be logged",
+        "context": "IAM, STS, and CloudFront are global services. Excluding them means all IAM API calls are invisible in this trail.",
+        "suggestion": "--include-global-service-events"
       }
     ]
   },

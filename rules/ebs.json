@@ -17,7 +17,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "EBS volume deletion is permanent — snapshot first if the data matters",
+        "message": "EBS volume deletion is permanent. Snapshot first if the data matters",
         "context": "Deleted EBS volumes cannot be recovered. AWS does not guarantee data is wiped before storage is reallocated. If the volume contained sensitive data, create a final snapshot for compliance purposes.",
         "suggestion": ""
       }
@@ -29,8 +29,8 @@
       {
         "type": "always_warn",
         "severity": "INFO",
-        "message": "Volume modifications have a 6-hour cooldown — you can't modify again until it expires",
-        "context": "After modifying a volume, you must wait 6 hours before modifying it again. Plan capacity changes carefully — you can't immediately undo an accidental size increase.",
+        "message": "Volume modifications have a 6-hour cooldown, and you can't modify again until it expires",
+        "context": "After modifying a volume, you must wait 6 hours before modifying it again. Plan capacity changes carefully because you can't immediately undo an accidental size increase.",
         "suggestion": ""
       }
     ]
@@ -41,7 +41,7 @@
       {
         "type": "always_warn",
         "severity": "INFO",
-        "message": "This only applies to new volumes — existing unencrypted volumes are not affected",
+        "message": "This only applies to new volumes. Existing unencrypted volumes are not affected",
         "context": "Enabling default encryption doesn't retroactively encrypt existing volumes. Snapshot each existing unencrypted volume and restore it with encryption enabled to cover your full EBS footprint.",
         "suggestion": ""
       }

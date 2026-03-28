@@ -5,6 +5,7 @@ import sys
 RULES_DIR = os.path.join(os.path.dirname(__file__), "rules")
 
 _rules_cache: dict = {}
+_rules_loaded: bool = False
 
 
 _FLAG_REQUIRED_TYPES = {"missing_flag", "forbidden_value"}
@@ -18,13 +19,14 @@ def _validate_check(check: dict, fname: str) -> str | None:
         return f"check missing fields {missing}"
     if check["type"] in _FLAG_REQUIRED_TYPES and "flag" not in check:
         return f"check of type '{check['type']}' missing 'flag'"
-    if check["type"] == "forbidden_value" and "forbidden_value" not in check and check.get("flag", "").startswith("-"):
+    if check["type"] == "forbidden_value" and "forbidden_value" not in check:
         return f"check of type 'forbidden_value' missing 'forbidden_value'"
     return None
 
 
 def _load_rules() -> dict:
-    if _rules_cache:
+    global _rules_loaded
+    if _rules_loaded:
         return _rules_cache
     try:
         filenames = sorted(os.listdir(RULES_DIR))
@@ -51,11 +53,26 @@ def _load_rules() -> dict:
                                 _rules_cache[key] = valid_checks
             except (json.JSONDecodeError, KeyError, IOError) as e:
                 print(f"Warning: skipping malformed rule file {fname}: {e}", file=sys.stderr)
+    _rules_loaded = True
     return _rules_cache
 
 
 def _flag_present(flags: dict, flag: str) -> bool:
-    return flag in flags
+    """Check whether *flag* (or its --no- / positive counterpart) is present.
+
+    IMPORTANT: This treats --X and --no-X as equivalent for *presence* only.
+    A missing_flag check for --no-X will report "present" when --X exists.
+    This is correct ONLY when paired with a forbidden_value check that catches
+    the dangerous positive form (e.g. --publicly-accessible true).  If you add
+    a missing_flag rule for --no-X, always add a matching forbidden_value rule
+    for --X to avoid silent false negatives.
+    """
+    if flag in flags:
+        return True
+    if flag.startswith("--no-"):
+        base = flag[5:]  # e.g. "--no-publicly-accessible" -> "publicly-accessible"
+        return bool(base) and ("--" + base) in flags
+    return ("--no-" + flag[2:]) in flags
 
 
 def _flag_value_contains(flags: dict, flag: str, value: str) -> bool:
@@ -65,10 +82,20 @@ def _flag_value_contains(flags: dict, flag: str, value: str) -> bool:
 
 def analyze(parsed: dict) -> list[dict]:
     rules = _load_rules()
+    flags = parsed["flags"]
+
+    # Warn when flags are passed via JSON file (bypasses all flag checks)
+    if "--cli-input-json" in flags or "--cli-input-yaml" in flags:
+        return [{
+            "severity": "INFO",
+            "message": "Parameters passed via JSON/YAML file, flag-based checks cannot inspect the contents",
+            "context": "Manually verify the input file against security best practices.",
+            "suggestion": "",
+        }]
+
     key = f"{parsed['service']} {parsed['operation']}"
     checks = rules.get(key, [])
     findings = []
-    flags = parsed["flags"]
 
     for check in checks:
         ctype = check["type"]
@@ -84,6 +111,9 @@ def analyze(parsed: dict) -> list[dict]:
         elif ctype == "forbidden_value":
             if _flag_present(flags, check["flag"]):
                 val = flags.get(check["flag"], "")
+                # Boolean flags (parsed as Python True) always match forbidden_value
+                # checks, regardless of the forbidden_value string. This is intentional:
+                # --associate-public-ip-address (no value) is treated as "true".
                 if val is True:
                     finding = check
                 elif isinstance(val, str):

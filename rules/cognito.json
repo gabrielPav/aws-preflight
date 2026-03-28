@@ -5,7 +5,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Verify MFA is enforced — not just optional",
+        "message": "Verify MFA is enforced, not just optional",
         "context": "Setting MFA to OPTIONAL means users can skip it entirely. For any pool handling real users, set it to ON (TOTP) or use adaptive authentication. AWS Config flags pools without MFA as NON_COMPLIANT.",
         "suggestion": ""
       },
@@ -19,7 +19,7 @@
       {
         "type": "always_warn",
         "severity": "MEDIUM",
-        "message": "Set a strong password policy — minimum 12 chars, require uppercase, lowercase, numbers, symbols",
+        "message": "Set a strong password policy: minimum 12 chars, require uppercase, lowercase, numbers, symbols",
         "context": "Default Cognito password policy allows 8-char passwords with minimal complexity. Weak passwords are the #1 vector for account takeover in user pools exposed to the internet.",
         "suggestion": ""
       }
@@ -38,7 +38,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Disable unused OAuth flows — especially implicit grant",
+        "message": "Disable unused OAuth flows, especially implicit grant",
         "context": "The implicit grant flow returns tokens in the URL fragment, which gets logged in browser history, server logs, and referrer headers. Only enable authorization_code flow for web apps.",
         "suggestion": ""
       }
@@ -63,7 +63,7 @@
         "type": "always_warn",
         "severity": "HIGH",
         "message": "Setting a permanent password bypasses the forced-change flow",
-        "context": "Using --permanent skips the requirement for the user to set their own password on first login. Only use this for service accounts or automated testing — never for real user accounts.",
+        "context": "Using --permanent skips the requirement for the user to set their own password on first login. Only use this for service accounts or automated testing and never for real user accounts.",
         "suggestion": ""
       }
     ]
@@ -74,7 +74,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "User pool deletion is permanent — all users, groups, and app clients are destroyed",
+        "message": "User pool deletion is permanent. All users, groups, and app clients are destroyed",
         "context": "There is no export or recovery option. All user accounts, attributes, and credentials are gone. Any application using this pool's client IDs will break immediately.",
         "suggestion": ""
       }
@@ -99,7 +99,7 @@
         "type": "always_warn",
         "severity": "HIGH",
         "message": "Verify unauthenticated access is disabled unless explicitly required",
-        "context": "Enabling unauthenticated identities grants AWS credentials to anyone — no login required. The unauthenticated IAM role must be locked down to the absolute minimum. Most apps don't need this at all.",
+        "context": "Enabling unauthenticated identities grants AWS credentials to anyone with no login required. The unauthenticated IAM role must be locked down to the absolute minimum. Most apps don't need this at all.",
         "suggestion": ""
       }
     ]

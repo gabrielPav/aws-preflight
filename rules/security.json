@@ -30,7 +30,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Secret deletion has a recovery window — verify no applications depend on it",
+        "message": "Secret deletion has a recovery window. Verify no applications depend on it",
         "context": "By default, secrets are scheduled for deletion after 7 days (configurable up to 30). Applications still referencing this secret will fail immediately. Use --force-delete-without-recovery only if you are certain the secret is unused.",
         "suggestion": ""
       }
@@ -55,7 +55,7 @@
         "type": "always_warn",
         "severity": "MEDIUM",
         "message": "Enable automatic key rotation after creation with `aws kms enable-key-rotation`",
-        "context": "Key rotation is not a flag on create-key — it requires a separate API call. AWS recommends enabling automatic annual rotation for all customer managed KMS keys. Key rotation limits the blast radius if a key is ever compromised, and is required by many compliance frameworks.",
+        "context": "Key rotation is not a flag on create-key; it requires a separate API call. AWS recommends enabling automatic annual rotation for all customer managed KMS keys. Key rotation limits the blast radius if a key is ever compromised, and is required by many compliance frameworks.",
         "suggestion": ""
       },
       {
@@ -73,8 +73,16 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "KMS key deletion is permanent — all data encrypted with this key will be unrecoverable",
-        "context": "Once a KMS key is deleted, any data encrypted with it (S3 objects, RDS databases, EBS volumes, Secrets Manager secrets) becomes permanently inaccessible. There is no way to recover the key or the data. Use the maximum waiting period (30 days) to allow time to identify dependencies.",
+        "message": "KMS key deletion is permanent. All data encrypted with this key will be unrecoverable",
+        "context": "Once a KMS key is deleted, any data encrypted with it (S3 objects, RDS databases, EBS volumes, Secrets Manager secrets) becomes permanently inaccessible. There is no way to recover the key or the data.",
+        "suggestion": ""
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--pending-window-in-days",
+        "severity": "HIGH",
+        "message": "No pending window specified. Defaults to 30 days, but should be set explicitly",
+        "context": "The default waiting period is 30 days. Always set this explicitly to the maximum (30 days) to give yourself time to identify all services and data that depend on this key before it is irreversibly destroyed.",
         "suggestion": "--pending-window-in-days 30"
       }
     ]

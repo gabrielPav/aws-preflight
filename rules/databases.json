@@ -32,11 +32,21 @@
     "command": "neptune delete-db-cluster",
     "checks": [
       {
-        "type": "always_warn",
+        "type": "missing_flag",
+        "flag": "--final-db-snapshot-identifier",
         "severity": "HIGH",
-        "message": "Take a final snapshot before deleting",
+        "message": "No final snapshot specified: Neptune cluster will be deleted without a backup",
         "context": "Neptune cluster deletion is permanent. Use --final-db-snapshot-identifier to preserve the graph data.",
         "suggestion": "--final-db-snapshot-identifier <snapshot-name>"
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--skip-final-snapshot",
+        "forbidden_value": "true",
+        "severity": "HIGH",
+        "message": "Explicitly skipping final snapshot. All graph data will be permanently lost",
+        "context": "With --skip-final-snapshot, no backup is taken before deletion. All graph data is gone forever.",
+        "suggestion": ""
       }
     ]
   },
@@ -73,11 +83,21 @@
     "command": "docdb delete-db-cluster",
     "checks": [
       {
-        "type": "always_warn",
+        "type": "missing_flag",
+        "flag": "--final-db-snapshot-identifier",
         "severity": "HIGH",
-        "message": "Take a final snapshot before deleting",
+        "message": "No final snapshot specified: DocumentDB cluster will be deleted without a backup",
         "context": "DocumentDB cluster deletion is permanent. Specify --final-db-snapshot-identifier to preserve the data.",
         "suggestion": "--final-db-snapshot-identifier <snapshot-name>"
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--skip-final-snapshot",
+        "forbidden_value": "true",
+        "severity": "HIGH",
+        "message": "Explicitly skipping final snapshot. All document data will be permanently lost",
+        "context": "With --skip-final-snapshot, no backup is taken before deletion. All DocumentDB data is gone forever.",
+        "suggestion": ""
       }
     ]
   },

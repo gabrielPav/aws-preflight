@@ -16,7 +16,7 @@
         "flag": "--block-device-mappings",
         "severity": "HIGH",
         "message": "Root volume encryption not specified",
-        "context": "Unencrypted EBS volumes can be detached and mounted on another instance, exposing all data at rest. Encryption is free and has no performance impact on modern instance types.",
+        "context": "Unencrypted EBS volumes can be detached and mounted on another instance, exposing all data at rest. Encryption is free and has no performance impact on modern instance types. The device name varies by AMI (e.g. /dev/xvda for Amazon Linux, /dev/sda1 for Ubuntu).",
         "suggestion": "--block-device-mappings '[{\"DeviceName\":\"/dev/xvda\",\"Ebs\":{\"Encrypted\":true}}]'"
       },
       {
@@ -24,7 +24,7 @@
         "flag": "--monitoring",
         "severity": "LOW",
         "message": "Detailed monitoring not enabled",
-        "context": "Without detailed monitoring, CloudWatch metrics are only available at 5-minute intervals. Detailed monitoring provides 1-minute granularity, critical for detecting and responding to security incidents quickly.",
+        "context": "Without detailed monitoring, CloudWatch metrics are only available at 5-minute intervals. Detailed monitoring provides 1-minute granularity, critical for detecting and responding to security incidents quickly. Note: detailed monitoring incurs additional CloudWatch charges.",
         "suggestion": "--monitoring Enabled=true"
       },
       {
@@ -34,6 +34,14 @@
         "severity": "HIGH",
         "message": "Instance launched with a public IP address",
         "context": "Assigning a public IP makes the instance directly reachable from the internet. Automated scanners find open ports within minutes. Use a NAT gateway for outbound traffic and a load balancer for inbound, keeping instances in private subnets.",
+        "suggestion": "--no-associate-public-ip-address"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--no-associate-public-ip-address",
+        "severity": "INFO",
+        "message": "Public IP assignment not explicitly disabled and will depend on subnet default",
+        "context": "Whether an instance gets a public IP depends on the subnet's auto-assign setting. If you intend this instance to be private, explicitly set --no-associate-public-ip-address rather than relying on the subnet default.",
         "suggestion": "--no-associate-public-ip-address"
       }
     ]
@@ -71,7 +79,7 @@
         "severity": "MEDIUM",
         "message": "Unrestricted outbound traffic allowed",
         "context": "Allowing all outbound traffic makes it trivial for malware or a compromised instance to exfiltrate data or communicate with command-and-control servers. Restrict egress to only required destinations and ports.",
-        "suggestion": ""
+        "suggestion": "--cidr <your-cidr>/32"
       }
     ]
   },

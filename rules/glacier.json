@@ -18,7 +18,7 @@
         "type": "always_warn",
         "severity": "HIGH",
         "message": "Verify the vault policy doesn't grant public access",
-        "context": "A vault access policy with Principal: * makes your archived data accessible to any AWS principal. Glacier archives often contain sensitive long-term data — scope access to specific IAM roles.",
+        "context": "A vault access policy with Principal: * makes your archived data accessible to any AWS principal. Glacier archives often contain sensitive long-term data, so scope access to specific IAM roles.",
         "suggestion": ""
       }
     ]
@@ -29,7 +29,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Vault must be empty before deletion — all archives must be deleted first",
+        "message": "Vault must be empty before deletion; all archives must be deleted first",
         "context": "You can't delete a vault that contains archives. Deleting archives from Glacier is a multi-step async process (initiate job, wait up to 24h, then delete). Plan this operation well in advance.",
         "suggestion": ""
       }
@@ -41,7 +41,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Lifecycle rules that expire objects are permanent — verify the scope before applying",
+        "message": "Lifecycle rules that expire objects are permanent. Verify the scope before applying",
         "context": "A lifecycle rule with Expiration on a prefix that's too broad will silently delete objects that match. Test with a narrow prefix first and verify the rule targets exactly what you intend.",
         "suggestion": ""
       }

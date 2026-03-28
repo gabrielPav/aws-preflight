@@ -3,6 +3,7 @@ VERSION = "1.0.0"
 
 import argparse
 import shlex
+import shutil
 import subprocess
 import sys
 
@@ -35,14 +36,15 @@ _min_severity = "MEDIUM"
 _all_findings: list[dict] = []
 
 
-def process(command: str):
+def process(command: str) -> list[dict]:
     parsed = parse_command(command)
     if not parsed:
         print(format_parse_error_json(command) if _output_json else format_parse_error(command))
-        return
+        return []
     findings = analyze(parsed)
     _all_findings.extend(findings)
     print(format_result_json(parsed, findings) if _output_json else format_result(parsed, findings))
+    return findings
 
 
 def execute(command: str):
@@ -55,6 +57,12 @@ def execute(command: str):
     if not parts or parts[0] != "aws":
         print("\n⚠️  Only AWS CLI commands can be executed. Use: run aws <command>")
         return
+    # Resolve to the real aws binary to prevent executing a rogue "aws" wrapper
+    aws_path = shutil.which("aws")
+    if not aws_path:
+        print("\n⚠️  AWS CLI not found in PATH")
+        return
+    parts[0] = aws_path
     try:
         result = subprocess.run(parts, timeout=30)
     except FileNotFoundError:

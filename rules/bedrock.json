@@ -45,7 +45,7 @@
         "severity": "HIGH",
         "message": "Associate a guardrail with this agent before exposing it to users",
         "context": "Agents without guardrails can be manipulated via prompt injection to leak data, bypass instructions, or call unintended action groups. Guardrails are the primary defense layer for production agents.",
-        "suggestion": ""
+        "suggestion": "--guardrail-configuration guardrailIdentifier=<guardrail-id>,guardrailVersion=DRAFT"
       }
     ]
   },

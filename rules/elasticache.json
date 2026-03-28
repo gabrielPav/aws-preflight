@@ -56,11 +56,13 @@
     "command": "elasticache modify-replication-group",
     "checks": [
       {
-        "type": "always_warn",
-        "severity": "MEDIUM",
-        "message": "Verify modifications do not disable encryption or authentication",
-        "context": "Modifying a replication group can change security settings. Ensure transit encryption and AUTH token settings are not being weakened.",
-        "suggestion": ""
+        "type": "forbidden_value",
+        "flag": "--no-transit-encryption-enabled",
+        "forbidden_value": "true",
+        "severity": "HIGH",
+        "message": "Disabling in-transit encryption. Cache traffic will be transmitted in plaintext",
+        "context": "Disabling TLS exposes all data between your application and the cache to network interception, including session tokens, cached credentials, and application data.",
+        "suggestion": "--transit-encryption-enabled"
       }
     ]
   }

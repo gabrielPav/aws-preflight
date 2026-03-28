@@ -4,6 +4,9 @@ SEVERITY_ICON = {"HIGH": "🔴", "MEDIUM": "🟡", "LOW": "🔵", "INFO": "ℹ�
 
 
 def _build_suggested(parsed: dict, findings: list[dict]) -> str:
+    # NOTE: Flag values in the output come from user input and are for display only.
+    # Do not pipe the suggested command into eval or shell execution without review.
+
     # Collect flags that should be removed (forbidden_value detections)
     forbidden_flags = {f["_forbidden_flag"] for f in findings if "_forbidden_flag" in f}
 

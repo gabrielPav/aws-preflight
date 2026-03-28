@@ -7,6 +7,7 @@ class TestEngineMissingFlag(unittest.TestCase):
 
     def setUp(self):
         engine._rules_cache.clear()
+        engine._rules_loaded = False
 
     def _messages(self, cmd):
         return [f["message"] for f in engine.analyze(parse_command(cmd))]
@@ -73,6 +74,7 @@ class TestEngineForbiddenValue(unittest.TestCase):
 
     def setUp(self):
         engine._rules_cache.clear()
+        engine._rules_loaded = False
 
     def _findings(self, cmd):
         return engine.analyze(parse_command(cmd))
@@ -144,6 +146,7 @@ class TestEngineAlwaysWarn(unittest.TestCase):
 
     def setUp(self):
         engine._rules_cache.clear()
+        engine._rules_loaded = False
 
     def _findings(self, cmd):
         return engine.analyze(parse_command(cmd))
@@ -177,6 +180,7 @@ class TestEngineGeneral(unittest.TestCase):
 
     def setUp(self):
         engine._rules_cache.clear()
+        engine._rules_loaded = False
 
     def test_unknown_command_no_findings(self):
         findings = engine.analyze(parse_command("aws s3 ls"))
@@ -198,11 +202,13 @@ class TestEngineGeneral(unittest.TestCase):
 
     def test_rules_load_without_errors(self):
         engine._rules_cache.clear()
+        engine._rules_loaded = False
         rules = engine._load_rules()
         self.assertGreater(len(rules), 0)
 
     def test_rules_load_expected_command_count(self):
         engine._rules_cache.clear()
+        engine._rules_loaded = False
         rules = engine._load_rules()
         self.assertGreaterEqual(len(rules), 369)
 

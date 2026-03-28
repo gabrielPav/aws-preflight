@@ -5,7 +5,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Verify compute resources use a private subnet — not a public one",
+        "message": "Verify compute resources use a private subnet, not a public one",
         "context": "Batch jobs running in public subnets get public IPs and are directly reachable from the internet. Always specify private subnets in --compute-resources with a NAT gateway for outbound access.",
         "suggestion": ""
       },

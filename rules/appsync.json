@@ -9,7 +9,7 @@
         "severity": "HIGH",
         "message": "API key authentication is not suitable for production APIs",
         "context": "API keys are long-lived, can't be scoped to specific users, and are frequently leaked in client-side code or git repos. AWS Security Hub flags this as a finding. Use Cognito User Pools, IAM, or OIDC instead.",
-        "suggestion": "--authentication-type AMAZON_COGNITO_USER_POOLS"
+        "suggestion": "--authentication-type AWS_IAM"
       },
       {
         "type": "missing_flag",

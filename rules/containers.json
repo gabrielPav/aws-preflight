@@ -64,7 +64,7 @@
         "severity": "INFO",
         "message": "Enable Container Insights for this cluster",
         "context": "Without Container Insights you have no visibility into container-level CPU, memory, or network anomalies \u2014 making it very hard to detect a compromised container or a cryptominer running in your cluster.",
-        "suggestion": ""
+        "suggestion": "--settings name=containerInsights,value=enabled"
       }
     ]
   },

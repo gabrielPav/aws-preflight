@@ -63,10 +63,11 @@
     "command": "acm request-certificate",
     "checks": [
       {
-        "type": "always_warn",
+        "type": "missing_flag",
+        "flag": "--validation-method",
         "severity": "MEDIUM",
-        "message": "Use DNS validation \u2014 email validation is fragile and doesn't auto-renew",
-        "context": "Email validation sends to WHOIS contacts that are often wrong or outdated. DNS validation is automated, doesn't expire, and auto-renews without manual intervention.",
+        "message": "Validation method not specified. Defaults to EMAIL, which is fragile and doesn't auto-renew",
+        "context": "Email validation sends to WHOIS contacts that are often wrong or outdated. DNS validation is automated, doesn't expire, and auto-renews without manual intervention. Always explicitly set --validation-method DNS.",
         "suggestion": "--validation-method DNS"
       }
     ]

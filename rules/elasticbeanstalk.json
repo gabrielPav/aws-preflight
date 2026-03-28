@@ -5,14 +5,14 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Verify the environment is not using the default service role — it has broad permissions",
+        "message": "Verify the environment is not using the default service role because it has broad permissions",
         "context": "The default Elastic Beanstalk service role has AdministratorAccess-like permissions. Create a scoped role with only the permissions your environment actually needs.",
         "suggestion": ""
       },
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Verify HTTPS is configured — Beanstalk serves HTTP by default",
+        "message": "Verify HTTPS is configured. Beanstalk serves HTTP by default",
         "context": "Default Beanstalk environments serve traffic over HTTP. Configure an HTTPS listener on the load balancer and redirect HTTP to HTTPS. Never serve production traffic unencrypted.",
         "suggestion": ""
       }
@@ -61,7 +61,7 @@
         "type": "always_warn",
         "severity": "MEDIUM",
         "message": "Verify the source bundle doesn't contain hardcoded credentials or .env files",
-        "context": "Application bundles uploaded to S3 are accessible to anyone with S3 read access to that bucket. Scan your bundle for secrets before uploading — git history, .env files, and config files are common culprits.",
+        "context": "Application bundles uploaded to S3 are accessible to anyone with S3 read access to that bucket. Scan your bundle for secrets before uploading. Git history, .env files, and config files are common culprits.",
         "suggestion": ""
       }
     ]

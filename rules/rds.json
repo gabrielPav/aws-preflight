@@ -29,6 +29,14 @@
       },
       {
         "type": "missing_flag",
+        "flag": "--no-publicly-accessible",
+        "severity": "HIGH",
+        "message": "Public accessibility not explicitly disabled. RDS may default to publicly accessible",
+        "context": "Depending on VPC and subnet group configuration, RDS instances can default to publicly accessible. Always explicitly set --no-publicly-accessible to ensure the database is not reachable from the internet.",
+        "suggestion": "--no-publicly-accessible"
+      },
+      {
+        "type": "missing_flag",
         "flag": "--backup-retention-period",
         "severity": "MEDIUM",
         "message": "Backup retention period not specified",
@@ -41,14 +49,14 @@
         "severity": "MEDIUM",
         "message": "CloudWatch log exports not configured",
         "context": "Without log exports, you have no visibility into slow queries, errors, or suspicious login attempts. Log types vary by engine: MySQL/MariaDB (audit, error, general, slowquery), PostgreSQL (postgresql, upgrade), Oracle (alert, audit, listener, trace), SQL Server (agent, error).",
-        "suggestion": "--enable-cloudwatch-logs-exports '[\"audit\",\"error\"]'"
+        "suggestion": "--enable-cloudwatch-logs-exports '[\"error\"]'"
       },
       {
         "type": "missing_flag",
         "flag": "--enable-iam-database-authentication",
         "severity": "MEDIUM",
         "message": "IAM database authentication not enabled",
-        "context": "IAM authentication lets applications connect to MySQL and PostgreSQL using short-lived IAM tokens instead of static database passwords. This eliminates a class of credential leak — no database password to rotate, store, or accidentally commit. Supported on MySQL 5.6.34+, PostgreSQL 9.5.15+, and Aurora.",
+        "context": "IAM authentication lets applications connect to MySQL and PostgreSQL using short-lived IAM tokens instead of static database passwords. This eliminates a class of credential leak: no database password to rotate, store, or accidentally commit. Supported on MySQL 5.6.34+, PostgreSQL 9.5.15+, and Aurora.",
         "suggestion": "--enable-iam-database-authentication"
       }
     ]
@@ -109,11 +117,21 @@
     "command": "rds delete-db-instance",
     "checks": [
       {
-        "type": "always_warn",
+        "type": "missing_flag",
+        "flag": "--final-db-snapshot-identifier",
         "severity": "HIGH",
-        "message": "RDS instance deletion \u2014 ensure a final snapshot is taken",
+        "message": "No final snapshot specified: database will be deleted without a backup",
         "context": "Without --final-db-snapshot-identifier, the database is deleted without a backup. Always take a final snapshot unless you are 100% certain the data is no longer needed.",
         "suggestion": "--final-db-snapshot-identifier <snapshot-name>"
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--skip-final-snapshot",
+        "forbidden_value": "true",
+        "severity": "HIGH",
+        "message": "Explicitly skipping final snapshot. All data will be permanently lost",
+        "context": "With --skip-final-snapshot, no backup is taken before deletion. If you need this data later, it is gone forever.",
+        "suggestion": ""
       }
     ]
   },
@@ -127,6 +145,14 @@
         "severity": "HIGH",
         "message": "Restoring RDS instance as publicly accessible",
         "context": "Restored instances should default to private. Exposing a restored database to the internet is rarely intentional and creates immediate risk.",
+        "suggestion": "--no-publicly-accessible"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--no-publicly-accessible",
+        "severity": "HIGH",
+        "message": "Public accessibility not explicitly disabled on restored instance",
+        "context": "Restored RDS instances can inherit public accessibility from the snapshot or default to publicly accessible depending on the subnet group. Always explicitly set --no-publicly-accessible.",
         "suggestion": "--no-publicly-accessible"
       }
     ]
@@ -171,11 +197,20 @@
     "command": "rds restore-db-cluster-from-snapshot",
     "checks": [
       {
-        "type": "always_warn",
+        "type": "missing_flag",
+        "flag": "--no-publicly-accessible",
+        "severity": "HIGH",
+        "message": "Public accessibility not explicitly disabled on restored cluster",
+        "context": "Restored clusters can default to publicly accessible depending on subnet group configuration. Always explicitly set --no-publicly-accessible to prevent internet exposure.",
+        "suggestion": "--no-publicly-accessible"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--deletion-protection",
         "severity": "MEDIUM",
-        "message": "Ensure instances added to the restored cluster are not publicly accessible",
-        "context": "Public accessibility is set at the DB instance level, not the cluster level. When you add instances to this restored cluster, explicitly set --no-publicly-accessible on each instance to prevent internet exposure.",
-        "suggestion": ""
+        "message": "Deletion protection not enabled on restored cluster",
+        "context": "Restored clusters do not inherit deletion protection from the snapshot. Explicitly enable it to prevent accidental deletion.",
+        "suggestion": "--deletion-protection"
       }
     ]
   },

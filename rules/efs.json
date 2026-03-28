@@ -7,7 +7,7 @@
         "flag": "--encrypted",
         "severity": "HIGH",
         "message": "EFS file system not encrypted at rest",
-        "context": "Encryption must be set at creation time — you can't enable it on an existing file system. An unencrypted EFS volume containing application data, configs, or secrets is a compliance failure waiting to happen.",
+        "context": "Encryption must be set at creation time because you can't enable it on an existing file system. An unencrypted EFS volume containing application data, configs, or secrets is a compliance failure waiting to happen.",
         "suggestion": "--encrypted"
       },
       {
@@ -37,7 +37,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "EFS deletion is permanent — all data is destroyed",
+        "message": "EFS deletion is permanent. All data is destroyed",
         "context": "There is no recycle bin for EFS. All files, directories, and metadata are gone. You must delete all mount targets before you can delete the file system.",
         "suggestion": ""
       }

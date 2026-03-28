@@ -6,9 +6,9 @@
         "type": "forbidden_value",
         "flag": "--scheme",
         "forbidden_value": "internet-facing",
-        "severity": "MEDIUM",
+        "severity": "INFO",
         "message": "Creating an internet-facing load balancer",
-        "context": "Internet-facing load balancers are directly reachable from the public internet. Ensure security groups restrict access to only required ports (80, 443) and that WAF is attached for application load balancers.",
+        "context": "Internet-facing load balancers are directly reachable from the public internet. This is expected for public-facing services. Ensure security groups restrict access to only required ports (80, 443) and that WAF is attached for application load balancers.",
         "suggestion": ""
       },
       {
@@ -17,7 +17,7 @@
         "severity": "INFO",
         "message": "Load balancer type not specified \u2014 defaults to 'application'",
         "context": "The elbv2 API defaults to Application Load Balancer (ALB) when --type is omitted. Specify --type explicitly if you need a Network Load Balancer (NLB) for TCP/UDP or Gateway Load Balancer (GWLB). Classic Load Balancers use the separate 'elb' CLI namespace.",
-        "suggestion": ""
+        "suggestion": "--type application"
       }
     ]
   },
@@ -31,7 +31,7 @@
         "severity": "INFO",
         "message": "Listener using unencrypted HTTP",
         "context": "HTTP listeners transmit all traffic in plaintext. If this is a redirect listener (HTTP \u2192 HTTPS), this is expected and correct. Otherwise, create an HTTPS listener with a valid SSL certificate. Never terminate TLS at the load balancer with HTTP forwarding to backends over the public internet.",
-        "suggestion": "--protocol HTTPS"
+        "suggestion": "--protocol HTTPS --certificates CertificateArn=<your-acm-certificate-arn> --ssl-policy ELBSecurityPolicy-TLS13-1-2-2021-06"
       }
     ]
   },

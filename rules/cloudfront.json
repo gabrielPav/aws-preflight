@@ -41,7 +41,7 @@
       {
         "type": "always_warn",
         "severity": "INFO",
-        "message": "Wildcard invalidations (/*) are expensive and slow — use specific paths when possible",
+        "message": "Wildcard invalidations (/*) are expensive and slow. Use specific paths when possible",
         "context": "Invalidating /* forces CloudFront to re-fetch every object from origin, increasing origin load and costs. AWS charges for invalidation requests beyond the free tier. Use specific paths for targeted invalidations.",
         "suggestion": ""
       }

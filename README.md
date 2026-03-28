@@ -1,6 +1,6 @@
 # aws-preflight
 
-![Checks](https://img.shields.io/badge/Security_Checks-434-00C853.svg?style=flat)
+![Checks](https://img.shields.io/badge/Security_Checks-451-00C853.svg?style=flat)
 ![Commands](https://img.shields.io/badge/Commands-369-1A73E8.svg?style=flat)
 ![AWS](https://img.shields.io/badge/AWS_Services-80-FF8C00.svg?style=flat&logo=amazon-aws&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3.10+-5B86B3.svg?style=flat&logo=python&logoColor=white)
@@ -8,7 +8,7 @@
 
 **Lint AWS CLI commands before they run. Stop security leaks, policy violations, and accidental deletions before they hit your cloud.**
 
-aws-preflight parses your commands locally, evaluates them against 425+ security checks mapped to AWS best practices, and returns actionable findings with severity ratings and remediated command suggestions. Nothing is ever executed. No credentials required. Fully offline.
+aws-preflight parses your commands locally, evaluates them against 450+ security checks mapped to AWS best practices, and returns actionable findings with severity ratings and remediated command suggestions. Nothing is ever executed. No credentials required. Fully offline.
 
 ```
 aws-preflight> aws rds create-db-instance --db-instance-identifier prod-db --engine mysql
@@ -203,7 +203,7 @@ security-lint:
 
 ## Coverage
 
-**369 commands | 434 checks | 80 AWS services | 0 dependencies**
+**369 commands | 451 checks | 80 AWS services | 0 dependencies**
 
 | Category | Services | Key Checks |
 |---|---|---|
@@ -235,10 +235,10 @@ security-lint:
 
 | Level | Icon | Meaning |
 |---|---|---|
-| `HIGH` | 🔴 | Immediate security exposure or irreversible data loss. 229 checks |
-| `MEDIUM` | 🟡 | Significant risk that should be addressed before production. 136 checks |
-| `LOW` | 🔵 | Best-practice gap with low immediate impact. 7 checks |
-| `INFO` | ℹ️ | Advisory guidance. Worth reviewing, not blocking. 54 checks |
+| `HIGH` | 🔴 | Immediate security exposure or irreversible data loss. 250 checks |
+| `MEDIUM` | 🟡 | Significant risk that should be addressed before production. 137 checks |
+| `LOW` | 🔵 | Best-practice gap with low immediate impact. 8 checks |
+| `INFO` | ℹ️ | Advisory guidance. Worth reviewing, not blocking. 56 checks |
 
 ---
 
@@ -342,18 +342,18 @@ Rules from multiple files for the same command are merged automatically.
 aws-preflight/
 ├── aws-preflight       # Shell wrapper entry point
 ├── main.py             # CLI arg parsing, interactive REPL, JSON/text output routing
-├── parser.py           # shlex-based tokenizer. Handles --flag value and --flag=value
+├── cli_parser.py       # shlex-based tokenizer. Handles --flag value and --flag=value
 ├── engine.py           # Rule loader + evaluator (missing_flag, forbidden_value, always_warn)
 ├── formatter.py        # Human-readable + JSON formatters, exit code logic
-├── rules/              # 51 JSON rule files, one per service group
-│   ├── ec2.json        #   36 commands, 39 checks
-│   ├── iam.json        #   26 commands, 28 checks
-│   ├── s3.json         #   16 commands, 20 checks
+├── rules/              # 52 JSON rule files, one per service group
+│   ├── ec2.json        #   36 commands, 41 checks
+│   ├── iam.json        #   26 commands, 29 checks
+│   ├── s3.json         #   16 commands, 25 checks
 │   ├── networking.json #   16 commands, 17 checks
-│   ├── rds.json        #   12 commands, 19 checks
-│   ├── ml.json         #   16 commands, 17 checks
+│   ├── rds.json        #   12 commands, 24 checks
+│   ├── ml.json         #   16 commands, 19 checks
 │   ├── lightsail.json  #   13 commands, 14 checks
-│   └── ... (44 more)
+│   └── ... (46 more)
 └── README.md
 ```
 

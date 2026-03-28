@@ -25,8 +25,8 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "FSx deletion is permanent — create a final backup first",
-        "context": "All data on the file system is destroyed. For FSx for Windows, use the appropriate configuration block to take a final backup (e.g. --windows-configuration). For Lustre, ensure all data has been copied out — Lustre scratch file systems have no backup capability.",
+        "message": "FSx deletion is permanent. Create a final backup first",
+        "context": "All data on the file system is destroyed. For FSx for Windows, use the appropriate configuration block to take a final backup (e.g. --windows-configuration). For Lustre, ensure all data has been copied out because Lustre scratch file systems have no backup capability.",
         "suggestion": ""
       }
     ]

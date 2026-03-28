@@ -21,6 +21,14 @@
       },
       {
         "type": "missing_flag",
+        "flag": "--no-publicly-accessible",
+        "severity": "HIGH",
+        "message": "Public accessibility not explicitly disabled. Redshift defaults to publicly accessible",
+        "context": "Redshift clusters default to publicly accessible. Always explicitly set --no-publicly-accessible to ensure the cluster is not reachable from the internet.",
+        "suggestion": "--no-publicly-accessible"
+      },
+      {
+        "type": "missing_flag",
         "flag": "--enhanced-vpc-routing",
         "severity": "MEDIUM",
         "message": "Enhanced VPC routing not enabled",
@@ -40,11 +48,21 @@
     "command": "redshift delete-cluster",
     "checks": [
       {
-        "type": "always_warn",
+        "type": "missing_flag",
+        "flag": "--final-cluster-snapshot-identifier",
         "severity": "HIGH",
-        "message": "Take a final snapshot before deleting",
+        "message": "No final snapshot specified: Redshift cluster will be deleted without a backup",
         "context": "Without --final-cluster-snapshot-identifier, all data in the cluster is permanently destroyed. Snapshots are cheap relative to the cost of losing a data warehouse.",
         "suggestion": "--final-cluster-snapshot-identifier <snapshot-name>"
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--skip-final-cluster-snapshot",
+        "forbidden_value": "true",
+        "severity": "HIGH",
+        "message": "Explicitly skipping final snapshot. All warehouse data will be permanently lost",
+        "context": "With --skip-final-cluster-snapshot, no backup is taken before deletion. All Redshift data is gone forever.",
+        "suggestion": ""
       }
     ]
   },
