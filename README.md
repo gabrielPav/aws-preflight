@@ -1,6 +1,6 @@
 # aws-preflight
 
-![Checks](https://img.shields.io/badge/Security_Checks-663-00C853.svg?style=flat)
+![Checks](https://img.shields.io/badge/Security_Checks-673-00C853.svg?style=flat)
 ![Commands](https://img.shields.io/badge/Commands-560-1A73E8.svg?style=flat)
 ![AWS](https://img.shields.io/badge/AWS_Services-91-FF8C00.svg?style=flat&logo=amazon-aws&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3.10+-5B86B3.svg?style=flat&logo=python&logoColor=white)
@@ -8,7 +8,7 @@
 
 **Security linter for AWS CLI commands. Catches misconfigurations before they hit your cloud.**
 
-660+ security checks across 91 AWS services. Findings include severity ratings and a remediated command.
+670+ security checks across 91 AWS services. Findings include severity ratings and a remediated command.
 
 ```
 aws-preflight> aws rds create-db-instance --db-instance-identifier prod-db --db-instance-class db.m5.large --engine mysql --allocated-storage 50 --master-username <dba-name> --master-user-password <dba-password>
@@ -288,7 +288,7 @@ security-lint:
 
 ## Coverage
 
-**560 commands | 663 checks | 91 AWS services | 0 dependencies**
+**560 commands | 673 checks | 91 AWS services | 0 dependencies**
 
 | Category | Services | Key Checks |
 |---|---|---|
@@ -309,8 +309,8 @@ security-lint:
 
 | Level | Icon | Meaning | Count |
 |---|---|---|---|
-| `HIGH` | 🔴 | Immediate security exposure or irreversible data loss | 366 |
-| `MEDIUM` | 🟡 | Significant risk - address before production | 210 |
+| `HIGH` | 🔴 | Immediate security exposure or irreversible data loss | 373 |
+| `MEDIUM` | 🟡 | Significant risk - address before production | 212 |
 | `LOW` | 🔵 | Best-practice gap, low immediate impact | 7 |
 | `INFO` | ℹ️ | Advisory - worth reviewing, not blocking | 80 |
 

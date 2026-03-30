@@ -16,8 +16,8 @@
         "flag": "--block-device-mappings",
         "severity": "HIGH",
         "message": "Root volume encryption not specified",
-        "context": "Unencrypted EBS volumes can be detached and mounted on another instance, exposing all data at rest. Encryption is free and has no performance impact on modern instance types. The device name varies by AMI (e.g. /dev/xvda for Amazon Linux, /dev/sda1 for Ubuntu).",
-        "suggestion": "--block-device-mappings '[{\"DeviceName\":\"/dev/xvda\",\"Ebs\":{\"Encrypted\":true}}]'"
+        "context": "Unencrypted EBS volumes can be detached and mounted on another instance, exposing all data at rest. Specifying a customer-managed KMS key (KmsKeyId) gives you full control over key rotation and access policies, and creates a CloudTrail audit trail of every decrypt operation - unlike AWS-managed keys where you have no visibility into who decrypted your data or when. The device name varies by AMI (e.g. /dev/xvda for Amazon Linux, /dev/sda1 for Ubuntu).",
+        "suggestion": "--block-device-mappings '[{\"DeviceName\":\"/dev/xvda\",\"Ebs\":{\"Encrypted\":true,\"KmsKeyId\":\"<key-arn>\"}}]'"
       },
       {
         "type": "missing_flag",
@@ -43,6 +43,22 @@
         "message": "EC2 instance launched with a public IP address",
         "context": "Assigning a public IP makes the instance directly reachable from the internet. Automated scanners find open ports within minutes. Use a NAT gateway for outbound traffic and a load balancer for inbound, keeping instances in private subnets.",
         "suggestion": "--no-associate-public-ip-address"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--security-group-ids",
+        "severity": "INFO",
+        "message": "No security group specified - instance will use the default security group",
+        "context": "Without --security-group-ids, AWS assigns the default security group, which allows all outbound traffic to 0.0.0.0/0. Unrestricted outbound is a real risk - a compromised instance can freely communicate with command-and-control servers or exfiltrate data. For production instances, always assign a purpose-built security group with least-privilege inbound and restricted outbound rules.",
+        "suggestion": "--security-group-ids <sg-id>"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--disable-api-termination",
+        "severity": "LOW",
+        "message": "Termination protection not enabled at launch",
+        "context": "Without --disable-api-termination, a single terminate-instances call permanently destroys the instance and any instance store data. Enable termination protection for production instances to prevent accidental or malicious deletion.",
+        "suggestion": "--disable-api-termination"
       }
     ]
   },
@@ -66,6 +82,24 @@
         "message": "Port open to the entire internet via IPv6 (::/0)",
         "context": "IPv6 wildcard rules are often overlooked but equally dangerous as 0.0.0.0/0. Any host on the internet can reach this port.",
         "suggestion": "--cidr <your-ipv6>/128"
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--port",
+        "forbidden_value": "3389",
+        "severity": "MEDIUM",
+        "message": "Opening RDP port 3389 - verify access is restricted to trusted IPs only",
+        "context": "RDP on port 3389 is one of the most targeted ports on the internet and a primary ransomware entry point. Brute-force and credential stuffing attacks against RDP are constant. Restrict the CIDR to specific trusted IPs, or better yet use SSM Session Manager for Windows access and eliminate RDP exposure entirely.",
+        "suggestion": "--port 3389"
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--port",
+        "forbidden_value": "22",
+        "severity": "INFO",
+        "message": "Opening SSH port 22 - consider SSM Session Manager instead",
+        "context": "SSH on port 22 is continuously scanned and brute-forced. If you must open it, restrict the CIDR to a specific IP (/32). The better alternative is SSM Session Manager - it communicates over HTTPS port 443 outbound with no inbound port 22 needed at all, and provides full session logging.",
+        "suggestion": "--port 22"
       }
     ]
   },
@@ -91,8 +125,8 @@
         "flag": "--encrypted",
         "severity": "HIGH",
         "message": "EBS volume created without encryption",
-        "context": "An unencrypted volume can be detached from a stopped instance and mounted elsewhere, giving full access to its contents. AWS KMS encryption adds no latency and costs nothing extra.",
-        "suggestion": "--encrypted"
+        "context": "An unencrypted volume can be detached from a stopped instance and mounted elsewhere, giving full access to its contents. Specifying a customer-managed KMS key (--kms-key-id) gives you full control over key rotation and access policies, and creates a CloudTrail audit trail of every decrypt operation - unlike the AWS-managed key where you have no visibility into who decrypted your data or when.",
+        "suggestion": "--encrypted --kms-key-id <key-arn>"
       }
     ]
   },

@@ -4,9 +4,9 @@
     "checks": [
       {
         "type": "always_warn",
-        "severity": "MEDIUM",
+        "severity": "INFO",
         "message": "Creating a long-lived IAM user",
-        "context": "IAM users with static credentials are a top source of credential leaks - they never expire and are often committed to git repos or hardcoded in apps. Prefer IAM roles or AWS IAM Identity Center (SSO) for human access.",
+        "context": "IAM users with static credentials are a top source of credential leaks - they never expire and are often committed to git repos or hardcoded in apps. Prefer IAM roles or AWS IAM Identity Center for human access.",
         "suggestion": ""
       }
     ]
@@ -18,15 +18,15 @@
         "type": "always_warn",
         "severity": "INFO",
         "message": "Verify the trust policy follows least-privilege",
-        "context": "A trust policy with a wildcard principal (\"AWS\": \"*\") means any AWS account can assume this role. Always scope the Principal to a specific account, service, or ARN.",
+        "context": "A trust policy with a wildcard principal (\"AWS\": \"*\") allows any AWS identity to attempt to assume this role. AWS strongly recommends against this unless you intend to grant public or anonymous access. Always scope the Principal to a specific account, service, or ARN - or use Condition keys such as aws:PrincipalOrgID, aws:PrincipalAccount, or sts:ExternalId to restrict who can assume it.",
         "suggestion": ""
       },
       {
         "type": "always_warn",
-        "severity": "MEDIUM",
+        "severity": "INFO",
         "message": "Verify --max-session-duration is not set higher than necessary",
-        "context": "The default max session duration is 1 hour (3600s). Setting it up to 12 hours (43200s) means a stolen session token remains valid for up to 12 hours with no way to invalidate it short of deleting the role. Set the shortest duration your workload can tolerate.",
-        "suggestion": "--max-session-duration 3600"
+        "context": "The default max session duration is 1 hour (3600s). If you explicitly set it higher (up to 43200s / 12 hours), a stolen session token remains valid for that entire window with no way to invalidate it short of deleting the role. Only increase the default if your workload genuinely requires longer sessions.",
+        "suggestion": ""
       }
     ]
   },
@@ -48,7 +48,34 @@
         "forbidden_value": "PowerUserAccess",
         "severity": "HIGH",
         "message": "Attaching PowerUserAccess - near-full AWS access granted",
-        "context": "PowerUserAccess grants access to almost all AWS services except IAM and Organizations. This is still extremely broad and violates least-privilege. Scope permissions to only what is needed.",
+        "context": "PowerUserAccess provides full access to AWS services and resources but does not allow management of IAM users and groups. This is still extremely broad and violates least-privilege. Scope permissions to only what is needed.",
+        "suggestion": ""
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--policy-arn",
+        "forbidden_value": "IAMFullAccess",
+        "severity": "HIGH",
+        "message": "Attaching IAMFullAccess - privilege escalation to full admin is possible",
+        "context": "IAMFullAccess provides full access to IAM, including the ability to create users, attach policies, and generate access keys. Anyone with this policy can escalate their own privileges to full administrator access. Treat it as equivalent to AdministratorAccess.",
+        "suggestion": ""
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--policy-arn",
+        "forbidden_value": "AWSOrganizationsFullAccess",
+        "severity": "HIGH",
+        "message": "Attaching AWSOrganizationsFullAccess - org-wide blast radius",
+        "context": "AWSOrganizationsFullAccess provides full access to AWS Organizations, including the ability to attach and detach SCPs, move accounts, and leave the organization. A compromised identity with this policy can remove guardrails from every account in your organization simultaneously.",
+        "suggestion": ""
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--policy-arn",
+        "forbidden_value": "AWSAccountManagementFullAccess",
+        "severity": "MEDIUM",
+        "message": "Attaching AWSAccountManagementFullAccess - can close accounts and modify account settings",
+        "context": "AWSAccountManagementFullAccess provides full access to AWS Account Management, including the ability to close accounts and modify account contact information. Scope this to only the principals that genuinely need to manage account-level settings.",
         "suggestion": ""
       }
     ]
@@ -63,6 +90,42 @@
         "severity": "HIGH",
         "message": "Attaching AdministratorAccess directly to a user",
         "context": "Granting a user full admin access creates a permanent high-privilege identity. If the user's credentials are compromised, the attacker has unrestricted access to your entire AWS account.",
+        "suggestion": ""
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--policy-arn",
+        "forbidden_value": "PowerUserAccess",
+        "severity": "HIGH",
+        "message": "Attaching PowerUserAccess directly to a user",
+        "context": "PowerUserAccess provides full access to AWS services and resources but does not allow management of IAM users and groups. If this user's credentials are compromised, the attacker has near-full access to your account. Scope permissions to only what the user actually needs.",
+        "suggestion": ""
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--policy-arn",
+        "forbidden_value": "IAMFullAccess",
+        "severity": "HIGH",
+        "message": "Attaching IAMFullAccess directly to a user - privilege escalation to full admin is possible",
+        "context": "IAMFullAccess provides full access to IAM, including the ability to create users, attach policies, and generate access keys. Anyone with this policy can escalate their own privileges to full administrator access. Treat it as equivalent to AdministratorAccess.",
+        "suggestion": ""
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--policy-arn",
+        "forbidden_value": "AWSOrganizationsFullAccess",
+        "severity": "HIGH",
+        "message": "Attaching AWSOrganizationsFullAccess directly to a user - org-wide blast radius",
+        "context": "AWSOrganizationsFullAccess provides full access to AWS Organizations, including the ability to attach and detach SCPs, move accounts, and leave the organization. A compromised identity with this policy can remove guardrails from every account in your organization simultaneously.",
+        "suggestion": ""
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--policy-arn",
+        "forbidden_value": "AWSAccountManagementFullAccess",
+        "severity": "MEDIUM",
+        "message": "Attaching AWSAccountManagementFullAccess directly to a user - can close accounts and modify account settings",
+        "context": "AWSAccountManagementFullAccess provides full access to AWS Account Management, including the ability to close accounts and modify account contact information. Scope this to only the principals that genuinely need to manage account-level settings.",
         "suggestion": ""
       }
     ]
@@ -193,7 +256,34 @@
         "forbidden_value": "PowerUserAccess",
         "severity": "HIGH",
         "message": "Attaching PowerUserAccess to an IAM group",
-        "context": "PowerUserAccess grants access to almost all AWS services except IAM and Organizations. Every user in this group inherits these broad permissions. Scope to specific services and actions.",
+        "context": "PowerUserAccess provides full access to AWS services and resources but does not allow management of IAM users and groups. Every user in this group inherits these broad permissions. Scope to specific services and actions.",
+        "suggestion": ""
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--policy-arn",
+        "forbidden_value": "IAMFullAccess",
+        "severity": "HIGH",
+        "message": "Attaching IAMFullAccess to an IAM group - privilege escalation to full admin is possible",
+        "context": "IAMFullAccess provides full access to IAM, including the ability to create users, attach policies, and generate access keys. Every user in this group can escalate their own privileges to full administrator access. Treat it as equivalent to AdministratorAccess.",
+        "suggestion": ""
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--policy-arn",
+        "forbidden_value": "AWSOrganizationsFullAccess",
+        "severity": "HIGH",
+        "message": "Attaching AWSOrganizationsFullAccess to an IAM group - org-wide blast radius",
+        "context": "AWSOrganizationsFullAccess provides full access to AWS Organizations, including the ability to attach and detach SCPs, move accounts, and leave the organization. Every user in this group can remove guardrails from every account in your organization simultaneously.",
+        "suggestion": ""
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--policy-arn",
+        "forbidden_value": "AWSAccountManagementFullAccess",
+        "severity": "MEDIUM",
+        "message": "Attaching AWSAccountManagementFullAccess to an IAM group - can close accounts and modify account settings",
+        "context": "AWSAccountManagementFullAccess provides full access to AWS Account Management, including the ability to close accounts and modify account contact information. Scope this to only the principals that genuinely need to manage account-level settings.",
         "suggestion": ""
       }
     ]

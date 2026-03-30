@@ -89,7 +89,7 @@ def interactive():
     print("\033[2m  Security Linter for AWS CLI\033[0m")
     print("")
     print("\033[2m  Commands are linted, not executed against AWS.\033[0m")
-    print("\033[2m  Type 'help' for options. Ctrl+C or 'exit' to quit.\033[0m")
+    print("\033[2m  Type 'help' for options. Ctrl+C or 'quit' to exit.\033[0m")
     print("")
 
     while True:

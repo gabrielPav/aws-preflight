@@ -84,9 +84,10 @@ def format_result(parsed: dict, findings: list[dict]) -> str:
         if f.get("suggestion"):
             lines.append(f"  → Add: {f['suggestion']}\n")
 
-    lines.append("⚡  Suggested command:\n")
-    lines.append(_build_suggested(parsed, findings))
-    lines.append(f"\n\033[2m→ Add missing required parameters before running in AWS (aws <service> <operation> help).\033[0m")
+    if any(f.get("suggestion") for f in findings):
+        lines.append("⚡  Suggested command:\n")
+        lines.append(_build_suggested(parsed, findings))
+        lines.append(f"\n\033[2m→ Add any missing required parameters before running in AWS (aws <service> <operation> help).\033[0m")
     return "\n".join(lines)
 
 

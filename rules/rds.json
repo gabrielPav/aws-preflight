@@ -46,9 +46,10 @@
       {
         "type": "missing_flag",
         "flag": "--enable-cloudwatch-logs-exports",
+        "expected_value": "error",
         "severity": "MEDIUM",
-        "message": "CloudWatch log exports not configured",
-        "context": "Without log exports, you have no visibility into slow queries, errors, or suspicious login attempts. Log types vary by engine: MySQL/MariaDB (audit, error, general, slowquery), PostgreSQL (postgresql, upgrade), Oracle (alert, audit, listener, trace), SQL Server (agent, error).",
+        "message": "CloudWatch log exports not configured with error logging",
+        "context": "Without error log exports, you have no visibility into failed connections, authentication failures, or engine errors. Log types vary by engine: MySQL/MariaDB (audit, error, general, slowquery), PostgreSQL (postgresql, upgrade), Oracle (alert, audit, listener, trace), SQL Server (agent, error). At minimum, always include error.",
         "suggestion": "--enable-cloudwatch-logs-exports '[\"error\"]'"
       },
       {
@@ -125,7 +126,9 @@
         "suggestion": "--final-db-snapshot-identifier <snapshot-name>"
       },
       {
-        "type": "always_warn",
+        "type": "forbidden_value",
+        "flag": "--skip-final-snapshot",
+        "forbidden_value": "true",
         "severity": "HIGH",
         "message": "Explicitly skipping final snapshot. All data will be permanently lost",
         "context": "With --skip-final-snapshot, no backup is taken before deletion. If you need this data later, it is gone forever.",
