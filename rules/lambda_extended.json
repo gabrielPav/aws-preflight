@@ -45,7 +45,7 @@
         "type": "always_warn",
         "severity": "MEDIUM",
         "message": "Verify the invocation payload does not contain plaintext secrets or PII",
-        "context": "Lambda invocation payloads are logged in CloudTrail data events if enabled, and may appear in function logs if the function logs its input. Never pass database passwords, API keys, or PII directly in the payload — use references to Secrets Manager ARNs instead.",
+        "context": "Lambda invocation payloads are logged in CloudTrail data events if enabled, and may appear in function logs if the function logs its input. Never pass database passwords, API keys, or PII directly in the payload - use references to Secrets Manager ARNs instead.",
         "suggestion": ""
       }
     ]

@@ -26,7 +26,7 @@
     "checks": [
       {
         "type": "always_warn",
-        "severity": "HIGH",
+        "severity": "MEDIUM",
         "message": "Verify you're not downgrading authentication type or disabling logging",
         "context": "Switching from Cognito/IAM to API_KEY or disabling logging on a production API is a significant security regression. Both are flagged by AWS Security Hub.",
         "suggestion": ""

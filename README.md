@@ -1,6 +1,6 @@
 # aws-preflight
 
-![Checks](https://img.shields.io/badge/Security_Checks-667-00C853.svg?style=flat)
+![Checks](https://img.shields.io/badge/Security_Checks-663-00C853.svg?style=flat)
 ![Commands](https://img.shields.io/badge/Commands-560-1A73E8.svg?style=flat)
 ![AWS](https://img.shields.io/badge/AWS_Services-91-FF8C00.svg?style=flat&logo=amazon-aws&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3.10+-5B86B3.svg?style=flat&logo=python&logoColor=white)
@@ -8,7 +8,7 @@
 
 **Security linter for AWS CLI commands. Catches misconfigurations before they hit your cloud.**
 
-650+ security checks across 91 AWS services. Findings include severity ratings and a remediated command.
+660+ security checks across 91 AWS services. Findings include severity ratings and a remediated command.
 
 ```
 aws-preflight> aws rds create-db-instance --db-instance-identifier prod-db --db-instance-class db.m5.large --engine mysql --allocated-storage 50 --master-username <dba-name> --master-user-password <dba-password>
@@ -24,7 +24,7 @@ Command: aws rds create-db-instance
      creation, you'd need to snapshot, restore, and migrate.
   → Add: --storage-encrypted
 
-  [HIGH] 🔴 Public accessibility not explicitly disabled
+  [HIGH] 🔴 Public accessibility not explicitly disabled. RDS may default to publicly accessible
   ℹ️  Depending on VPC and subnet group configuration, RDS instances can
      default to publicly accessible. Always explicitly set
      --no-publicly-accessible to ensure the database is not reachable
@@ -40,15 +40,15 @@ Command: aws rds create-db-instance
   ℹ️  Default retention is 1 day. Set to at least 7 for production workloads.
   → Add: --backup-retention-period 7
 
-  [MEDIUM] 🟡 IAM database authentication not enabled
-  ℹ️  IAM authentication lets applications connect using short-lived tokens
-     instead of static database passwords.
-  → Add: --enable-iam-database-authentication
-
   [MEDIUM] 🟡 CloudWatch log exports not configured
   ℹ️  Without log exports, no visibility into errors or
      suspicious login attempts.
   → Add: --enable-cloudwatch-logs-exports '["error"]'
+
+  [MEDIUM] 🟡 IAM database authentication not enabled
+  ℹ️  IAM authentication lets applications connect using short-lived tokens
+     instead of static database passwords.
+  → Add: --enable-iam-database-authentication
 
  ⚡ Suggested command:
 
@@ -63,10 +63,8 @@ aws rds create-db-instance \
   --deletion-protection \
   --no-publicly-accessible \
   --backup-retention-period 7 \
-  --enable-iam-database-authentication \
-  --enable-cloudwatch-logs-exports '["error"]'
-
-→ Add missing required parameters before running (aws <service> <operation> help).
+  --enable-cloudwatch-logs-exports '["error"]' \
+  --enable-iam-database-authentication
 ```
 
 ---
@@ -92,7 +90,7 @@ AWS Config, GuardDuty, and Security Hub catch these *after* the resource exists.
 aws-preflight> aws iam attach-role-policy --role-name lambda-role \
   --policy-arn arn:aws:iam::aws:policy/AdministratorAccess
 
-  [HIGH] 🔴 Attaching AdministratorAccess - full AWS access granted
+  [HIGH] 🔴 Attaching AdministratorAccess — full AWS access granted
   ℹ️  AdministratorAccess is the most powerful policy in AWS. If this role is
      ever compromised, the attacker owns your entire account. Grant only the
      specific actions and resources the role actually needs.
@@ -224,6 +222,18 @@ cat commands.txt | ./aws-preflight
       "message": "Root volume encryption not specified",
       "context": "Unencrypted EBS volumes can be detached and mounted on another instance, exposing all data at rest. Encryption is free and has no performance impact on modern instance types.",
       "suggestion": "--block-device-mappings '[{\"DeviceName\":\"/dev/xvda\",\"Ebs\":{\"Encrypted\":true}}]'"
+    },
+    {
+      "severity": "HIGH",
+      "message": "Public IP association not explicitly disabled",
+      "context": "Without explicitly setting --no-associate-public-ip-address, instances in a default VPC or a subnet with auto-assign public IP enabled will receive a public IP.",
+      "suggestion": "--no-associate-public-ip-address"
+    },
+    {
+      "severity": "LOW",
+      "message": "Detailed monitoring not enabled",
+      "context": "Without detailed monitoring, CloudWatch metrics are only available at 5-minute intervals.",
+      "suggestion": "--monitoring Enabled=true"
     }
   ],
   "summary": {
@@ -278,7 +288,7 @@ security-lint:
 
 ## Coverage
 
-**560 commands | 667 checks | 91 AWS services | 0 dependencies**
+**560 commands | 663 checks | 91 AWS services | 0 dependencies**
 
 | Category | Services | Key Checks |
 |---|---|---|
@@ -299,8 +309,8 @@ security-lint:
 
 | Level | Icon | Meaning | Count |
 |---|---|---|---|
-| `HIGH` | 🔴 | Immediate security exposure or irreversible data loss | 384 |
-| `MEDIUM` | 🟡 | Significant risk - address before production | 196 |
+| `HIGH` | 🔴 | Immediate security exposure or irreversible data loss | 366 |
+| `MEDIUM` | 🟡 | Significant risk - address before production | 210 |
 | `LOW` | 🔵 | Best-practice gap, low immediate impact | 7 |
 | `INFO` | ℹ️ | Advisory - worth reviewing, not blocking | 80 |
 

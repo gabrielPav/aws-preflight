@@ -115,7 +115,9 @@
     "command": "cloudformation update-termination-protection",
     "checks": [
       {
-        "type": "always_warn",
+        "type": "forbidden_value",
+        "flag": "--no-enable-termination-protection",
+        "forbidden_value": "true",
         "severity": "HIGH",
         "message": "Disabling termination protection exposes the stack to accidental deletion",
         "context": "Once disabled, a single delete-stack command destroys all resources managed by the stack. Only disable temporarily if you intend to delete, and re-enable immediately if you change your mind.",

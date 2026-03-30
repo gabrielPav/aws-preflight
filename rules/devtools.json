@@ -17,7 +17,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Repository deletion is permanent — all commits, branches, and pull requests are destroyed",
+        "message": "Repository deletion is permanent - all commits, branches, and pull requests are destroyed",
         "context": "There is no recycle bin for CodeCommit repositories. All code history is permanently deleted. Clone the repository locally or mirror it to another service before deleting.",
         "suggestion": ""
       }

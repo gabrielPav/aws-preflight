@@ -17,7 +17,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Glue dev endpoints have direct internet access by default — deploy in a VPC",
+        "message": "Glue dev endpoints have direct internet access by default - deploy in a VPC",
         "context": "Without a VPC configuration, Glue dev endpoints are deployed with direct internet access, bypassing your network controls. They can download arbitrary packages and exfiltrate data. Always specify --subnet-id and --security-group-ids to deploy in a private subnet.",
         "suggestion": "--subnet-id subnet-<private-subnet-id> --security-group-ids sg-<id>"
       },
@@ -25,7 +25,7 @@
         "type": "missing_flag",
         "flag": "--subnet-id",
         "severity": "HIGH",
-        "message": "No VPC subnet specified — dev endpoint will have direct internet access",
+        "message": "No VPC subnet specified - dev endpoint will have direct internet access",
         "context": "Glue dev endpoints without a subnet are deployed outside your VPC with direct internet connectivity. Specify a private subnet to ensure the endpoint is network-isolated and traffic flows through your VPC controls.",
         "suggestion": "--subnet-id subnet-<your-private-subnet>"
       }
@@ -96,7 +96,7 @@
     "checks": [
       {
         "type": "always_warn",
-        "severity": "HIGH",
+        "severity": "MEDIUM",
         "message": "Verify you are enabling block public access, not disabling it",
         "context": "EMR block public access prevents clusters from being launched with security group rules that allow public internet access on ports other than 22. Disabling this setting allows future clusters to be launched with open security groups, exposing Hadoop web UIs (HDFS NameNode, YARN) to the internet.",
         "suggestion": ""
@@ -107,7 +107,9 @@
     "command": "emr set-termination-protection",
     "checks": [
       {
-        "type": "always_warn",
+        "type": "forbidden_value",
+        "flag": "--no-termination-protected",
+        "forbidden_value": "true",
         "severity": "HIGH",
         "message": "Disabling termination protection allows the cluster to be terminated, losing all HDFS data",
         "context": "Termination protection prevents accidental cluster termination. Disabling it on a running cluster with unwritten HDFS data means a single terminate-clusters command permanently destroys all intermediate results. Only disable immediately before a planned termination.",

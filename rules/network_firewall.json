@@ -3,7 +3,9 @@
     "command": "network-firewall update-firewall-delete-protection",
     "checks": [
       {
-        "type": "always_warn",
+        "type": "forbidden_value",
+        "flag": "--no-delete-protection",
+        "forbidden_value": "true",
         "severity": "HIGH",
         "message": "Disabling delete protection exposes the firewall to accidental deletion",
         "context": "If the firewall is deleted, all traffic routed through it is immediately dropped or bypassed depending on your routing configuration. This can cause a complete network outage or expose previously filtered traffic.",

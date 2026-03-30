@@ -5,7 +5,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "New S3 bucket — verify Block Public Access is enabled",
+        "message": "New S3 bucket - verify Block Public Access is enabled",
         "context": "Public S3 buckets are the #1 cause of AWS data breaches. Billions of records have been exposed this way. Run `aws s3api put-public-access-block` immediately after creation.",
         "suggestion": ""
       },
@@ -69,7 +69,7 @@
         "forbidden_value": "public-read",
         "severity": "HIGH",
         "message": "Bucket ACL set to public-read",
-        "context": "This makes every object in the bucket readable by anyone on the internet — no credentials required. If you need to share files publicly, use a CloudFront distribution with an Origin Access Identity instead.",
+        "context": "This makes every object in the bucket readable by anyone on the internet - no credentials required. If you need to share files publicly, use a CloudFront distribution with an Origin Access Identity instead.",
         "suggestion": "--acl private"
       },
       {
@@ -127,7 +127,7 @@
         "type": "always_warn",
         "severity": "HIGH",
         "message": "Bucket deletion is permanent and irreversible",
-        "context": "Deleting an S3 bucket removes all objects and cannot be undone. Bucket names are globally unique — once deleted, another AWS account could claim the same name, potentially breaking application references.",
+        "context": "Deleting an S3 bucket removes all objects and cannot be undone. Bucket names are globally unique - once deleted, another AWS account could claim the same name, potentially breaking application references.",
         "suggestion": ""
       }
     ]
@@ -138,7 +138,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Bulk object deletion — verify bucket has versioning enabled",
+        "message": "Bulk object deletion - verify bucket has versioning enabled",
         "context": "Without versioning, deleted objects are permanently gone. This operation can delete thousands of objects in a single call. Run with a dry-run or list the objects first to confirm the scope.",
         "suggestion": ""
       }
@@ -153,14 +153,16 @@
         "forbidden_value": "public-read",
         "severity": "HIGH",
         "message": "File uploaded with public-read ACL",
-        "context": "This object will be accessible to anyone with the URL — no AWS credentials needed. A common mistake when testing that gets forgotten and left public. Use a pre-signed URL for temporary sharing instead.",
+        "context": "This object will be accessible to anyone with the URL - no AWS credentials needed. A common mistake when testing that gets forgotten and left public. Use a pre-signed URL for temporary sharing instead.",
         "suggestion": "--acl private"
       },
       {
-        "type": "always_warn",
+        "type": "forbidden_value",
+        "flag": "--no-verify-ssl",
+        "forbidden_value": "true",
         "severity": "HIGH",
         "message": "SSL verification disabled",
-        "context": "Disabling SSL verification exposes your data and credentials to man-in-the-middle attacks. If you're hitting a proxy or cert error, fix the certificate trust chain — don't bypass it.",
+        "context": "Disabling SSL verification exposes your data and credentials to man-in-the-middle attacks. If you're hitting a proxy or cert error, fix the certificate trust chain - don't bypass it.",
         "suggestion": ""
       },
       {
@@ -181,12 +183,14 @@
         "flag": "--acl",
         "forbidden_value": "public-read",
         "severity": "HIGH",
-        "message": "Syncing with public-read ACL — all synced objects will be publicly accessible",
+        "message": "Syncing with public-read ACL - all synced objects will be publicly accessible",
         "context": "Every file in this sync operation will be readable by anyone on the internet. A single sync of the wrong directory can expose source code, credentials, or customer data.",
         "suggestion": "--acl private"
       },
       {
-        "type": "always_warn",
+        "type": "forbidden_value",
+        "flag": "--delete",
+        "forbidden_value": "true",
         "severity": "MEDIUM",
         "message": "--delete flag will permanently remove files not present in the source",
         "context": "This is a common cause of accidental data loss. Files deleted from S3 without versioning enabled are unrecoverable. Run with --dryrun first to preview what will be deleted.",
@@ -207,7 +211,7 @@
       {
         "type": "always_warn",
         "severity": "MEDIUM",
-        "message": "S3 delete operation — this may be irreversible",
+        "message": "S3 delete operation - this may be irreversible",
         "context": "If the bucket does not have versioning enabled, deleted objects are gone permanently. There is no recycle bin. Run `aws s3 ls` first to confirm the target.",
         "suggestion": ""
       }
@@ -245,7 +249,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Removing Block Public Access — bucket may become publicly accessible",
+        "message": "Removing Block Public Access - bucket may become publicly accessible",
         "context": "Deleting the public access block removes all four protections (BlockPublicAcls, IgnorePublicAcls, BlockPublicPolicy, RestrictPublicBuckets). Any existing public ACLs or bucket policies will immediately take effect, potentially exposing data to the internet.",
         "suggestion": ""
       }

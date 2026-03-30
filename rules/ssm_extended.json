@@ -3,11 +3,13 @@
     "command": "ssm put-parameter",
     "checks": [
       {
-        "type": "always_warn",
+        "type": "forbidden_value",
+        "flag": "--type",
+        "forbidden_value": "String",
         "severity": "HIGH",
-        "message": "Use SecureString type for sensitive values — Standard String parameters are stored in plaintext",
+        "message": "Use SecureString type for sensitive values - Standard String parameters are stored in plaintext",
         "context": "SSM Parameter Store Standard String parameters are stored unencrypted and visible to anyone with ssm:GetParameter. For passwords, API keys, and connection strings, always use SecureString with a KMS key. SecureString values are encrypted at rest and require kms:Decrypt to retrieve.",
-        "suggestion": ""
+        "suggestion": "--type SecureString"
       }
     ]
   },
@@ -18,7 +20,7 @@
         "type": "always_warn",
         "severity": "HIGH",
         "message": "Verify no applications or Lambda functions reference this parameter before deleting",
-        "context": "Deleting a parameter causes immediate failures for any application that calls ssm:GetParameter for it. Unlike Secrets Manager, there is no recovery window — deletion is immediate and permanent.",
+        "context": "Deleting a parameter causes immediate failures for any application that calls ssm:GetParameter for it. Unlike Secrets Manager, there is no recovery window - deletion is immediate and permanent.",
         "suggestion": ""
       }
     ]
@@ -29,7 +31,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Bulk parameter deletion is immediate and permanent — verify all targets before executing",
+        "message": "Bulk parameter deletion is immediate and permanent - verify all targets before executing",
         "context": "This command deletes multiple parameters in a single call with no confirmation prompt. Any application referencing the deleted parameters will fail immediately. Verify the parameter names carefully before executing.",
         "suggestion": ""
       }
@@ -41,7 +43,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "SSM Session Manager provides shell access to instances — verify session logging is enabled",
+        "message": "SSM Session Manager provides shell access to instances - verify session logging is enabled",
         "context": "Session Manager sessions provide interactive shell access to managed instances. Without session logging to S3 or CloudWatch Logs, there is no audit trail of commands executed during the session. Enable session logging in the SSM Session Manager preferences before using in production.",
         "suggestion": ""
       }
@@ -101,7 +103,7 @@
       {
         "type": "always_warn",
         "severity": "MEDIUM",
-        "message": "Verify the patch baseline approves security patches promptly — long approval delays leave instances vulnerable",
+        "message": "Verify the patch baseline approves security patches promptly - long approval delays leave instances vulnerable",
         "context": "Patch baselines with long auto-approval delays (e.g. 30+ days) leave instances unpatched for extended periods after security patches are released. For production systems, use a 7-day or shorter approval delay for security patches.",
         "suggestion": ""
       }

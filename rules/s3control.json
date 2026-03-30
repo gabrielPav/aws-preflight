@@ -28,7 +28,7 @@
     "checks": [
       {
         "type": "always_warn",
-        "severity": "HIGH",
+        "severity": "MEDIUM",
         "message": "Verify you are enabling (not disabling) public access block at the account level",
         "context": "Account-level S3 Block Public Access overrides all bucket-level settings. Setting all four options to true is the strongest protection. Setting any to false opens the door for individual buckets to become public.",
         "suggestion": ""

@@ -38,7 +38,7 @@
         "type": "missing_flag",
         "flag": "--multi-region-enabled",
         "severity": "HIGH",
-        "message": "Multi-region not enabled — API activity in other regions will not be captured",
+        "message": "Multi-region not enabled - API activity in other regions will not be captured",
         "context": "A single-region event data store only captures events from the region where it's created. Attackers often operate in regions you don't monitor. Enable multi-region to capture all API activity across your account.",
         "suggestion": "--multi-region-enabled"
       }
@@ -110,7 +110,7 @@
       {
         "type": "always_warn",
         "severity": "INFO",
-        "message": "Data protection policies mask PII in log events — verify the audit destination is configured",
+        "message": "Data protection policies mask PII in log events - verify the audit destination is configured",
         "context": "CloudWatch Logs data protection policies detect and mask sensitive data (SSNs, credit cards, etc.) in log events. Configure an audit destination (S3 or Firehose) to receive findings about detected sensitive data. Without an audit destination, you won't know what PII was found and masked.",
         "suggestion": ""
       }

@@ -7,7 +7,7 @@
         "flag": "--image-tag-mutability",
         "forbidden_value": "MUTABLE",
         "severity": "HIGH",
-        "message": "Setting image tags to mutable allows tag overwriting — supply chain attack risk",
+        "message": "Setting image tags to mutable allows tag overwriting - supply chain attack risk",
         "context": "Mutable tags allow the 'latest' or any other tag to be overwritten with a different image. An attacker with ECR push access can replace a trusted image tag with a malicious one, causing all deployments using that tag to run compromised code. AWS Security Hub flags this as ECR.2. Set to IMMUTABLE.",
         "suggestion": "--image-tag-mutability IMMUTABLE"
       }
@@ -55,7 +55,7 @@
       {
         "type": "always_warn",
         "severity": "MEDIUM",
-        "message": "ECR authorization tokens are valid for 12 hours — treat them like passwords",
+        "message": "ECR authorization tokens are valid for 12 hours - treat them like passwords",
         "context": "The token returned is a base64-encoded username:password that grants full ECR access for 12 hours. Do not log it, store it in plaintext, or pass it as an environment variable. Use it immediately for docker login and discard it.",
         "suggestion": ""
       }
@@ -69,7 +69,7 @@
         "flag": "--image-scanning-configuration",
         "expected_value": "scanOnPush=true",
         "severity": "MEDIUM",
-        "message": "Scan on push not enabled — images will not be automatically scanned for vulnerabilities",
+        "message": "Scan on push not enabled - images will not be automatically scanned for vulnerabilities",
         "context": "Without scan-on-push, images are only scanned if you manually trigger a scan. Vulnerable images can be deployed without any security check. Enable scan-on-push to automatically scan every image pushed to the repository.",
         "suggestion": "--image-scanning-configuration scanOnPush=true"
       }
@@ -81,7 +81,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "ECS Exec provides shell access to a running container — this bypasses application-level audit trails",
+        "message": "ECS Exec provides shell access to a running container - this bypasses application-level audit trails",
         "context": "ECS Exec uses SSM Session Manager to open an interactive shell in a running container. Commands run this way are not logged by your application and may not appear in CloudTrail unless SSM logging is configured. Enable SSM session logging to S3 or CloudWatch Logs before using ECS Exec in production.",
         "suggestion": ""
       }
@@ -117,7 +117,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Account settings affect all ECS resources in the account — verify the change is intentional",
+        "message": "Account settings affect all ECS resources in the account - verify the change is intentional",
         "context": "ECS account settings control features like awsvpc trunking, container insights, and task ARN format for the entire account. Changing these settings can affect all clusters, services, and tasks. Test in a non-production account before applying to production.",
         "suggestion": ""
       }
@@ -129,8 +129,8 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Cluster deletion fails if active services or running tasks exist — drain first",
-        "context": "You must stop all running tasks and delete all services before deleting a cluster. Deleting a cluster does not automatically terminate EC2 instances in the cluster — those must be terminated separately. Verify all workloads are migrated before proceeding.",
+        "message": "Cluster deletion fails if active services or running tasks exist - drain first",
+        "context": "You must stop all running tasks and delete all services before deleting a cluster. Deleting a cluster does not automatically terminate EC2 instances in the cluster - those must be terminated separately. Verify all workloads are migrated before proceeding.",
         "suggestion": ""
       }
     ]

@@ -174,7 +174,7 @@
     "checks": [
       {
         "type": "always_warn",
-        "severity": "HIGH",
+        "severity": "MEDIUM",
         "message": "Verify you are enabling PITR, not disabling it",
         "context": "Point-in-Time Recovery allows restoration to any second within the last 35 days. Disabling PITR removes this protection immediately \u2014 if data is corrupted or deleted after disabling, recovery is only possible from on-demand backups. Never disable PITR on production tables.",
         "suggestion": ""

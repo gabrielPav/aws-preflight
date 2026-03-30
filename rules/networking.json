@@ -259,7 +259,7 @@
     "checks": [
       {
         "type": "always_warn",
-        "severity": "HIGH",
+        "severity": "MEDIUM",
         "message": "Verify you are not disabling encryption, HTTPS enforcement, or opening the access policy",
         "context": "Domain config updates can disable security features. Disabling node-to-node encryption, at-rest encryption, or HTTPS enforcement exposes your search data. Verify the access policy is not being changed to allow public access (Principal: *).",
         "suggestion": ""

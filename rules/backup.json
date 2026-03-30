@@ -26,7 +26,7 @@
         "type": "always_warn",
         "severity": "HIGH",
         "message": "Configure a vault lock policy to prevent backup deletion",
-        "context": "Without vault lock, anyone with backup:DeleteRecoveryPoint can delete your backups — including ransomware or a compromised admin account. Vault lock (WORM) makes backups immutable for a defined period.",
+        "context": "Without vault lock, anyone with backup:DeleteRecoveryPoint can delete your backups - including ransomware or a compromised admin account. Vault lock (WORM) makes backups immutable for a defined period.",
         "suggestion": ""
       }
     ]
@@ -37,8 +37,8 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Backup vault deletion — verify all recovery points are preserved elsewhere",
-        "context": "You cannot delete a vault that still contains recovery points — you must delete each recovery point first. If someone is deleting this vault, they've likely already deleted or plan to delete all recovery points in it. Verify those backups exist in another vault or location before proceeding.",
+        "message": "Backup vault deletion - verify all recovery points are preserved elsewhere",
+        "context": "You cannot delete a vault that still contains recovery points - you must delete each recovery point first. If someone is deleting this vault, they've likely already deleted or plan to delete all recovery points in it. Verify those backups exist in another vault or location before proceeding.",
         "suggestion": ""
       }
     ]
@@ -49,7 +49,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Recovery point deletion is permanent — verify this is not your only backup",
+        "message": "Recovery point deletion is permanent - verify this is not your only backup",
         "context": "Deleting a recovery point removes that backup permanently. If this is the only backup of a resource and the resource is later corrupted or deleted, there is no recovery path.",
         "suggestion": ""
       }

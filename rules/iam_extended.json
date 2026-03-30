@@ -30,7 +30,7 @@
         "type": "always_warn",
         "severity": "INFO",
         "message": "Instance profiles are the mechanism for attaching IAM roles to EC2 instances",
-        "context": "The profile itself has no permissions — permissions come from the role you add to it. Ensure the role added to this profile follows least-privilege. Any EC2 instance with this profile can access the instance metadata service to retrieve the role's credentials.",
+        "context": "The profile itself has no permissions - permissions come from the role you add to it. Ensure the role added to this profile follows least-privilege. Any EC2 instance with this profile can access the instance metadata service to retrieve the role's credentials.",
         "suggestion": ""
       }
     ]
@@ -42,7 +42,7 @@
         "type": "always_warn",
         "severity": "MEDIUM",
         "message": "Verify the role's permissions before attaching it to an instance profile",
-        "context": "Once attached, any EC2 instance using this profile can retrieve the role's credentials via the instance metadata service. A role with broad permissions (s3:*, ec2:*, iam:*) means any process on the instance — including malware — can access those AWS resources.",
+        "context": "Once attached, any EC2 instance using this profile can retrieve the role's credentials via the instance metadata service. A role with broad permissions (s3:*, ec2:*, iam:*) means any process on the instance - including malware - can access those AWS resources.",
         "suggestion": ""
       }
     ]
@@ -126,7 +126,7 @@
         "type": "always_warn",
         "severity": "HIGH",
         "message": "Deleting an inline role policy immediately removes those permissions",
-        "context": "Inline policies are deleted permanently — unlike managed policies, there is no version history. Any workload relying on the permissions in this inline policy will immediately start receiving AccessDenied errors.",
+        "context": "Inline policies are deleted permanently - unlike managed policies, there is no version history. Any workload relying on the permissions in this inline policy will immediately start receiving AccessDenied errors.",
         "suggestion": ""
       }
     ]

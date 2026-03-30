@@ -109,7 +109,7 @@
     "checks": [
       {
         "type": "always_warn",
-        "severity": "HIGH",
+        "severity": "MEDIUM",
         "message": "Verify you are not weakening content filters or removing PII protections",
         "context": "Updating a guardrail affects all agents and model invocations using it in real time. Removing a denied topic or sensitive information filter immediately exposes those gaps to users.",
         "suggestion": ""

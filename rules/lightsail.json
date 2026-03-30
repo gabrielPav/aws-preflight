@@ -45,7 +45,7 @@
         "flag": "--no-publicly-accessible",
         "severity": "HIGH",
         "message": "Public accessibility not explicitly disabled on Lightsail database",
-        "context": "Always explicitly set --no-publicly-accessible to ensure the database is not reachable from the internet. A publicly accessible database is reachable from the entire internet — automated scanners will find it and attempt brute-force logins within hours.",
+        "context": "Always explicitly set --no-publicly-accessible to ensure the database is not reachable from the internet. A publicly accessible database is reachable from the entire internet - automated scanners will find it and attempt brute-force logins within hours.",
         "suggestion": "--no-publicly-accessible"
       },
       {

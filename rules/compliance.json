@@ -30,7 +30,7 @@
         "type": "always_warn",
         "severity": "HIGH",
         "message": "Deleting the configuration recorder permanently removes all resource tracking",
-        "context": "All configuration history and compliance evaluation stops immediately. This is irreversible — you cannot recover the configuration history for the period after deletion. Investigate why this deletion is needed before proceeding.",
+        "context": "All configuration history and compliance evaluation stops immediately. This is irreversible - you cannot recover the configuration history for the period after deletion. Investigate why this deletion is needed before proceeding.",
         "suggestion": ""
       }
     ]
@@ -65,7 +65,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Verify auto-remediation actions are tested before enabling — they modify resources automatically",
+        "message": "Verify auto-remediation actions are tested before enabling - they modify resources automatically",
         "context": "Auto-remediation executes SSM Automation documents on non-compliant resources without human approval. A misconfigured remediation can modify or delete production resources automatically. Test remediation actions in a non-production account before enabling auto-remediation.",
         "suggestion": ""
       }

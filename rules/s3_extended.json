@@ -55,7 +55,7 @@
         "flag": "--acl",
         "forbidden_value": "public-read",
         "severity": "HIGH",
-        "message": "Object ACL set to public-read — anyone on the internet can access this object",
+        "message": "Object ACL set to public-read - anyone on the internet can access this object",
         "context": "Setting an object ACL to public-read makes it accessible to anyone with the URL, no credentials required. This bypasses bucket-level Block Public Access if it's not set to IgnorePublicAcls=true. Use pre-signed URLs for temporary sharing instead.",
         "suggestion": "--acl private"
       },
@@ -64,7 +64,7 @@
         "flag": "--acl",
         "forbidden_value": "public-read-write",
         "severity": "HIGH",
-        "message": "Object ACL set to public-read-write — anyone can read and overwrite this object",
+        "message": "Object ACL set to public-read-write - anyone can read and overwrite this object",
         "context": "Public read-write ACL allows any unauthenticated user to read and replace this object. This is almost never intentional and can be exploited to inject malicious content.",
         "suggestion": "--acl private"
       }
@@ -100,7 +100,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Lifecycle rules that expire objects are permanent — verify the scope before applying",
+        "message": "Lifecycle rules that expire objects are permanent - verify the scope before applying",
         "context": "A lifecycle rule with Expiration on a prefix that's too broad will silently delete objects that match. Test with a narrow prefix first and verify the rule targets exactly what you intend. Objects deleted by lifecycle rules bypass versioning delete markers if the rule targets current versions.",
         "suggestion": ""
       }
@@ -124,7 +124,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "S3 mv deletes the source object after copying — verify the copy succeeded before the source is removed",
+        "message": "S3 mv deletes the source object after copying - verify the copy succeeded before the source is removed",
         "context": "The mv command copies the object to the destination then deletes the source. If the copy fails partway through, you may lose the source without a complete destination. For critical data, use cp followed by manual verification before deleting the source.",
         "suggestion": ""
       }
@@ -136,7 +136,7 @@
       {
         "type": "always_warn",
         "severity": "INFO",
-        "message": "Restored objects are temporarily accessible — verify the restore duration and access controls",
+        "message": "Restored objects are temporarily accessible - verify the restore duration and access controls",
         "context": "Restoring a Glacier object makes it temporarily available in S3 Standard for the number of days you specify. During this window, the object is accessible to anyone with S3 read permissions on the bucket. Ensure the bucket's access controls are appropriate for the restored data.",
         "suggestion": ""
       }

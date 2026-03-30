@@ -38,14 +38,14 @@
     "checks": [
       {
         "type": "always_warn",
-        "severity": "HIGH",
+        "severity": "MEDIUM",
         "message": "Verify token expiry is not set too long",
         "context": "Long-lived access tokens (default is 1 hour, refresh tokens default to 30 days) increase the window for token theft. Set access token validity to 15-60 minutes and refresh tokens to the minimum your app needs.",
         "suggestion": ""
       },
       {
         "type": "always_warn",
-        "severity": "HIGH",
+        "severity": "MEDIUM",
         "message": "Disable unused OAuth flows, especially implicit grant",
         "context": "The implicit grant flow returns tokens in the URL fragment, which gets logged in browser history, server logs, and referrer headers. Only enable authorization_code flow for web apps.",
         "suggestion": ""
@@ -103,13 +103,6 @@
   {
     "command": "cognito-identity create-identity-pool",
     "checks": [
-      {
-        "type": "always_warn",
-        "severity": "HIGH",
-        "message": "Verify unauthenticated access is disabled unless explicitly required",
-        "context": "Enabling unauthenticated identities grants AWS credentials to anyone with no login required. The unauthenticated IAM role must be locked down to the absolute minimum. Most apps don't need this at all.",
-        "suggestion": ""
-      },
       {
         "type": "missing_flag",
         "flag": "--no-allow-unauthenticated-identities",

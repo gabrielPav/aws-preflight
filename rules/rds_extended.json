@@ -5,7 +5,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Verify all subnets in the group are private — public subnets make RDS internet-reachable",
+        "message": "Verify all subnets in the group are private - public subnets make RDS internet-reachable",
         "context": "A DB subnet group containing public subnets allows RDS instances to be placed in those subnets. Combined with --publicly-accessible, this exposes your database directly to the internet. Only include private subnets (no route to an internet gateway) in DB subnet groups.",
         "suggestion": ""
       }
@@ -66,7 +66,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Rebooting an RDS instance causes a brief outage — notify dependent applications",
+        "message": "Rebooting an RDS instance causes a brief outage - notify dependent applications",
         "context": "A standard reboot takes 1-5 minutes during which the database is unavailable. A reboot with failover (Multi-AZ) promotes the standby and takes 60-120 seconds. All active connections are dropped. Ensure applications have retry logic and schedule during a maintenance window.",
         "suggestion": ""
       }
@@ -78,7 +78,7 @@
       {
         "type": "always_warn",
         "severity": "MEDIUM",
-        "message": "RDS automatically restarts stopped instances after 7 days — this may be unexpected",
+        "message": "RDS automatically restarts stopped instances after 7 days - this may be unexpected",
         "context": "AWS automatically starts stopped RDS instances after 7 days to apply pending maintenance. If you stopped the instance to save costs, it will incur charges again after 7 days. For long-term cost savings, consider creating a final snapshot and deleting the instance instead.",
         "suggestion": ""
       }
@@ -102,7 +102,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Snapshot deletion is permanent — verify this is not your only backup",
+        "message": "Snapshot deletion is permanent - verify this is not your only backup",
         "context": "Deleting an RDS snapshot removes that backup permanently. If this is the only snapshot of a database and the database is later corrupted or deleted, there is no recovery path. Verify other backups exist before deleting.",
         "suggestion": ""
       }
@@ -114,7 +114,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Cluster snapshot deletion is permanent — verify this is not your only backup",
+        "message": "Cluster snapshot deletion is permanent - verify this is not your only backup",
         "context": "Deleting an Aurora cluster snapshot removes that backup permanently. If this is the only snapshot of the cluster and the cluster is later corrupted or deleted, there is no recovery path.",
         "suggestion": ""
       }
@@ -126,7 +126,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Promoting a read replica breaks replication permanently — it becomes a standalone instance",
+        "message": "Promoting a read replica breaks replication permanently - it becomes a standalone instance",
         "context": "Once promoted, the replica is no longer synchronized with the source. Replication cannot be re-established without creating a new replica. Ensure this is intentional (e.g. for a migration or DR scenario) and that applications are updated to point to the new standalone instance.",
         "suggestion": ""
       }

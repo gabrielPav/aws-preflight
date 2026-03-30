@@ -6,7 +6,7 @@
         "type": "missing_flag",
         "flag": "--vpc-id",
         "severity": "HIGH",
-        "message": "SageMaker domain not deployed in a VPC — traffic goes over the public internet",
+        "message": "SageMaker domain not deployed in a VPC - traffic goes over the public internet",
         "context": "Without a VPC configuration, SageMaker Studio domains use direct internet access for all traffic including data downloads, model training, and API calls. Deploy in a VPC with private subnets and VPC endpoints for SageMaker to keep all traffic within your network.",
         "suggestion": "--vpc-id vpc-<your-vpc-id>"
       },
@@ -74,9 +74,9 @@
         "type": "missing_flag",
         "flag": "--offline-store-config",
         "severity": "MEDIUM",
-        "message": "Offline store not configured — feature data will only be available in the online store",
+        "message": "Offline store not configured - feature data will only be available in the online store",
         "context": "Without an offline store, feature data is only available in the online store (DynamoDB) for real-time inference. For training, batch inference, and audit purposes, configure an offline store backed by S3. Verify the S3 destination has appropriate encryption and access controls.",
-        "suggestion": ""
+        "suggestion": "--offline-store-config S3StorageConfig={S3Uri=s3://<bucket>/feature-store/}"
       }
     ]
   },
@@ -87,7 +87,7 @@
         "type": "always_warn",
         "severity": "HIGH",
         "message": "Feature group deletion removes the online store immediately but offline store data persists in S3",
-        "context": "The online store (DynamoDB) is deleted immediately. The offline store data in S3 is not deleted automatically — you must clean it up separately. Any model or pipeline that reads from this feature group will fail after deletion.",
+        "context": "The online store (DynamoDB) is deleted immediately. The offline store data in S3 is not deleted automatically - you must clean it up separately. Any model or pipeline that reads from this feature group will fail after deletion.",
         "suggestion": ""
       }
     ]
@@ -110,7 +110,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Deleting a flow removes all versions and aliases — any application using it will fail immediately",
+        "message": "Deleting a flow removes all versions and aliases - any application using it will fail immediately",
         "context": "All flow versions and aliases are destroyed. Applications invoking the flow via its ARN will receive errors immediately. Update all callers before deleting.",
         "suggestion": ""
       }

@@ -41,7 +41,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Node version updates replace nodes one by one — verify PodDisruptionBudgets are configured",
+        "message": "Node version updates replace nodes one by one - verify PodDisruptionBudgets are configured",
         "context": "EKS replaces nodes by cordoning, draining, and terminating them in sequence. Without PodDisruptionBudgets, pods may be forcefully evicted causing service disruption. Verify your workloads have appropriate PDBs and that the cluster has enough capacity to absorb the rolling replacement.",
         "suggestion": ""
       }
@@ -65,7 +65,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Verify the access policy scope — cluster-wide admin access should be granted sparingly",
+        "message": "Verify the access policy scope - cluster-wide admin access should be granted sparingly",
         "context": "Associating AmazonEKSClusterAdminPolicy grants full Kubernetes cluster-admin access. This allows the principal to create, modify, and delete any resource in the cluster including secrets, RBAC rules, and workloads. Use namespace-scoped policies where possible.",
         "suggestion": ""
       }

@@ -23,7 +23,7 @@
         "flag": "--user-group-ids",
         "severity": "MEDIUM",
         "message": "No access control configured for Redis/Valkey cluster",
-        "context": "Without access control, any client that can reach the endpoint can read and write all cached data. Use --user-group-ids (RBAC) to assign a user group with fine-grained permissions — this is the recommended approach for Redis 6+ and Valkey. RBAC supersedes the older --auth-token (AUTH) method and is flagged by AWS Config (elasticache-rbac-auth-enabled). AUTH is still supported but RBAC provides per-user command and key permissions.",
+        "context": "Without access control, any client that can reach the endpoint can read and write all cached data. Use --user-group-ids (RBAC) to assign a user group with fine-grained permissions - this is the recommended approach for Redis 6+ and Valkey. RBAC supersedes the older --auth-token (AUTH) method and is flagged by AWS Config (elasticache-rbac-auth-enabled). AUTH is still supported but RBAC provides per-user command and key permissions.",
         "suggestion": "--user-group-ids <user-group-id>"
       }
     ]
@@ -67,6 +67,15 @@
         "type": "forbidden_value",
         "flag": "--transit-encryption-enabled",
         "forbidden_value": "false",
+        "severity": "HIGH",
+        "message": "Disabling in-transit encryption. Cache traffic will be transmitted in plaintext",
+        "context": "Disabling TLS exposes all data between your application and the cache to network interception, including session tokens, cached credentials, and application data.",
+        "suggestion": "--transit-encryption-enabled"
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--no-transit-encryption-enabled",
+        "forbidden_value": "true",
         "severity": "HIGH",
         "message": "Disabling in-transit encryption. Cache traffic will be transmitted in plaintext",
         "context": "Disabling TLS exposes all data between your application and the cache to network interception, including session tokens, cached credentials, and application data.",
