@@ -31,8 +31,8 @@
         "type": "missing_flag",
         "flag": "--no-associate-public-ip-address",
         "severity": "HIGH",
-        "message": "Instance launched with a public IP address (--associate-public-ip-address specified)",
-        "context": "Assigning a public IP makes the instance directly reachable from the internet. Automated scanners find open ports within minutes. Use a NAT gateway for outbound traffic and a load balancer for inbound, keeping instances in private subnets.",
+        "message": "Public IP association not explicitly disabled",
+        "context": "Without explicitly setting --no-associate-public-ip-address, instances in a default VPC or a subnet with auto-assign public IP enabled will receive a public IP. Automated scanners find open ports within minutes. Use a NAT gateway for outbound traffic and a load balancer for inbound, keeping instances in private subnets.",
         "suggestion": "--no-associate-public-ip-address"
       },
       {

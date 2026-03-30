@@ -72,8 +72,11 @@ def format_result(parsed: dict, findings: list[dict]) -> str:
         lines.append("✅  No obvious security issues detected")
         return "\n".join(lines)
 
-    lines.append("⚠️   Issues detected:\n")
-    for f in findings:
+    lines.append("")
+    lines.append("⚠️  Issues detected:\n")
+    severity_order = {"HIGH": 0, "MEDIUM": 1, "LOW": 2, "INFO": 3}
+    sorted_findings = sorted(findings, key=lambda f: severity_order.get(f["severity"], 4))
+    for f in sorted_findings:
         icon = SEVERITY_ICON.get(f["severity"], "•")
         lines.append(f"  [{f['severity']}] {icon} {f['message']}")
         if f.get("context"):
@@ -81,8 +84,9 @@ def format_result(parsed: dict, findings: list[dict]) -> str:
         if f.get("suggestion"):
             lines.append(f"  → Add: {f['suggestion']}\n")
 
-    lines.append("💡  Suggested command:\n")
+    lines.append("⚡  Suggested command:\n")
     lines.append(_build_suggested(parsed, findings))
+    lines.append(f"\n\033[2m→ Add missing required parameters before running in AWS (aws <service> <operation> help).\033[0m")
     return "\n".join(lines)
 
 
@@ -92,7 +96,7 @@ def format_result_json(parsed: dict, findings: list[dict]) -> str:
         "service": parsed["service"],
         "operation": parsed["operation"],
         "passed": len(findings) == 0,
-        "findings": [{k: v for k, v in f.items() if not k.startswith("_")} for f in findings],
+        "findings": [{k: v for k, v in f.items() if not k.startswith("_")} for f in sorted(findings, key=lambda f: {"HIGH": 0, "MEDIUM": 1, "LOW": 2, "INFO": 3}.get(f["severity"], 4))],
         "summary": {
             "total": len(findings),
             "high": sum(1 for f in findings if f["severity"] == "HIGH"),

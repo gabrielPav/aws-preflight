@@ -13,7 +13,7 @@
         "type": "always_warn",
         "severity": "HIGH",
         "message": "Enable threat protection (advanced security)",
-        "context": "Without threat protection, Cognito won't detect compromised credentials, block suspicious sign-ins, or flag account takeover attempts. This is the single most impactful security setting in Cognito. Use --user-pool-tier PLUS to enable it on new pools (the legacy --user-pool-add-ons AdvancedSecurityMode parameter still works for existing pools but is superseded by the tier model).",
+        "context": "Without threat protection, Cognito won't detect compromised credentials, block suspicious sign-ins, or flag account takeover attempts. Threat protection requires the Cognito Plus feature plan. Use --user-pool-tier PLUS (CLI) or set UserPoolAddOns.AdvancedSecurityMode=ENFORCED (API) to enable it. This is the single most impactful security setting in Cognito and is flagged by AWS Security Hub (Cognito.1).",
         "suggestion": "--user-pool-tier PLUS"
       },
       {
@@ -22,6 +22,14 @@
         "message": "Set a strong password policy: minimum 12 chars, require uppercase, lowercase, numbers, symbols",
         "context": "Default Cognito password policy allows 8-char passwords with minimal complexity. Weak passwords are the #1 vector for account takeover in user pools exposed to the internet.",
         "suggestion": "--policies PasswordPolicy={MinimumLength=12,RequireUppercase=true,RequireLowercase=true,RequireNumbers=true,RequireSymbols=true}"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--deletion-protection",
+        "severity": "MEDIUM",
+        "message": "Deletion protection not enabled on user pool",
+        "context": "Without deletion protection, a single delete-user-pool command permanently destroys all user accounts, credentials, and app clients. AWS Security Hub flags this as a finding (Cognito.6). Enable it on any pool used in production.",
+        "suggestion": "--deletion-protection ACTIVE"
       }
     ]
   },
@@ -117,13 +125,6 @@
         "severity": "HIGH",
         "message": "Cognito identity pool allows unauthenticated identities",
         "context": "Enabling unauthenticated identities grants temporary AWS credentials to anyone without authentication. The unauthenticated IAM role must be locked down to the absolute minimum permissions. Most apps don't need this at all.",
-        "suggestion": "--no-allow-unauthenticated-identities"
-      },
-      {
-        "type": "always_warn",
-        "severity": "HIGH",
-        "message": "Unauthenticated identities enabled — anonymous users will receive AWS credentials",
-        "context": "Enabling unauthenticated identities grants temporary AWS credentials to anyone without authentication. The unauthenticated IAM role must be locked down to the absolute minimum permissions.",
         "suggestion": "--no-allow-unauthenticated-identities"
       }
     ]

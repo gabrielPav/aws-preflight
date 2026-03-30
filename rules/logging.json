@@ -27,9 +27,7 @@
         "suggestion": "--kms-key-id alias/<your-cloudtrail-key>"
       },
       {
-        "type": "forbidden_value",
-        "flag": "--no-include-global-service-events",
-        "forbidden_value": "true",
+        "type": "always_warn",
         "severity": "HIGH",
         "message": "Global service events excluded — IAM activity will not be logged",
         "context": "IAM, STS, and CloudFront are global services. Using --no-include-global-service-events means all IAM API calls (CreateUser, AttachRolePolicy, AssumeRole, etc.) are invisible in this trail. This is a critical audit gap because IAM activity is exactly what attackers try to hide.",

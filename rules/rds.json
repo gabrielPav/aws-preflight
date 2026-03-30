@@ -65,7 +65,9 @@
     "command": "rds modify-db-instance",
     "checks": [
       {
-        "type": "always_warn",
+        "type": "forbidden_value",
+        "flag": "--publicly-accessible",
+        "forbidden_value": "true",
         "severity": "HIGH",
         "message": "Making RDS instance publicly accessible",
         "context": "You are about to expose a database directly to the internet. If this is for debugging, use an SSH tunnel or SSM port forwarding instead — then revert this change immediately after.",

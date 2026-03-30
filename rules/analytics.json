@@ -7,7 +7,7 @@
         "severity": "HIGH",
         "message": "Enforce encryption for query results in the workgroup configuration",
         "context": "Athena writes query results to S3. Without enforcing encryption in the workgroup, results can land in plaintext. Set EncryptionConfiguration to SSE_KMS and enforce it so users can't override it.",
-        "suggestion": "--configuration ResultConfiguration={EncryptionConfiguration={EncryptionOption=SSE_S3}}"
+        "suggestion": "--configuration ResultConfiguration={EncryptionConfiguration={EncryptionOption=SSE_KMS}}"
       }
     ]
   },

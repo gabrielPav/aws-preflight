@@ -91,7 +91,7 @@
         "severity": "INFO",
         "message": "Prefer SSE-KMS over SSE-S3 for stronger key control",
         "context": "SSE-S3 uses a key managed entirely by AWS with no audit trail. SSE-KMS gives you key rotation, CloudTrail logs of every decryption, and the ability to revoke access instantly by disabling the key.",
-        "suggestion": "--server-side-encryption-configuration Rules=[{ApplyServerSideEncryptionByDefault={SSEAlgorithm=aws:kms,KMSMasterKeyID=alias/<your-key>},BucketKeyEnabled=true}]"
+        "suggestion": "--server-side-encryption-configuration Rules=[{ApplyServerSideEncryptionByDefault={SSEAlgorithm=aws:kms,KMSMasterKeyID=alias/<your-cmk-alias>},BucketKeyEnabled=true}]"
       }
     ]
   },
@@ -104,7 +104,7 @@
         "severity": "INFO",
         "message": "MFA Delete not enabled. Consider enabling for critical buckets",
         "context": "Versioning alone doesn't prevent deletion; it just keeps old versions. MFA Delete requires a second factor to permanently delete versions, protecting against both accidental deletion and ransomware.",
-        "suggestion": "--mfa 'arn:aws:iam::123456789012:mfa/user 123456'"
+        "suggestion": "--mfa 'arn:aws:iam::<account-id>:mfa/<device-name> <totp-code>'"
       }
     ]
   },
@@ -157,9 +157,7 @@
         "suggestion": "--acl private"
       },
       {
-        "type": "forbidden_value",
-        "flag": "--no-verify-ssl",
-        "forbidden_value": "true",
+        "type": "always_warn",
         "severity": "HIGH",
         "message": "SSL verification disabled",
         "context": "Disabling SSL verification exposes your data and credentials to man-in-the-middle attacks. If you're hitting a proxy or cert error, fix the certificate trust chain — don't bypass it.",
@@ -167,11 +165,11 @@
       },
       {
         "type": "missing_flag",
-        "flag": "--sse",
+        "flag": "--sse-kms-key-id",
         "severity": "LOW",
         "message": "Server-side encryption not explicitly specified for upload",
-        "context": "While S3 default encryption may be configured at the bucket level, explicitly specifying --sse aws:kms ensures the object is encrypted with KMS regardless of bucket defaults.",
-        "suggestion": "--sse aws:kms"
+        "context": "While S3 default encryption may be configured at the bucket level, explicitly specifying a customer-managed KMS key ensures the object is encrypted under your key policy, with full control over rotation, access, and audit. Without --sse-kms-key-id, S3 falls back to the AWS-managed key (aws/s3) which you cannot control or rotate on your own schedule.",
+        "suggestion": "--sse aws:kms --sse-kms-key-id <key-arn>"
       }
     ]
   },
@@ -188,9 +186,7 @@
         "suggestion": "--acl private"
       },
       {
-        "type": "forbidden_value",
-        "flag": "--delete",
-        "forbidden_value": "true",
+        "type": "always_warn",
         "severity": "MEDIUM",
         "message": "--delete flag will permanently remove files not present in the source",
         "context": "This is a common cause of accidental data loss. Files deleted from S3 without versioning enabled are unrecoverable. Run with --dryrun first to preview what will be deleted.",

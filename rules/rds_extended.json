@@ -33,13 +33,6 @@
       },
       {
         "type": "always_warn",
-        "severity": "HIGH",
-        "message": "Point-in-time restored instance set to publicly accessible",
-        "context": "A publicly accessible restored instance exposes your database to the internet. Always use --no-publicly-accessible.",
-        "suggestion": "--no-publicly-accessible"
-      },
-      {
-        "type": "always_warn",
         "severity": "MEDIUM",
         "message": "Verify the restored instance's security groups and parameter groups are correct",
         "context": "Point-in-time restores create a new instance that may not inherit the same security group configuration as the source. Verify the security groups, parameter groups, and option groups are appropriate for the restored instance before connecting applications to it.",

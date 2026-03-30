@@ -150,8 +150,8 @@
         "type": "always_warn",
         "severity": "HIGH",
         "message": "Enable all data sources \u2014 S3 protection, EKS audit logs, and malware protection are off by default",
-        "context": "A detector with only CloudTrail and VPC flow logs misses S3 data events, Kubernetes API activity, and malware on EC2. Enable all data sources for complete coverage.",
-        "suggestion": "--features '[{\"Name\":\"S3_DATA_EVENTS\",\"Status\":\"ENABLED\"},{\"Name\":\"EKS_AUDIT_LOGS\",\"Status\":\"ENABLED\"},{\"Name\":\"MALWARE_PROTECTION\",\"Status\":\"ENABLED\"},{\"Name\":\"LAMBDA_NETWORK_LOGS\",\"Status\":\"ENABLED\"},{\"Name\":\"RDS_LOGIN_EVENTS\",\"Status\":\"ENABLED\"}]'"
+        "context": "A detector with only CloudTrail and VPC flow logs misses S3 data events, Kubernetes API activity, EC2 malware scanning, Lambda network activity, and RDS login events. Most features are enabled by default when you create a detector, but explicitly specifying them ensures they are not accidentally omitted. Use --features to enumerate all protection plans you want enabled.",
+        "suggestion": "--features '[{\"Name\":\"S3_DATA_EVENTS\",\"Status\":\"ENABLED\"},{\"Name\":\"EKS_AUDIT_LOGS\",\"Status\":\"ENABLED\"},{\"Name\":\"EBS_MALWARE_PROTECTION\",\"Status\":\"ENABLED\"},{\"Name\":\"LAMBDA_NETWORK_LOGS\",\"Status\":\"ENABLED\"},{\"Name\":\"RDS_LOGIN_EVENTS\",\"Status\":\"ENABLED\"},{\"Name\":\"RUNTIME_MONITORING\",\"Status\":\"ENABLED\"}]'"
       }
     ]
   },

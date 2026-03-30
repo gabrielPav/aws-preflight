@@ -41,18 +41,11 @@
     "command": "lightsail create-relational-database",
     "checks": [
       {
-        "type": "always_warn",
-        "severity": "HIGH",
-        "message": "Lightsail database set to publicly accessible",
-        "context": "A publicly accessible database is reachable from the entire internet. Automated scanners will find it and attempt brute-force logins. Databases should only be accessible from within your Lightsail VPC.",
-        "suggestion": "--no-publicly-accessible"
-      },
-      {
         "type": "missing_flag",
         "flag": "--no-publicly-accessible",
         "severity": "HIGH",
         "message": "Public accessibility not explicitly disabled on Lightsail database",
-        "context": "Always explicitly set --no-publicly-accessible to ensure the database is not reachable from the internet.",
+        "context": "Always explicitly set --no-publicly-accessible to ensure the database is not reachable from the internet. A publicly accessible database is reachable from the entire internet — automated scanners will find it and attempt brute-force logins within hours.",
         "suggestion": "--no-publicly-accessible"
       },
       {
@@ -162,7 +155,9 @@
     "command": "lightsail update-relational-database",
     "checks": [
       {
-        "type": "always_warn",
+        "type": "forbidden_value",
+        "flag": "--publicly-accessible",
+        "forbidden_value": "true",
         "severity": "HIGH",
         "message": "Making Lightsail database publicly accessible",
         "context": "A publicly accessible database is reachable from the entire internet. Automated scanners will find it and attempt brute-force logins. Keep databases private and access them through Lightsail instances.",

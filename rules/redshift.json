@@ -11,13 +11,6 @@
         "suggestion": "--encrypted"
       },
       {
-        "type": "always_warn",
-        "severity": "HIGH",
-        "message": "Redshift cluster set to publicly accessible",
-        "context": "A public Redshift cluster is reachable on port 5439 from the internet. Automated scanners find these within hours. Redshift should only be accessible from within your VPC.",
-        "suggestion": "--no-publicly-accessible"
-      },
-      {
         "type": "missing_flag",
         "flag": "--no-publicly-accessible",
         "severity": "HIGH",
@@ -75,7 +68,9 @@
     "command": "redshift modify-cluster",
     "checks": [
       {
-        "type": "always_warn",
+        "type": "forbidden_value",
+        "flag": "--publicly-accessible",
+        "forbidden_value": "true",
         "severity": "HIGH",
         "message": "Making Redshift cluster publicly accessible",
         "context": "If this is for a one-off data load, use a bastion host or VPN instead and revert immediately after. Never leave a data warehouse exposed to the internet.",

@@ -18,13 +18,6 @@
         "message": "DMS replication instance set to publicly accessible",
         "context": "A publicly accessible replication instance exposes your database migration traffic path to the internet. Automated scanners find open endpoints within minutes. Always deploy in private subnets.",
         "suggestion": "--no-publicly-accessible"
-      },
-      {
-        "type": "always_warn",
-        "severity": "HIGH",
-        "message": "Replication instance set to publicly accessible",
-        "context": "A public replication instance exposes your database migration traffic to the internet. Always deploy in private subnets with --no-publicly-accessible.",
-        "suggestion": "--no-publicly-accessible"
       }
     ]
   },

@@ -11,9 +11,7 @@
 650+ security checks across 91 AWS services. Findings include severity ratings and a remediated command.
 
 ```
-aws-preflight> aws rds create-db-instance --db-instance-identifier prod-db \
-  --db-instance-class db.m5.large --engine mysql --allocated-storage 50 \
-  --master-username <dba-name> --master-user-password <dba-password>
+aws-preflight> aws rds create-db-instance --db-instance-identifier prod-db --db-instance-class db.m5.large --engine mysql --allocated-storage 50 --master-username <dba-name> --master-user-password <dba-password>
 
 ────────────────────────────────────────────────────────────
 Command: aws rds create-db-instance
@@ -34,7 +32,7 @@ Command: aws rds create-db-instance
   → Add: --no-publicly-accessible
 
   [MEDIUM] 🟡 Deletion protection not enabled
-  ℹ️  Without this, a single `rds delete-db-instance` command permanently
+  ℹ️  Without this, a single 'rds delete-db-instance' command permanently
      destroys your database.
   → Add: --deletion-protection
 
@@ -59,16 +57,16 @@ aws rds create-db-instance \
   --db-instance-class db.m5.large \
   --engine mysql \
   --allocated-storage 50 \
-  --db-subnet-group-name <subnet-group> \
-  --vpc-security-group-ids <sg-id>
-  --master-username <dba-name> \
-  --master-user-password <dba-password> \
+  --master-username '<dba-name>' \
+  --master-user-password '<dba-password>' \
   --storage-encrypted \
   --deletion-protection \
   --no-publicly-accessible \
   --backup-retention-period 7 \
   --enable-iam-database-authentication \
   --enable-cloudwatch-logs-exports '["error"]'
+
+→ Add missing required parameters before running (aws <service> <operation> help).
 ```
 
 ---

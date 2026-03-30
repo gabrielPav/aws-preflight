@@ -2,6 +2,7 @@
 VERSION = "1.0.0"
 
 import argparse
+import os
 import shlex
 import shutil
 import subprocess
@@ -82,11 +83,14 @@ def execute(command: str):
 
 def interactive():
     all_findings: list[dict] = []
-    print("┌─────────────────────────────────────────────────────┐")
-    print("│  aws-preflight  -  Security Linter for AWS CLI      │")
-    print("│  Commands are linted, NOT executed against AWS.     │")
-    print("│  Type 'help' for options. Ctrl+C or 'exit' to quit. │")
-    print("└─────────────────────────────────────────────────────┘\n")
+    os.system('clear')
+    print("")
+    print("\033[36m  ░▒▓\033[0m \033[1maws-preflight\033[0m \033[36m▓▒░\033[0m")
+    print("\033[2m  Security Linter for AWS CLI\033[0m")
+    print("")
+    print("\033[2m  Commands are linted, not executed against AWS.\033[0m")
+    print("\033[2m  Type 'help' for options. Ctrl+C or 'exit' to quit.\033[0m")
+    print("")
 
     while True:
         try:
