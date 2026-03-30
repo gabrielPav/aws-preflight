@@ -1,0 +1,119 @@
+[
+  {
+    "command": "cloudtrail put-event-selectors",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify S3 data events and Lambda invocations are included for a complete audit trail",
+        "context": "By default, CloudTrail only logs management events (API calls that create, modify, or delete resources). Data events (S3 object-level operations, Lambda invocations, DynamoDB item-level operations) must be explicitly enabled. Without data events, you have no record of who read or wrote specific S3 objects or invoked Lambda functions.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "cloudtrail put-insight-selectors",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "CloudTrail Insights incurs additional charges per 100,000 events analyzed",
+        "context": "Insights analyzes management events to detect unusual API activity. It's billed separately from standard CloudTrail logging. For high-volume accounts, the cost can be significant. Verify the cost impact before enabling, especially for trails covering all regions.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "cloudtrail create-event-data-store",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--kms-key-id",
+        "severity": "MEDIUM",
+        "message": "Event data store not encrypted with a customer managed KMS key",
+        "context": "CloudTrail Lake event data stores contain your full API audit history. Without a CMK, the data is encrypted with an AWS-managed key with no audit trail of who accessed the logs. Use a CMK so you can track and control access to your audit data.",
+        "suggestion": "--kms-key-id alias/<your-cloudtrail-key>"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--multi-region-enabled",
+        "severity": "HIGH",
+        "message": "Multi-region not enabled — API activity in other regions will not be captured",
+        "context": "A single-region event data store only captures events from the region where it's created. Attackers often operate in regions you don't monitor. Enable multi-region to capture all API activity across your account.",
+        "suggestion": "--multi-region-enabled"
+      }
+    ]
+  },
+  {
+    "command": "cloudtrail start-logging",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Verify the trail is configured with multi-region, log file validation, and KMS encryption",
+        "context": "Starting logging on a trail that lacks multi-region coverage, log file integrity validation, or KMS encryption provides incomplete audit coverage. Verify the trail configuration meets your security requirements before relying on it for compliance.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "logs put-subscription-filter",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the subscription destination is in your account and not an untrusted external destination",
+        "context": "CloudWatch Logs subscription filters stream log data in real time to the destination (Lambda, Kinesis, Firehose). If the destination ARN belongs to an untrusted account or is misconfigured, your log data (which may contain credentials, PII, or security events) is streamed externally.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "logs associate-kms-key",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Verify the KMS key policy allows CloudWatch Logs to use the key",
+        "context": "The KMS key policy must explicitly grant logs.<region>.amazonaws.com permission to use the key for encryption. Without this, the association will fail or log writes will fail silently. Add the required key policy statement before associating.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "logs disassociate-kms-key",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Removing KMS encryption from a log group means new log events are stored without customer-managed encryption",
+        "context": "After disassociation, new log events are encrypted with the default CloudWatch Logs encryption (AWS-managed key). Existing encrypted log events remain encrypted with the old key. If the log group contains sensitive data, verify this change meets your compliance requirements.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "logs delete-subscription-filter",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Removing a subscription filter stops real-time log streaming to the destination",
+        "context": "If the subscription was feeding a SIEM, security monitoring system, or alerting pipeline, removing it creates a blind spot. Verify no active security monitoring depends on this subscription before deleting.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "logs put-data-protection-policy",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Data protection policies mask PII in log events — verify the audit destination is configured",
+        "context": "CloudWatch Logs data protection policies detect and mask sensitive data (SSNs, credit cards, etc.) in log events. Configure an audit destination (S3 or Firehose) to receive findings about detected sensitive data. Without an audit destination, you won't know what PII was found and masked.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

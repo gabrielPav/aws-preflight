@@ -1,0 +1,154 @@
+[
+  {
+    "command": "rds create-db-subnet-group",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify all subnets in the group are private — public subnets make RDS internet-reachable",
+        "context": "A DB subnet group containing public subnets allows RDS instances to be placed in those subnets. Combined with --publicly-accessible, this exposes your database directly to the internet. Only include private subnets (no route to an internet gateway) in DB subnet groups.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "rds restore-db-instance-to-point-in-time",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--no-publicly-accessible",
+        "severity": "HIGH",
+        "message": "Public accessibility not explicitly disabled on point-in-time restored instance",
+        "context": "Restored instances can default to publicly accessible depending on the subnet group. Always explicitly set --no-publicly-accessible to prevent the restored database from being reachable from the internet.",
+        "suggestion": "--no-publicly-accessible"
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--publicly-accessible",
+        "forbidden_value": "true",
+        "severity": "HIGH",
+        "message": "Point-in-time restored RDS instance set to publicly accessible",
+        "context": "A publicly accessible restored instance exposes your database to the internet. Restored instances should default to private. Always use --no-publicly-accessible.",
+        "suggestion": "--no-publicly-accessible"
+      },
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Point-in-time restored instance set to publicly accessible",
+        "context": "A publicly accessible restored instance exposes your database to the internet. Always use --no-publicly-accessible.",
+        "suggestion": "--no-publicly-accessible"
+      },
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the restored instance's security groups and parameter groups are correct",
+        "context": "Point-in-time restores create a new instance that may not inherit the same security group configuration as the source. Verify the security groups, parameter groups, and option groups are appropriate for the restored instance before connecting applications to it.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "rds delete-db-cluster",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--final-db-snapshot-identifier",
+        "severity": "HIGH",
+        "message": "No final snapshot specified: Aurora cluster will be deleted without a backup",
+        "context": "Without --final-db-snapshot-identifier, the entire cluster and all its data is permanently destroyed. Always take a final snapshot unless you are 100% certain the data is no longer needed.",
+        "suggestion": "--final-db-snapshot-identifier <snapshot-name>"
+      },
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Explicitly skipping final snapshot. All Aurora cluster data will be permanently lost",
+        "context": "With --skip-final-snapshot, no backup is taken before deletion. All data in the Aurora cluster is gone forever with no recovery path.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "rds reboot-db-instance",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Rebooting an RDS instance causes a brief outage — notify dependent applications",
+        "context": "A standard reboot takes 1-5 minutes during which the database is unavailable. A reboot with failover (Multi-AZ) promotes the standby and takes 60-120 seconds. All active connections are dropped. Ensure applications have retry logic and schedule during a maintenance window.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "rds stop-db-instance",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "RDS automatically restarts stopped instances after 7 days — this may be unexpected",
+        "context": "AWS automatically starts stopped RDS instances after 7 days to apply pending maintenance. If you stopped the instance to save costs, it will incur charges again after 7 days. For long-term cost savings, consider creating a final snapshot and deleting the instance instead.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "rds start-export-task",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the S3 destination bucket has appropriate encryption and access controls",
+        "context": "RDS snapshot exports write your entire database in Parquet format to S3. If the destination bucket is misconfigured (public, wrong KMS key, or overly permissive bucket policy), your entire database is exposed. Verify the bucket's Block Public Access, encryption, and access policy before starting the export.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "rds delete-db-snapshot",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Snapshot deletion is permanent — verify this is not your only backup",
+        "context": "Deleting an RDS snapshot removes that backup permanently. If this is the only snapshot of a database and the database is later corrupted or deleted, there is no recovery path. Verify other backups exist before deleting.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "rds delete-db-cluster-snapshot",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Cluster snapshot deletion is permanent — verify this is not your only backup",
+        "context": "Deleting an Aurora cluster snapshot removes that backup permanently. If this is the only snapshot of the cluster and the cluster is later corrupted or deleted, there is no recovery path.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "rds promote-read-replica",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Promoting a read replica breaks replication permanently — it becomes a standalone instance",
+        "context": "Once promoted, the replica is no longer synchronized with the source. Replication cannot be re-established without creating a new replica. Ensure this is intentional (e.g. for a migration or DR scenario) and that applications are updated to point to the new standalone instance.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "rds create-db-parameter-group",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Verify security-relevant parameters are set correctly in the new parameter group",
+        "context": "Parameter groups control database engine settings including SSL enforcement (rds.force_ssl for PostgreSQL, require_secure_transport for MySQL), audit logging, and password policies. A parameter group that disables SSL enforcement allows unencrypted database connections.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

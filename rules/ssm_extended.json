@@ -1,0 +1,110 @@
+[
+  {
+    "command": "ssm put-parameter",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Use SecureString type for sensitive values — Standard String parameters are stored in plaintext",
+        "context": "SSM Parameter Store Standard String parameters are stored unencrypted and visible to anyone with ssm:GetParameter. For passwords, API keys, and connection strings, always use SecureString with a KMS key. SecureString values are encrypted at rest and require kms:Decrypt to retrieve.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ssm delete-parameter",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify no applications or Lambda functions reference this parameter before deleting",
+        "context": "Deleting a parameter causes immediate failures for any application that calls ssm:GetParameter for it. Unlike Secrets Manager, there is no recovery window — deletion is immediate and permanent.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ssm delete-parameters",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Bulk parameter deletion is immediate and permanent — verify all targets before executing",
+        "context": "This command deletes multiple parameters in a single call with no confirmation prompt. Any application referencing the deleted parameters will fail immediately. Verify the parameter names carefully before executing.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ssm start-session",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "SSM Session Manager provides shell access to instances — verify session logging is enabled",
+        "context": "Session Manager sessions provide interactive shell access to managed instances. Without session logging to S3 or CloudWatch Logs, there is no audit trail of commands executed during the session. Enable session logging in the SSM Session Manager preferences before using in production.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ssm create-document",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the document content does not contain hardcoded credentials or execute untrusted scripts",
+        "context": "SSM documents define commands that run on managed instances. A document with hardcoded credentials exposes them to anyone with ssm:GetDocument. A document that downloads and executes scripts from untrusted URLs is a supply chain risk. Review document content carefully before sharing.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ssm delete-document",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify no associations, maintenance windows, or automation workflows reference this document",
+        "context": "Deleting an SSM document breaks any State Manager association, Maintenance Window task, or Automation workflow that references it. Those automations will fail on their next execution. Verify all references before deleting.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ssm modify-document-permission",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify you are not sharing the document publicly or with untrusted accounts",
+        "context": "Sharing an SSM document publicly (AccountIdsToAdd: all) or with untrusted accounts allows those accounts to run the document's commands on their instances. If the document contains sensitive logic or references internal resources, sharing it exposes that information.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ssm create-maintenance-window",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the maintenance window schedule and duration are appropriate for your workload",
+        "context": "Maintenance windows run tasks (patch baselines, Run Command, Automation) on a schedule. A window that's too short may not complete patching, leaving instances in a partially patched state. Verify the schedule doesn't overlap with peak traffic periods.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ssm create-patch-baseline",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the patch baseline approves security patches promptly — long approval delays leave instances vulnerable",
+        "context": "Patch baselines with long auto-approval delays (e.g. 30+ days) leave instances unpatched for extended periods after security patches are released. For production systems, use a 7-day or shorter approval delay for security patches.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

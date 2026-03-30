@@ -1,4 +1,5 @@
 import json
+import shlex
 
 SEVERITY_ICON = {"HIGH": "🔴", "MEDIUM": "🟡", "LOW": "🔵", "INFO": "ℹ️ "}
 
@@ -14,7 +15,7 @@ def _build_suggested(parsed: dict, findings: list[dict]) -> str:
     replace_flags = {}
     for f in findings:
         suggestion = f.get("suggestion", "")
-        if not suggestion:
+        if not suggestion or not suggestion.startswith("-"):
             continue
         flag = suggestion.split()[0]
         replace_flags[flag] = suggestion
@@ -31,13 +32,13 @@ def _build_suggested(parsed: dict, findings: list[dict]) -> str:
         else:
             parts.append(flag)
             if val is not True:
-                parts.append(val)
+                parts.append(shlex.quote(val))
             existing_flags.add(flag)
 
     # Append suggestions (missing flags + replacements for forbidden flags)
     for f in findings:
         suggestion = f.get("suggestion", "")
-        if not suggestion:
+        if not suggestion or not suggestion.startswith("-"):
             continue
         flag = suggestion.split()[0]
         if flag not in existing_flags:
@@ -111,7 +112,7 @@ def format_parse_error(raw: str) -> str:
 
 def format_parse_error_json(raw: str) -> str:
     return json.dumps({
-        "command": raw[:200],
+        "command": raw[:80],
         "error": "not a valid AWS command",
         "passed": False,
         "findings": [],

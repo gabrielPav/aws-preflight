@@ -7,13 +7,11 @@
         "flag": "--encrypted",
         "severity": "HIGH",
         "message": "Redshift cluster not encrypted at rest",
-        "context": "Encryption must be set at creation time \u2014 enabling it later requires a cluster restore. An unencrypted Redshift cluster storing PII or financial data is a compliance failure.",
+        "context": "Encryption must be set at creation time — enabling it later requires a cluster restore. An unencrypted Redshift cluster storing PII or financial data is a compliance failure.",
         "suggestion": "--encrypted"
       },
       {
-        "type": "forbidden_value",
-        "flag": "--publicly-accessible",
-        "forbidden_value": "true",
+        "type": "always_warn",
         "severity": "HIGH",
         "message": "Redshift cluster set to publicly accessible",
         "context": "A public Redshift cluster is reachable on port 5439 from the internet. Automated scanners find these within hours. Redshift should only be accessible from within your VPC.",
@@ -23,8 +21,17 @@
         "type": "missing_flag",
         "flag": "--no-publicly-accessible",
         "severity": "HIGH",
-        "message": "Public accessibility not explicitly disabled. Redshift defaults to publicly accessible",
-        "context": "Redshift clusters default to publicly accessible. Always explicitly set --no-publicly-accessible to ensure the cluster is not reachable from the internet.",
+        "message": "Public accessibility not explicitly disabled — verify your subnet configuration",
+        "context": "In a default VPC, Redshift clusters default to publicly accessible. In a custom VPC they default to private. Always explicitly set --no-publicly-accessible to ensure the cluster is not reachable from the internet regardless of VPC type.",
+        "suggestion": "--no-publicly-accessible"
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--publicly-accessible",
+        "forbidden_value": "true",
+        "severity": "HIGH",
+        "message": "Redshift cluster set to publicly accessible",
+        "context": "A public Redshift cluster is reachable on port 5439 from the internet. Automated scanners find these within hours. Redshift should only be accessible from within your VPC.",
         "suggestion": "--no-publicly-accessible"
       },
       {
@@ -39,7 +46,7 @@
         "type": "always_warn",
         "severity": "MEDIUM",
         "message": "Audit logging must be enabled separately via 'redshift enable-logging'",
-        "context": "Audit logging is not a create-cluster flag \u2014 it's a separate API call. Without it you have no record of who connected, what queries ran, or what data was accessed. Required for PCI-DSS, HIPAA, and SOC 2.",
+        "context": "Audit logging is not a create-cluster flag — it's a separate API call. Without it you have no record of who connected, what queries ran, or what data was accessed. Required for PCI-DSS, HIPAA, and SOC 2.",
         "suggestion": ""
       }
     ]
@@ -56,9 +63,7 @@
         "suggestion": "--final-cluster-snapshot-identifier <snapshot-name>"
       },
       {
-        "type": "forbidden_value",
-        "flag": "--skip-final-cluster-snapshot",
-        "forbidden_value": "true",
+        "type": "always_warn",
         "severity": "HIGH",
         "message": "Explicitly skipping final snapshot. All warehouse data will be permanently lost",
         "context": "With --skip-final-cluster-snapshot, no backup is taken before deletion. All Redshift data is gone forever.",
@@ -70,9 +75,7 @@
     "command": "redshift modify-cluster",
     "checks": [
       {
-        "type": "forbidden_value",
-        "flag": "--publicly-accessible",
-        "forbidden_value": "true",
+        "type": "always_warn",
         "severity": "HIGH",
         "message": "Making Redshift cluster publicly accessible",
         "context": "If this is for a one-off data load, use a bastion host or VPN instead and revert immediately after. Never leave a data warehouse exposed to the internet.",
@@ -110,7 +113,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Classic resize causes cluster downtime \u2014 consider elastic resize for minimal disruption",
+        "message": "Classic resize causes cluster downtime — consider elastic resize for minimal disruption",
         "context": "Classic resize makes the cluster read-only and may take hours. Elastic resize completes in minutes with brief unavailability. Verify the resize type and schedule during a maintenance window.",
         "suggestion": ""
       }

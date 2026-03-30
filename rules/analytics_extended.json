@@ -1,0 +1,130 @@
+[
+  {
+    "command": "glue create-security-configuration",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify S3, CloudWatch Logs, and job bookmark encryption are all enabled in the security configuration",
+        "context": "A Glue security configuration controls encryption for three separate data paths: S3 output, CloudWatch Logs, and job bookmarks. Enabling only S3 encryption leaves your ETL logs and job state unencrypted. Enable all three encryption options with KMS keys for complete coverage.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "glue create-dev-endpoint",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Glue dev endpoints have direct internet access by default — deploy in a VPC",
+        "context": "Without a VPC configuration, Glue dev endpoints are deployed with direct internet access, bypassing your network controls. They can download arbitrary packages and exfiltrate data. Always specify --subnet-id and --security-group-ids to deploy in a private subnet.",
+        "suggestion": "--subnet-id subnet-<private-subnet-id> --security-group-ids sg-<id>"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--subnet-id",
+        "severity": "HIGH",
+        "message": "No VPC subnet specified — dev endpoint will have direct internet access",
+        "context": "Glue dev endpoints without a subnet are deployed outside your VPC with direct internet connectivity. Specify a private subnet to ensure the endpoint is network-isolated and traffic flows through your VPC controls.",
+        "suggestion": "--subnet-id subnet-<your-private-subnet>"
+      }
+    ]
+  },
+  {
+    "command": "glue delete-dev-endpoint",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify no active notebook sessions or scripts are connected to this endpoint",
+        "context": "Deleting a dev endpoint immediately terminates all active connections. Any unsaved work in connected notebooks (SageMaker, Zeppelin) is lost. Ensure all work is saved and sessions are closed before deleting.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "glue create-crawler",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the crawler IAM role is scoped to only the data sources it needs to catalog",
+        "context": "Glue crawlers assume the role you provide to read data sources and write to the Data Catalog. A role with s3:GetObject on * can catalog data from any bucket in your account. Scope the role to specific bucket ARNs and prefixes.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "glue delete-database",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Deleting a Glue database removes all tables and partitions in it permanently",
+        "context": "All table metadata, partition information, and column statistics in the database are destroyed. ETL jobs, Athena queries, and Redshift Spectrum queries that reference these tables will fail. The underlying S3 data is not deleted, but the catalog metadata is gone.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "glue delete-table",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Deleting a Glue table removes all metadata and partition information permanently",
+        "context": "The table metadata is destroyed but the underlying S3 data remains. Any Athena queries, Glue jobs, or Redshift Spectrum queries referencing this table will fail. Verify no active workloads depend on this table before deleting.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "glue delete-connection",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify no active Glue jobs or crawlers reference this connection",
+        "context": "Deleting a Glue connection removes the JDBC or network connection configuration. Any job or crawler that references this connection by name will fail on its next run. Update or delete those jobs before removing the connection.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "emr put-block-public-access-configuration",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify you are enabling block public access, not disabling it",
+        "context": "EMR block public access prevents clusters from being launched with security group rules that allow public internet access on ports other than 22. Disabling this setting allows future clusters to be launched with open security groups, exposing Hadoop web UIs (HDFS NameNode, YARN) to the internet.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "emr set-termination-protection",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Disabling termination protection allows the cluster to be terminated, losing all HDFS data",
+        "context": "Termination protection prevents accidental cluster termination. Disabling it on a running cluster with unwritten HDFS data means a single terminate-clusters command permanently destroys all intermediate results. Only disable immediately before a planned termination.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "emr add-steps",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify step scripts are from trusted sources and do not contain hardcoded credentials",
+        "context": "EMR steps execute JAR files or scripts from S3. If the S3 bucket containing the scripts is compromised or the scripts contain hardcoded AWS credentials, the step runs malicious code with the cluster's IAM role permissions. Use S3 bucket policies to restrict who can write to the script bucket.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

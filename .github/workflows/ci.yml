@@ -1,0 +1,135 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Run tests
+        run: python -m unittest discover tests/ -v
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check syntax (py_compile)
+        run: python -m py_compile main.py cli_parser.py engine.py formatter.py
+
+      - name: Validate rule JSON files
+        run: |
+          python -c "
+          import json, glob, sys
+          errors = 0
+          for f in sorted(glob.glob('rules/*.json')):
+              try:
+                  with open(f) as fh:
+                      rules = json.load(fh)
+                  for r in rules:
+                      assert 'command' in r, f'missing command in {f}'
+                      assert 'checks' in r, f'missing checks in {f}'
+                      for c in r['checks']:
+                          assert c.get('type') in ('missing_flag', 'forbidden_value', 'always_warn'), f'bad type in {f}: {c.get(\"type\")}'
+                          assert c.get('severity') in ('HIGH', 'MEDIUM', 'LOW', 'INFO'), f'bad severity in {f}: {c.get(\"severity\")}'
+                          assert c.get('message'), f'empty message in {f}'
+              except Exception as e:
+                  print(f'FAIL: {f}: {e}')
+                  errors += 1
+          if errors:
+              sys.exit(1)
+          print(f'Validated {len(glob.glob(\"rules/*.json\"))} rule files')
+          "
+
+  smoke:
+    name: Smoke test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Interactive mode (single command)
+        run: |
+          output=$(python main.py "aws s3api create-bucket --bucket test" || true)
+          echo "$output"
+          echo "$output" | grep -q "Block Public Access"
+
+      - name: JSON output
+        run: |
+          output=$(python main.py --json "aws ec2 run-instances --image-id ami-123" || true)
+          echo "$output"
+          echo "$output" | python -c "import sys,json; d=json.load(sys.stdin); assert d['passed']==False; assert d['summary']['high']>0"
+
+      - name: Pipe mode
+        run: |
+          echo "aws rds create-db-instance --db-instance-identifier prod --engine mysql" | python main.py || true
+          echo "aws s3 cp file s3://bucket/ --acl public-read" | python main.py || true
+
+      - name: Exit code gating (HIGH only, should pass)
+        run: |
+          python main.py --min-severity HIGH "aws s3api put-bucket-versioning --bucket b --versioning-configuration Status=Enabled" || exit 1
+
+      - name: Exit code gating (should fail on HIGH)
+        run: |
+          python main.py --min-severity HIGH "aws rds create-db-instance --db-instance-identifier prod --engine mysql" && exit 1 || true
+
+      - name: All commands produce expected findings
+        run: |
+          python -c "
+          import json, glob
+          from engine import analyze
+          from cli_parser import parse_command
+          total = fired = fv_only = 0
+          for f in sorted(glob.glob('rules/*.json')):
+              with open(f) as fh:
+                  rules = json.load(fh)
+              for r in rules:
+                  cmd = 'aws ' + r['command']
+                  parsed = parse_command(cmd)
+                  findings = analyze(parsed)
+                  types = {c['type'] for c in r['checks']}
+                  # Commands with only forbidden_value checks correctly produce
+                  # no findings when the dangerous value is not present
+                  if types == {'forbidden_value'}:
+                      fv_only += 1
+                  else:
+                      assert len(findings) > 0, f'No findings for: {cmd}'
+                      fired += 1
+                  total += 1
+          print(f'{fired}/{total} commands fire on bare invocation ({fv_only} forbidden_value-only, correctly silent)')
+          "

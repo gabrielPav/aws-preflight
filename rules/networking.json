@@ -55,7 +55,7 @@
         "severity": "MEDIUM",
         "message": "Verify SSL/TLS policy is not being downgraded",
         "context": "Changing the SSL policy to an older version (e.g. ELBSecurityPolicy-2016-08) enables weak ciphers and older TLS versions. Use ELBSecurityPolicy-TLS13-1-2-2021-06 or newer.",
-        "suggestion": ""
+        "suggestion": "--ssl-policy ELBSecurityPolicy-TLS13-1-2-2021-06"
       }
     ]
   },
@@ -200,6 +200,404 @@
         "severity": "MEDIUM",
         "message": "Verify the web ACL rules are tested and won't block legitimate traffic",
         "context": "Associating a WAF web ACL with a resource (ALB, CloudFront, API Gateway) immediately starts filtering traffic. Misconfigured rules can block legitimate users. Test in count mode before enforcing.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "opensearch create-domain",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--node-to-node-encryption-options",
+        "severity": "HIGH",
+        "message": "Node-to-node encryption not enabled",
+        "context": "Without node-to-node encryption, data replication between cluster nodes is transmitted in plaintext. This is flagged by AWS Security Hub (OpenSearch.3). Enable it at domain creation \u2014 it cannot be added to an existing domain without creating a new one.",
+        "suggestion": "--node-to-node-encryption-options Enabled=true"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--encryption-at-rest-options",
+        "severity": "HIGH",
+        "message": "Encryption at rest not enabled",
+        "context": "Without at-rest encryption, index data is stored unencrypted on disk. Encryption must be enabled at domain creation. Flagged by AWS Security Hub (OpenSearch.1).",
+        "suggestion": "--encryption-at-rest-options Enabled=true"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--domain-endpoint-options",
+        "expected_value": "EnforceHTTPS=true",
+        "severity": "HIGH",
+        "message": "HTTPS not enforced on OpenSearch domain endpoint",
+        "context": "Without EnforceHTTPS=true, the domain accepts unencrypted HTTP connections, exposing search queries and results to interception. Flagged by AWS Security Hub (OpenSearch.8).",
+        "suggestion": "--domain-endpoint-options EnforceHTTPS=true,TLSSecurityPolicy=Policy-Min-TLS-1-2-2019-07"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--vpc-options",
+        "severity": "HIGH",
+        "message": "OpenSearch domain not deployed in a VPC \u2014 domain may be publicly accessible",
+        "context": "Without VPC options, the domain is deployed with a public endpoint. Combined with a permissive access policy, this makes your search cluster accessible from the internet. Deploy in a VPC with private subnets.",
+        "suggestion": "--vpc-options SubnetIds=<subnet-id>,SecurityGroupIds=<sg-id>"
+      }
+    ]
+  },
+  {
+    "command": "opensearch delete-domain",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Domain deletion permanently destroys all indices and data \u2014 take a manual snapshot first",
+        "context": "There is no undo. All OpenSearch indices, dashboards, and configurations are permanently deleted. Take a manual snapshot to S3 before deleting if you need to retain any data.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "opensearch update-domain-config",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify you are not disabling encryption, HTTPS enforcement, or opening the access policy",
+        "context": "Domain config updates can disable security features. Disabling node-to-node encryption, at-rest encryption, or HTTPS enforcement exposes your search data. Verify the access policy is not being changed to allow public access (Principal: *).",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "opensearch create-vpc-endpoint",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the VPC endpoint security group restricts access to only trusted sources",
+        "context": "OpenSearch VPC endpoints provide private access to the domain from within a VPC. The security group attached to the endpoint controls which resources can connect. Ensure it restricts access to specific application security groups rather than broad CIDR ranges.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "network-firewall create-firewall",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify route tables are updated to route traffic through the firewall after creation",
+        "context": "Creating a Network Firewall does nothing until you update your VPC route tables to send traffic through the firewall endpoints. Traffic bypasses the firewall until routing is configured. Update route tables in both the firewall subnet and the protected subnets.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "network-firewall create-firewall-policy",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the default action is DROP or ALERT, not PASS, for stateless rules",
+        "context": "A firewall policy with a default stateless action of PASS allows all traffic that doesn't match a rule. For security-focused deployments, set the default action to DROP and explicitly allow only required traffic. Use ALERT to log traffic without blocking during initial deployment.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "network-firewall delete-firewall",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Deleting the firewall immediately removes all traffic inspection \u2014 update route tables first",
+        "context": "Once the firewall is deleted, traffic that was routed through it will be dropped or bypass inspection depending on your route table configuration. Update route tables to bypass the firewall endpoints before deleting, or traffic will be black-holed.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "wafv2 update-web-acl",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "WAF ACL updates take effect immediately \u2014 verify rules don't block legitimate traffic",
+        "context": "Changes to a WAF web ACL are applied to all associated resources immediately. Adding overly broad rules can block legitimate users. Test new rules in count mode before switching to block mode, and monitor CloudWatch metrics for false positives.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "wafv2 delete-rule-group",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the rule group is not referenced by any web ACL before deleting",
+        "context": "Deleting a rule group that is still referenced by a web ACL will fail. However, if you remove the reference first and then delete, the web ACL immediately loses those protection rules. Verify the impact on all associated resources before proceeding.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "route53 create-health-check",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Verify health check thresholds are appropriate for your application's response time",
+        "context": "Health checks with overly aggressive thresholds (short intervals, low failure thresholds) can trigger false failovers during brief latency spikes. Health checks with lenient thresholds delay detection of real outages. Tune the interval and failure threshold based on your application's normal response time.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "route53 delete-health-check",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify no routing policies or CloudWatch alarms reference this health check",
+        "context": "Deleting a health check that is referenced by a Route 53 routing policy (failover, weighted, latency) removes the health evaluation for that record. The record may continue routing traffic to an unhealthy endpoint. Update routing policies before deleting.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "route53 associate-vpc-with-hosted-zone",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the VPC is in a trusted account before associating with a private hosted zone",
+        "context": "Associating a VPC with a private hosted zone allows instances in that VPC to resolve the zone's DNS records. If the VPC belongs to an untrusted account, those instances gain access to your internal DNS namespace, potentially revealing internal service endpoints.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "elasticloadbalancing create-load-balancer",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Classic Load Balancers are deprecated \u2014 migrate to ALB or NLB",
+        "context": "Classic Load Balancers (ELB v1) are in maintenance mode and lack modern security features like SNI, HTTP/2, and advanced routing. AWS recommends migrating to Application Load Balancers (ALB) or Network Load Balancers (NLB). New deployments should use elbv2.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "elbv2 create-target-group",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify health check settings are appropriate for your application",
+        "context": "Target groups with lenient health check settings (high threshold, long interval) continue routing traffic to unhealthy targets for extended periods. Configure health checks with appropriate thresholds to detect failures quickly and remove unhealthy targets from rotation.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "elbv2 delete-target-group",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify no listeners reference this target group before deleting",
+        "context": "Deleting a target group that is still referenced by a listener rule causes that rule to fail, dropping traffic for the affected routes. Remove all listener rules referencing this target group before deleting.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "elbv2 add-listener-certificates",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the certificate is valid and covers the correct domain names",
+        "context": "Adding an expired or domain-mismatched certificate to a listener causes TLS handshake failures for clients connecting to those domains. Verify the certificate's validity period and Subject Alternative Names before adding.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "elbv2 remove-listener-certificates",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Removing a certificate breaks HTTPS for all domains covered by that certificate",
+        "context": "Clients connecting to domains covered by the removed certificate will receive TLS errors. Verify no active traffic uses the domains covered by this certificate before removing it from the listener.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "acm-pca create-certificate-authority",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Private CA creation is a significant security commitment \u2014 protect the CA key material",
+        "context": "A private Certificate Authority can issue certificates trusted by all systems in your organization. If the CA key is compromised, an attacker can issue certificates for any internal domain. Use a hardware security module (HSM) key storage and restrict CA administrator access to a small number of trusted principals.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "acm-pca delete-certificate-authority",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Deleting a CA revokes trust for all certificates it issued",
+        "context": "All certificates issued by this CA become untrusted once the CA is deleted. Any service using those certificates will experience TLS failures. Ensure all issued certificates are replaced before deleting the CA.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "acm-pca issue-certificate",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the certificate validity period is appropriate \u2014 avoid excessively long-lived certificates",
+        "context": "Certificates with multi-year validity periods increase the window of exposure if the private key is compromised. Use short-lived certificates (90 days or less) with automated renewal for internal services. Long validity periods are a compliance risk under most security frameworks.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam upload-signing-certificate",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "IAM signing certificates are legacy \u2014 use ACM or KMS for modern signing workflows",
+        "context": "IAM signing certificates are used for legacy SOAP-based AWS API authentication, which is no longer supported for most services. If you're using this for a modern workflow, consider whether ACM Private CA or KMS asymmetric keys are more appropriate.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "directconnect create-connection",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Direct Connect does not encrypt traffic in transit by default",
+        "context": "A dedicated circuit doesn't mean encrypted. Anyone with physical access at the colocation can intercept traffic. Use MACsec on dedicated connections or run an IPsec VPN over the DX connection for encryption.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "directconnect delete-connection",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Deleting a Direct Connect connection immediately cuts all traffic using it",
+        "context": "If this connection carries production traffic, deletion causes an immediate outage. Verify failover to a backup DX connection or VPN is in place and tested before proceeding.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "directconnect create-private-virtual-interface",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify BGP peer IP, ASN, and VLAN with your network team before creating",
+        "context": "A wrong BGP config on a private VIF can black-hole traffic or advertise incorrect routes into your VPC. Mistakes here require a support ticket and colocation coordination to fix.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "globalaccelerator create-accelerator",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Configure health checks on endpoint groups. Without them, traffic routes to unhealthy endpoints",
+        "context": "Global Accelerator doesn't know your endpoint is down unless you configure health checks. Set thresholds appropriate for your app's response time to avoid routing users to a broken backend.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "globalaccelerator delete-accelerator",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Disable the accelerator before deleting and update DNS records pointing to its static IPs first",
+        "context": "The two static Anycast IPs assigned to the accelerator are released on deletion. Any DNS records pointing to those IPs will route to released addresses that no longer serve your traffic. Update DNS before deletion.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ec2 create-transit-gateway",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Disable auto-accept shared attachments unless you explicitly need it",
+        "context": "With auto-accept on, any account sharing an attachment to this TGW connects automatically. In a multi-account org this creates unintended network paths. Require explicit acceptance.",
+        "suggestion": "--options AutoAcceptSharedAttachments=disable"
+      }
+    ]
+  },
+  {
+    "command": "ec2 create-transit-gateway-vpc-attachment",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Attaching a VPC to a TGW doesn't route traffic automatically. Update route tables",
+        "context": "You need to add routes in both the VPC route tables and the TGW route table. Also verify the attachment doesn't create unintended east-west connectivity between VPCs that should be isolated.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "route53 create-hosted-zone",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Enable DNSSEC signing for public hosted zones",
+        "context": "Without DNSSEC, your domain is vulnerable to DNS spoofing and cache poisoning. Route 53 supports DNSSEC, so enable it for any public zone handling sensitive traffic.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "route53 delete-hosted-zone",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "All DNS records are destroyed and services stop resolving immediately",
+        "context": "Export the zone file first. Update your domain registrar's nameservers if this zone was authoritative. Any service relying on these DNS names fails the moment the zone is deleted.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "route53 change-resource-record-sets",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "DNS changes propagate globally within 60 seconds. Verify before submitting",
+        "context": "A wrong A record or CNAME redirects production traffic immediately. For critical records, lower the TTL to 60 seconds before making changes so you can revert quickly if something breaks.",
         "suggestion": ""
       }
     ]

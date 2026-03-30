@@ -110,5 +110,53 @@
         "suggestion": ""
       }
     ]
+  },
+  {
+    "command": "sqs add-permission",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the permission does not grant access to untrusted accounts or use wildcard actions",
+        "context": "SQS add-permission adds a statement to the queue policy. A statement with Principal: * or Action: SQS:* allows any AWS account to send or receive messages. Use set-queue-attributes with a full policy document for more granular control.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "sqs receive-message",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Verify messages are deleted after processing to prevent duplicate processing",
+        "context": "SQS messages are not deleted after receive \u2014 they become invisible for the visibility timeout period. If your consumer fails to delete the message, it reappears and is processed again. Ensure your consumer calls delete-message after successful processing.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "sns add-permission",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the permission does not grant publish access to untrusted accounts",
+        "context": "SNS add-permission adds a statement to the topic policy. Granting Publish to an untrusted account allows them to inject messages into your topic, potentially triggering downstream Lambda functions, SQS queues, or HTTP endpoints with malicious payloads.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "sns publish",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the message does not contain plaintext secrets or PII",
+        "context": "SNS messages are delivered to all subscribers and may be logged in CloudTrail. Messages containing credentials, API keys, or PII are exposed to all subscribers and anyone with CloudTrail read access. Use references to Secrets Manager ARNs instead of actual secret values.",
+        "suggestion": ""
+      }
+    ]
   }
 ]

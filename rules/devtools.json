@@ -1,0 +1,130 @@
+[
+  {
+    "command": "codecommit create-repository",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the repository does not have overly permissive resource policies",
+        "context": "CodeCommit repositories are private by default, but resource policies can grant cross-account access. Ensure no policy grants codecommit:GitPull or codecommit:GitPush to untrusted accounts or wildcard principals.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "codecommit delete-repository",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Repository deletion is permanent — all commits, branches, and pull requests are destroyed",
+        "context": "There is no recycle bin for CodeCommit repositories. All code history is permanently deleted. Clone the repository locally or mirror it to another service before deleting.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "codebuild create-project",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the service role is scoped to only the resources this build project needs",
+        "context": "CodeBuild service roles are used during build execution. A role with broad permissions (s3:*, ecr:*, iam:*) means a compromised build script or dependency can access and modify AWS resources far beyond what the build needs. Scope to specific resource ARNs.",
+        "suggestion": ""
+      },
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Never store secrets as plaintext environment variables in the build project",
+        "context": "CodeBuild environment variables are visible in the console and CLI to anyone with codebuild:BatchGetProjects. Store secrets in AWS Secrets Manager or SSM Parameter Store and reference them using the SECRETS_MANAGER or PARAMETER_STORE type.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "codepipeline create-pipeline",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the pipeline role is scoped to only the actions and resources in the pipeline",
+        "context": "CodePipeline service roles are used to orchestrate all pipeline stages. A role with broad permissions can be exploited if a pipeline stage is compromised. Scope the role to specific S3 buckets, CodeBuild projects, and deployment targets.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "codepipeline delete-pipeline",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Deleting a pipeline immediately stops all in-progress executions",
+        "context": "Any currently running pipeline execution is terminated immediately. Deployments in progress may be left in a partial state. Verify no critical deployments are running before deleting.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "codedeploy create-deployment",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the deployment group and revision are correct before deploying to production",
+        "context": "CodeDeploy deployments are difficult to roll back if they fail mid-way. Verify the deployment group targets the correct instances or ECS service, and that the application revision has been tested in a lower environment. Use deployment configurations with minimum healthy hosts to limit blast radius.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "codedeploy delete-deployment-group",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Deleting a deployment group removes all deployment history and configuration",
+        "context": "All deployment history, alarms, and rollback configuration for this group are permanently deleted. Any in-progress deployments are not automatically stopped. Verify no active deployments are running before deleting.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "codeartifact create-domain",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--encryption-key",
+        "severity": "MEDIUM",
+        "message": "CodeArtifact domain not encrypted with a customer managed KMS key",
+        "context": "CodeArtifact domains store your software packages. Without a CMK, packages are encrypted with an AWS-managed key with no audit trail. Use a CMK for domains storing proprietary packages to track access and maintain independent key control.",
+        "suggestion": "--encryption-key alias/<your-key>"
+      }
+    ]
+  },
+  {
+    "command": "codeartifact put-domain-permissions-policy",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the domain policy does not grant package publish access to untrusted accounts",
+        "context": "A CodeArtifact domain policy granting PublishPackageVersion to untrusted accounts allows them to publish malicious packages to your domain. These packages could then be pulled by your build systems. Scope publish permissions to specific trusted accounts and IAM roles.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "codeartifact delete-domain",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Domain deletion destroys all repositories and packages within it permanently",
+        "context": "All repositories, packages, and package versions in the domain are permanently deleted. Any build system or pipeline pulling packages from this domain will fail immediately. Verify all consumers have migrated to an alternative source before deleting.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

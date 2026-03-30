@@ -23,7 +23,7 @@
         "severity": "MEDIUM",
         "message": "Verify the execution role is scoped to only the services this workflow actually calls",
         "context": "State machine roles with broad permissions (e.g. lambda:*, ecs:*) mean a compromised or misconfigured workflow can trigger unintended actions. Scope to specific resource ARNs.",
-        "suggestion": ""
+        "suggestion": "--role-arn arn:aws:iam::<account>:role/<scoped-sfn-role>"
       }
     ]
   },

@@ -34,17 +34,5 @@
         "suggestion": ""
       }
     ]
-  },
-  {
-    "command": "s3api put-bucket-lifecycle-configuration",
-    "checks": [
-      {
-        "type": "always_warn",
-        "severity": "HIGH",
-        "message": "Lifecycle rules that expire objects are permanent. Verify the scope before applying",
-        "context": "A lifecycle rule with Expiration on a prefix that's too broad will silently delete objects that match. Test with a narrow prefix first and verify the rule targets exactly what you intend.",
-        "suggestion": ""
-      }
-    ]
   }
 ]

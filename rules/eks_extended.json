@@ -1,0 +1,98 @@
+[
+  {
+    "command": "eks create-addon",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the addon version is compatible with your cluster version and uses a least-privilege service account",
+        "context": "EKS addons like vpc-cni, kube-proxy, and coredns run with elevated permissions in the cluster. Specify a service account role ARN scoped to only what the addon needs using IRSA (IAM Roles for Service Accounts). Using the default node role for addon permissions grants the addon access to all node-level AWS permissions.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "eks create-fargate-profile",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the pod execution role is scoped to only what Fargate pods need",
+        "context": "The Fargate pod execution role is used by the Fargate infrastructure to pull container images and write logs. It should only have permissions for ECR image pulls and CloudWatch Logs writes. Attaching broad policies to this role grants those permissions to the Fargate infrastructure itself.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "eks delete-nodegroup",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "All pods running on these nodes will be evicted and the EC2 instances terminated",
+        "context": "Deleting a node group drains and terminates all EC2 instances in it. Pods without PodDisruptionBudgets may be forcefully evicted. Persistent volumes using local storage are lost. Ensure workloads are rescheduled to other node groups before deleting.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "eks update-nodegroup-version",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Node version updates replace nodes one by one — verify PodDisruptionBudgets are configured",
+        "context": "EKS replaces nodes by cordoning, draining, and terminating them in sequence. Without PodDisruptionBudgets, pods may be forcefully evicted causing service disruption. Verify your workloads have appropriate PDBs and that the cluster has enough capacity to absorb the rolling replacement.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "eks create-access-entry",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the principal ARN and access scope before granting Kubernetes cluster access",
+        "context": "EKS access entries grant IAM principals access to the Kubernetes API. An access entry with AmazonEKSClusterAdminPolicy grants full cluster-admin privileges. Scope access to the minimum required Kubernetes RBAC permissions and verify the principal ARN belongs to a trusted entity.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "eks associate-access-policy",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the access policy scope — cluster-wide admin access should be granted sparingly",
+        "context": "Associating AmazonEKSClusterAdminPolicy grants full Kubernetes cluster-admin access. This allows the principal to create, modify, and delete any resource in the cluster including secrets, RBAC rules, and workloads. Use namespace-scoped policies where possible.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "eks delete-addon",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Deleting a critical addon like vpc-cni or coredns will break cluster networking or DNS",
+        "context": "Core addons (vpc-cni, kube-proxy, coredns) are required for cluster operation. Deleting vpc-cni breaks pod networking. Deleting coredns breaks DNS resolution for all pods. Only delete addons you intend to replace with a self-managed alternative.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "eks delete-fargate-profile",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Deleting a Fargate profile terminates all pods running on it",
+        "context": "All pods scheduled to the Fargate profile are terminated when the profile is deleted. Pods are not automatically rescheduled to other profiles or node groups. Ensure workloads are migrated before deleting the profile.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

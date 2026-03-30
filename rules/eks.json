@@ -15,7 +15,7 @@
         "flag": "--encryption-config",
         "severity": "HIGH",
         "message": "EKS secrets encryption not configured",
-        "context": "Without envelope encryption, Kubernetes secrets (which often contain database passwords, API keys, and TLS certs) are stored in etcd in base64 only \u2014 not encrypted. Use a KMS key to encrypt secrets at rest.",
+        "context": "Without envelope encryption, Kubernetes secrets (which often contain database passwords, API keys, and TLS certs) are stored in etcd in base64 only — not encrypted. Use a KMS key to encrypt secrets at rest.",
         "suggestion": "--encryption-config '[{\"resources\":[\"secrets\"],\"provider\":{\"keyArn\":\"<your-kms-key-arn>\"}}]'"
       },
       {
@@ -23,7 +23,7 @@
         "severity": "MEDIUM",
         "message": "Verify the cluster endpoint is not publicly accessible without IP restrictions",
         "context": "By default, the EKS API server endpoint is publicly accessible. Restrict access using --resources-vpc-config endpointPublicAccess=true,publicAccessCidrs=<your-ip>/32 or disable public access entirely.",
-        "suggestion": ""
+        "suggestion": "--resources-vpc-config endpointPublicAccess=true,publicAccessCidrs=<your-ip>/32,endpointPrivateAccess=true"
       }
     ]
   },
@@ -35,7 +35,7 @@
         "severity": "MEDIUM",
         "message": "Verify endpoint access settings are not being made more permissive",
         "context": "Enabling public endpoint access without IP restrictions exposes the Kubernetes API server to the entire internet. Brute-force and credential stuffing attacks against the API server are common.",
-        "suggestion": ""
+        "suggestion": "--resources-vpc-config endpointPublicAccess=false,endpointPrivateAccess=true"
       }
     ]
   },
@@ -53,7 +53,7 @@
         "type": "missing_flag",
         "flag": "--disk-size",
         "severity": "LOW",
-        "message": "Disk size not specified \u2014 default may be insufficient for workloads",
+        "message": "Disk size not specified — default may be insufficient for workloads",
         "context": "Nodes running out of disk space can cause pod evictions and cluster instability. Specify an appropriate disk size for your workloads.",
         "suggestion": "--disk-size 80"
       }
@@ -65,7 +65,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "EKS cluster deletion is permanent \u2014 all workloads will be terminated",
+        "message": "EKS cluster deletion is permanent — all workloads will be terminated",
         "context": "Deleting an EKS cluster terminates all node groups and running pods. Persistent volumes (EBS) may be deleted depending on the reclaim policy. Ensure all critical data is backed up before proceeding.",
         "suggestion": ""
       }
@@ -89,7 +89,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Addon updates can cause brief disruption \u2014 verify compatibility with your cluster version",
+        "message": "Addon updates can cause brief disruption — verify compatibility with your cluster version",
         "context": "Critical addons like vpc-cni, kube-proxy, and coredns affect cluster networking. An incompatible version can break pod networking or DNS resolution across the entire cluster. Test in a non-production cluster first.",
         "suggestion": ""
       }
@@ -101,7 +101,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Kubernetes version upgrades are irreversible \u2014 you cannot downgrade",
+        "message": "Kubernetes version upgrades are irreversible — you cannot downgrade",
         "context": "The upgrade modifies the control plane and may deprecate APIs your workloads depend on. Verify all addons, node groups, and manifests are compatible with the target version before upgrading.",
         "suggestion": ""
       }

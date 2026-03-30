@@ -114,6 +114,20 @@
     ]
   },
   {
+    "command": "lambda create-function-url-config",
+    "checks": [
+      {
+        "type": "forbidden_value",
+        "flag": "--auth-type",
+        "forbidden_value": "NONE",
+        "severity": "HIGH",
+        "message": "Function URL created with no authentication. Anyone on the internet can invoke it",
+        "context": "A function URL with AuthType=NONE allows unauthenticated invocations from any source. If the function processes sensitive data, modifies resources, or has broad IAM permissions, this is a critical exposure.",
+        "suggestion": "--auth-type AWS_IAM"
+      }
+    ]
+  },
+  {
     "command": "lambda update-function-url-config",
     "checks": [
       {

@@ -1,0 +1,134 @@
+[
+  {
+    "command": "config put-configuration-recorder",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the recorder captures all resource types, not just a subset",
+        "context": "A configuration recorder scoped to specific resource types misses changes to unmonitored resources. AWS Config is most effective when recording all supported resource types. Limiting the scope creates blind spots in your compliance and change tracking.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "config stop-configuration-recorder",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Stopping the configuration recorder creates a compliance and audit blind spot",
+        "context": "While the recorder is stopped, all resource configuration changes are untracked. AWS Config rules will not evaluate new changes, and the configuration history will have gaps. Stopping the recorder is a common attacker technique to hide unauthorized resource changes.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "config delete-configuration-recorder",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Deleting the configuration recorder permanently removes all resource tracking",
+        "context": "All configuration history and compliance evaluation stops immediately. This is irreversible — you cannot recover the configuration history for the period after deletion. Investigate why this deletion is needed before proceeding.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "config put-config-rule",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Verify the rule scope and trigger type are appropriate for your use case",
+        "context": "Config rules with overly broad scopes evaluate every resource change, which can generate excessive findings and increase costs. Scope rules to specific resource types and use periodic evaluation for rules that don't need real-time detection.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "config delete-config-rule",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Deleting a Config rule removes compliance monitoring for the resources it covered",
+        "context": "All compliance findings for this rule are deleted and no new evaluations will run. If the rule was detecting security misconfigurations (e.g. public S3 buckets, unencrypted EBS volumes), those misconfigurations will no longer be flagged.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "config put-remediation-configurations",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify auto-remediation actions are tested before enabling — they modify resources automatically",
+        "context": "Auto-remediation executes SSM Automation documents on non-compliant resources without human approval. A misconfigured remediation can modify or delete production resources automatically. Test remediation actions in a non-production account before enabling auto-remediation.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "securityhub enable-security-hub",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Enable all relevant security standards and verify findings are routed to your SIEM or ticketing system",
+        "context": "Security Hub aggregates findings from GuardDuty, Inspector, Macie, and Config. Without enabling security standards (CIS, AWS Foundational, PCI-DSS) and routing findings to an actionable destination, Security Hub provides visibility but no response capability.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "securityhub disable-security-hub",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Disabling Security Hub removes centralized security finding aggregation",
+        "context": "All findings from GuardDuty, Inspector, Macie, and Config will no longer be aggregated. Custom insights, finding filters, and integrations are deleted. This is a common attacker technique to reduce security visibility. Verify this is intentional.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "securityhub batch-update-findings",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Suppressing or resolving findings without remediation creates false compliance",
+        "context": "Marking findings as SUPPRESSED or RESOLVED without actually fixing the underlying issue creates a false sense of security. Audit trails show the finding was acknowledged, but the vulnerability remains. Only suppress findings with documented justification.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "macie2 enable-macie",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Configure Macie to scan all S3 buckets and route findings to Security Hub or SNS",
+        "context": "Macie discovers and protects sensitive data in S3. Without configuring automated sensitive data discovery and routing findings to an actionable destination, Macie provides limited value. Enable automated sensitive data discovery for all buckets and configure finding notifications.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "macie2 disable-macie",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Disabling Macie removes all PII and sensitive data detection for S3",
+        "context": "All Macie findings, jobs, and sensitive data discovery configurations are deleted. S3 buckets will no longer be monitored for PII, credentials, or other sensitive data. This is a compliance risk for organizations subject to GDPR, HIPAA, or PCI-DSS.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

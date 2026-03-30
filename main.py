@@ -33,21 +33,23 @@ Commands:
 
 _output_json = False
 _min_severity = "MEDIUM"
-_all_findings: list[dict] = []
 
 
-def process(command: str) -> list[dict]:
+def process(command: str, all_findings: list[dict]) -> list[dict]:
     parsed = parse_command(command)
     if not parsed:
         print(format_parse_error_json(command) if _output_json else format_parse_error(command))
         return []
     findings = analyze(parsed)
-    _all_findings.extend(findings)
+    all_findings.extend(findings)
     print(format_result_json(parsed, findings) if _output_json else format_result(parsed, findings))
     return findings
 
 
 def execute(command: str):
+    if not sys.stdin.isatty():
+        print("\n⚠️  'run' / '!' commands are disabled in pipe/batch mode")
+        return
     print(f"\n▶  Executing: {command}\n")
     try:
         parts = shlex.split(command)
@@ -79,6 +81,7 @@ def execute(command: str):
 
 
 def interactive():
+    all_findings: list[dict] = []
     print("┌─────────────────────────────────────────────────────┐")
     print("│  aws-preflight  -  Security Linter for AWS CLI      │")
     print("│  Commands are linted, NOT executed against AWS.     │")
@@ -105,7 +108,7 @@ def interactive():
         elif cmd.startswith("!"):
             execute(cmd[1:].strip())
         else:
-            process(cmd)
+            process(cmd, all_findings)
             print()
 
 
@@ -131,16 +134,17 @@ def main():
 
     _output_json = args.json_output
     _min_severity = args.min_severity
+    all_findings: list[dict] = []
 
     if args.command:
-        process(args.command)
-        sys.exit(exit_code_for_findings(_all_findings, _min_severity))
+        process(args.command, all_findings)
+        sys.exit(exit_code_for_findings(all_findings, _min_severity))
     elif not sys.stdin.isatty():
         for line in sys.stdin:
             line = line.strip()
             if line:
-                process(line)
-        sys.exit(exit_code_for_findings(_all_findings, _min_severity))
+                process(line, all_findings)
+        sys.exit(exit_code_for_findings(all_findings, _min_severity))
     else:
         interactive()
 

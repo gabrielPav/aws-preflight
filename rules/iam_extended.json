@@ -1,0 +1,194 @@
+[
+  {
+    "command": "iam create-saml-provider",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the SAML metadata document is from a trusted identity provider",
+        "context": "The SAML metadata you upload defines which IdP can issue assertions to your AWS account. A malicious or compromised metadata document allows an attacker-controlled IdP to issue valid SAML assertions and assume any role that trusts this provider. Only upload metadata from your organization's official IdP.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam create-open-id-connect-provider",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the OIDC provider URL, thumbprint, and client IDs before creating",
+        "context": "An OIDC provider allows tokens from that issuer to be exchanged for AWS credentials. A wrong thumbprint or overly broad client ID list can allow tokens from unintended applications to assume your IAM roles. Verify the thumbprint matches the current TLS certificate of the OIDC endpoint.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam create-instance-profile",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Instance profiles are the mechanism for attaching IAM roles to EC2 instances",
+        "context": "The profile itself has no permissions — permissions come from the role you add to it. Ensure the role added to this profile follows least-privilege. Any EC2 instance with this profile can access the instance metadata service to retrieve the role's credentials.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam add-role-to-instance-profile",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the role's permissions before attaching it to an instance profile",
+        "context": "Once attached, any EC2 instance using this profile can retrieve the role's credentials via the instance metadata service. A role with broad permissions (s3:*, ec2:*, iam:*) means any process on the instance — including malware — can access those AWS resources.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam delete-access-key",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Deleting an access key immediately breaks any application or pipeline using it",
+        "context": "Unlike deactivating a key, deletion is permanent and immediate. Applications, CI/CD pipelines, and scripts using this key will fail with authentication errors. Deactivate the key first, monitor for failures, then delete after confirming nothing depends on it.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam set-default-policy-version",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Setting a new default policy version takes effect immediately for all attached entities",
+        "context": "Every user, role, and group with this policy attached immediately gets the permissions defined in the new version. If the new version grants broader permissions (e.g. adds s3:* or iam:*), that access is live the moment you set it as default. Review the new version's diff carefully before promoting it.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam delete-policy",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the policy is detached from all users, roles, and groups before deleting",
+        "context": "AWS prevents deletion of a policy that is still attached, but verify manually. Deleting a policy that was providing necessary permissions to a role or user will break those workloads the next time the policy is re-evaluated.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam detach-role-policy",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Detaching a policy immediately removes those permissions from the role",
+        "context": "Any EC2 instance, Lambda function, or ECS task using this role will immediately lose the permissions defined in the detached policy. API calls that relied on those permissions will start failing with AccessDenied errors. Verify no active workloads depend on the permissions being removed.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam detach-user-policy",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Detaching a policy immediately removes those permissions from the user",
+        "context": "The user will immediately lose access to any resources or actions granted by the detached policy. If the user is actively working, this can cause unexpected access denied errors. Coordinate with the user before removing permissions.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam detach-group-policy",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Detaching a policy removes those permissions from every user in the group",
+        "context": "All users in the group immediately lose the permissions defined in the detached policy. This can break access for multiple users simultaneously. Verify the impact across all group members before detaching.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam delete-role-policy",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Deleting an inline role policy immediately removes those permissions",
+        "context": "Inline policies are deleted permanently — unlike managed policies, there is no version history. Any workload relying on the permissions in this inline policy will immediately start receiving AccessDenied errors.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam delete-user-policy",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Deleting an inline user policy immediately removes those permissions",
+        "context": "Inline policies are deleted permanently with no version history. The user immediately loses all permissions defined in this policy. Verify no active sessions or applications depend on these permissions.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam delete-group-policy",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Deleting an inline group policy removes those permissions from all group members",
+        "context": "All users in the group immediately lose the permissions defined in this inline policy. Inline policies have no version history and cannot be recovered. Verify the impact across all group members before deleting.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam create-service-linked-role",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Service-linked roles have AWS-managed policies that cannot be modified",
+        "context": "Service-linked roles are created with a predefined set of permissions managed by AWS. You cannot attach additional policies or modify the trust policy. Verify the service that will use this role is the one you intend to grant access to.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam remove-user-from-group",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Removing a user from a group immediately revokes all permissions inherited from that group",
+        "context": "If the group provides the user's primary permissions, removing them causes immediate access loss. Verify the user has alternative permissions or that the removal is intentional before proceeding.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "iam delete-group",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify all users are removed from the group and all policies are detached before deleting",
+        "context": "AWS requires the group to be empty (no users) and have no attached policies before deletion. Deleting a group that was the primary source of permissions for its members means those users lose access. Verify alternative permissions are in place.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

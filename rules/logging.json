@@ -31,7 +31,7 @@
         "flag": "--no-include-global-service-events",
         "forbidden_value": "true",
         "severity": "HIGH",
-        "message": "Global service events excluded, so IAM activity will not be logged",
+        "message": "Global service events excluded — IAM activity will not be logged",
         "context": "IAM, STS, and CloudFront are global services. Using --no-include-global-service-events means all IAM API calls (CreateUser, AttachRolePolicy, AssumeRole, etc.) are invisible in this trail. This is a critical audit gap because IAM activity is exactly what attackers try to hide.",
         "suggestion": "--include-global-service-events"
       }
@@ -41,27 +41,21 @@
     "command": "cloudtrail update-trail",
     "checks": [
       {
-        "type": "forbidden_value",
-        "flag": "--no-is-multi-region-trail",
-        "forbidden_value": "true",
+        "type": "always_warn",
         "severity": "HIGH",
         "message": "Disabling multi-region trail. API activity in other regions will be invisible",
         "context": "A single-region trail misses all API activity in other regions, including IAM. Attackers often operate in regions you don't monitor.",
         "suggestion": "--is-multi-region-trail"
       },
       {
-        "type": "forbidden_value",
-        "flag": "--no-enable-log-file-validation",
-        "forbidden_value": "true",
+        "type": "always_warn",
         "severity": "HIGH",
         "message": "Disabling log file integrity validation",
         "context": "Without integrity validation, you cannot prove that CloudTrail logs haven't been tampered with. This is required for forensic investigations and compliance.",
         "suggestion": "--enable-log-file-validation"
       },
       {
-        "type": "forbidden_value",
-        "flag": "--no-include-global-service-events",
-        "forbidden_value": "true",
+        "type": "always_warn",
         "severity": "HIGH",
         "message": "Excluding global service events, so IAM activity will not be logged",
         "context": "IAM, STS, and CloudFront are global services. Excluding them means all IAM API calls are invisible in this trail.",

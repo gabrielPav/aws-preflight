@@ -1,5 +1,34 @@
 [
   {
+    "command": "dms create-replication-instance",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--no-publicly-accessible",
+        "severity": "HIGH",
+        "message": "Public accessibility not explicitly disabled on replication instance",
+        "context": "DMS replication instances default to publicly accessible. A public replication instance exposes your database migration traffic path to the internet. Always deploy in private subnets.",
+        "suggestion": "--no-publicly-accessible"
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--publicly-accessible",
+        "forbidden_value": "true",
+        "severity": "HIGH",
+        "message": "DMS replication instance set to publicly accessible",
+        "context": "A publicly accessible replication instance exposes your database migration traffic path to the internet. Automated scanners find open endpoints within minutes. Always deploy in private subnets.",
+        "suggestion": "--no-publicly-accessible"
+      },
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Replication instance set to publicly accessible",
+        "context": "A public replication instance exposes your database migration traffic to the internet. Always deploy in private subnets with --no-publicly-accessible.",
+        "suggestion": "--no-publicly-accessible"
+      }
+    ]
+  },
+  {
     "command": "dms modify-replication-instance",
     "checks": [
       {

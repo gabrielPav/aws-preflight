@@ -1,0 +1,113 @@
+[
+  {
+    "command": "lambda publish-layer-version",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the layer content does not contain secrets, hardcoded credentials, or vulnerable dependencies",
+        "context": "Lambda layers are shared across functions and potentially across accounts. A layer containing hardcoded API keys, database passwords, or vulnerable library versions propagates those issues to every function that uses it. Scan layer content with a secrets detector and dependency vulnerability scanner before publishing.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "lambda add-layer-version-permission",
+    "checks": [
+      {
+        "type": "forbidden_value",
+        "flag": "--principal",
+        "forbidden_value": "*",
+        "severity": "HIGH",
+        "message": "Layer version being shared publicly with all AWS accounts",
+        "context": "Setting principal to * makes this layer version accessible to any AWS account in the world. If the layer contains proprietary code, internal tooling, or any sensitive configuration, it is now publicly accessible. Share only with specific trusted account IDs.",
+        "suggestion": "--principal <specific-account-id>"
+      }
+    ]
+  },
+  {
+    "command": "lambda put-function-event-invoke-config",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--destination-config",
+        "severity": "MEDIUM",
+        "message": "No failure destination configured for async invocations",
+        "context": "Without a failure destination (SQS, SNS, Lambda, or EventBridge), failed async invocations are silently discarded after the retry attempts are exhausted. Configure an OnFailure destination to capture and alert on failed invocations, especially for functions processing critical events.",
+        "suggestion": "--destination-config OnFailure={Destination=<sqs-or-sns-arn>}"
+      }
+    ]
+  },
+  {
+    "command": "lambda invoke",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the invocation payload does not contain plaintext secrets or PII",
+        "context": "Lambda invocation payloads are logged in CloudTrail data events if enabled, and may appear in function logs if the function logs its input. Never pass database passwords, API keys, or PII directly in the payload — use references to Secrets Manager ARNs instead.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "lambda delete-layer-version",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Deleting a layer version breaks all functions that reference it by that specific version",
+        "context": "Functions pinned to a specific layer version ARN will fail to initialize after the version is deleted. Functions using $LATEST or a different version are unaffected. Verify no active functions reference this version before deleting.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "lambda create-code-signing-config",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Set UntrustedArtifactOnDeployment to Enforce, not Warn, for production functions",
+        "context": "A code signing config with UntrustedArtifactOnDeployment=Warn allows unsigned or incorrectly signed packages to be deployed with only a warning. Set it to Enforce to block deployments of packages that don't match a trusted signing profile.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "lambda remove-permission",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Removing a permission immediately breaks any service that was invoking this function via that statement",
+        "context": "If the permission statement allowed API Gateway, S3, or another service to invoke this function, removing it causes those invocations to fail with AccessDenied. Verify the statement ID and its associated trigger before removing.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "lambda create-alias",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Verify the alias points to the correct function version before routing traffic to it",
+        "context": "Lambda aliases are used for traffic shifting and stable invocation endpoints. An alias pointing to the wrong version can silently route production traffic to an older or broken function version. Verify the function version ARN before creating the alias.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "lambda update-alias",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Updating an alias immediately shifts traffic to the new version for all callers",
+        "context": "All services, API Gateway integrations, and event source mappings using this alias immediately invoke the new function version. If the new version has a bug or security regression, all traffic is affected instantly. Use routing-config with a small weight for canary deployments.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

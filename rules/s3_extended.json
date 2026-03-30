@@ -1,0 +1,157 @@
+[
+  {
+    "command": "s3api put-bucket-cors",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify CORS configuration does not allow wildcard origins with write methods",
+        "context": "A CORS rule with AllowedOrigins: ['*'] and AllowedMethods: ['PUT', 'DELETE'] allows any website to make cross-origin requests that modify your bucket contents. Scope AllowedOrigins to your specific domain(s) and restrict AllowedMethods to only what your application needs.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "s3api put-bucket-logging",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Verify the log destination bucket has appropriate access controls and is not the same bucket",
+        "context": "S3 access logs are written to the target bucket you specify. If the target bucket is public or has overly permissive access, your access logs (which contain requester IPs, object keys, and operation types) are exposed. Also, logging a bucket to itself creates a log loop.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "s3api put-bucket-website",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Enabling static website hosting makes the bucket accessible via HTTP with no authentication",
+        "context": "Static website hosting exposes bucket contents over HTTP (not HTTPS) via a public endpoint. Block Public Access must be disabled for website hosting to serve content, which means all objects with public ACLs or a public bucket policy become accessible to anyone. Use CloudFront with HTTPS instead of direct S3 website hosting for production.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "s3api delete-bucket-policy",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Removing the bucket policy may expose the bucket to unintended access",
+        "context": "If the bucket policy was enforcing HTTPS-only access, denying public access, or restricting access to specific VPC endpoints, removing it immediately removes those controls. Verify what the existing policy enforces before deleting it.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "s3api put-object-acl",
+    "checks": [
+      {
+        "type": "forbidden_value",
+        "flag": "--acl",
+        "forbidden_value": "public-read",
+        "severity": "HIGH",
+        "message": "Object ACL set to public-read — anyone on the internet can access this object",
+        "context": "Setting an object ACL to public-read makes it accessible to anyone with the URL, no credentials required. This bypasses bucket-level Block Public Access if it's not set to IgnorePublicAcls=true. Use pre-signed URLs for temporary sharing instead.",
+        "suggestion": "--acl private"
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--acl",
+        "forbidden_value": "public-read-write",
+        "severity": "HIGH",
+        "message": "Object ACL set to public-read-write — anyone can read and overwrite this object",
+        "context": "Public read-write ACL allows any unauthenticated user to read and replace this object. This is almost never intentional and can be exploited to inject malicious content.",
+        "suggestion": "--acl private"
+      }
+    ]
+  },
+  {
+    "command": "s3api put-bucket-replication",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the destination bucket has equivalent encryption and access controls",
+        "context": "Replication copies objects to the destination bucket with the same encryption as the source, but the destination bucket's own policies and Block Public Access settings apply independently. A destination bucket with weaker controls can expose replicated data even if the source is locked down.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "s3api delete-bucket-replication",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Disabling replication stops future object copies but does not delete already-replicated objects",
+        "context": "Objects already replicated to the destination bucket remain there after replication is disabled. If replication was providing DR coverage, disabling it means new objects will no longer be protected. Verify an alternative backup strategy is in place.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "s3api put-bucket-lifecycle-configuration",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Lifecycle rules that expire objects are permanent — verify the scope before applying",
+        "context": "A lifecycle rule with Expiration on a prefix that's too broad will silently delete objects that match. Test with a narrow prefix first and verify the rule targets exactly what you intend. Objects deleted by lifecycle rules bypass versioning delete markers if the rule targets current versions.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "s3api put-bucket-notification-configuration",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify notification targets (Lambda, SQS, SNS) are in your account and have appropriate access policies",
+        "context": "S3 bucket notifications can trigger Lambda functions, SQS queues, or SNS topics. If the target ARN belongs to an untrusted account or has a permissive resource policy, S3 events (which include object keys and metadata) are delivered to that external destination.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "s3 mv",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "S3 mv deletes the source object after copying — verify the copy succeeded before the source is removed",
+        "context": "The mv command copies the object to the destination then deletes the source. If the copy fails partway through, you may lose the source without a complete destination. For critical data, use cp followed by manual verification before deleting the source.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "s3api restore-object",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Restored objects are temporarily accessible — verify the restore duration and access controls",
+        "context": "Restoring a Glacier object makes it temporarily available in S3 Standard for the number of days you specify. During this window, the object is accessible to anyone with S3 read permissions on the bucket. Ensure the bucket's access controls are appropriate for the restored data.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "s3api delete-bucket-website",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Disabling website hosting breaks any application or DNS record pointing to the S3 website endpoint",
+        "context": "The S3 website endpoint URL immediately stops serving content. Any CloudFront distribution, DNS CNAME, or application using the website endpoint will fail. Update DNS and application configurations before or immediately after disabling.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

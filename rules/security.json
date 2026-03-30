@@ -31,8 +31,16 @@
         "type": "always_warn",
         "severity": "HIGH",
         "message": "Secret deletion has a recovery window. Verify no applications depend on it",
-        "context": "By default, secrets are scheduled for deletion after 7 days (configurable up to 30). Applications still referencing this secret will fail immediately. Use --force-delete-without-recovery only if you are certain the secret is unused.",
+        "context": "By default, secrets are scheduled for deletion after 30 days (minimum is 7 days). Applications still referencing this secret will fail immediately. Use --force-delete-without-recovery only if you are certain the secret is unused.",
         "suggestion": ""
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--recovery-window-in-days",
+        "severity": "HIGH",
+        "message": "Recovery window not explicitly set. Defaults to 30 days, but should be confirmed",
+        "context": "Setting the maximum recovery window (30 days) gives you time to discover any applications that depend on the secret before it is permanently destroyed.",
+        "suggestion": "--recovery-window-in-days 30"
       }
     ]
   },
@@ -82,7 +90,7 @@
         "flag": "--pending-window-in-days",
         "severity": "HIGH",
         "message": "No pending window specified. Defaults to 30 days, but should be set explicitly",
-        "context": "The default waiting period is 30 days. Always set this explicitly to the maximum (30 days) to give yourself time to identify all services and data that depend on this key before it is irreversibly destroyed.",
+        "context": "The waiting period is 7\u201330 days; the default is 30 days. Set this explicitly so the window is intentional. Use the maximum (30 days) to give yourself the most time to identify all services and data that depend on this key before it is irreversibly destroyed.",
         "suggestion": "--pending-window-in-days 30"
       }
     ]
@@ -107,6 +115,127 @@
         "severity": "HIGH",
         "message": "Verify the new key policy does not lock out all administrators",
         "context": "A misconfigured KMS key policy can lock out all IAM users and roles, making the key permanently unmanageable. Always ensure the key policy includes at least one admin principal with kms:PutKeyPolicy permission.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "shield create-subscription",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Shield Advanced is $3,000/month with a 1-year commitment \u2014 verify this is intentional",
+        "context": "Evaluate your actual DDoS risk profile before subscribing. For most workloads, Shield Standard (free) plus WAF is sufficient. Shield Advanced makes sense for high-profile public-facing services.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "shield create-protection",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Associate a Route 53 health check for health-based detection",
+        "context": "Without a health check, Shield Advanced can't distinguish a DDoS attack from a legitimate traffic spike. A health check enables proactive engagement with the AWS DDoS Response Team.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "guardduty create-detector",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Enable all data sources \u2014 S3 protection, EKS audit logs, and malware protection are off by default",
+        "context": "A detector with only CloudTrail and VPC flow logs misses S3 data events, Kubernetes API activity, and malware on EC2. Enable all data sources for complete coverage.",
+        "suggestion": "--features '[{\"Name\":\"S3_DATA_EVENTS\",\"Status\":\"ENABLED\"},{\"Name\":\"EKS_AUDIT_LOGS\",\"Status\":\"ENABLED\"},{\"Name\":\"MALWARE_PROTECTION\",\"Status\":\"ENABLED\"},{\"Name\":\"LAMBDA_NETWORK_LOGS\",\"Status\":\"ENABLED\"},{\"Name\":\"RDS_LOGIN_EVENTS\",\"Status\":\"ENABLED\"}]'"
+      }
+    ]
+  },
+  {
+    "command": "guardduty delete-detector",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Deleting a GuardDuty detector removes all threat detection for this region",
+        "context": "All findings, suppression rules, and threat intelligence are destroyed. Disabling GuardDuty is one of the first things attackers do after gaining access. Verify this is intentional.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "guardduty disassociate-from-administrator-account",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Disassociating removes this account's findings from the central security console",
+        "context": "Your security team's GuardDuty administrator account will no longer see findings from this account. Threats in this account become invisible to centralized monitoring.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "acm request-certificate",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--validation-method",
+        "severity": "MEDIUM",
+        "message": "Validation method not specified. Defaults to EMAIL, which is fragile and doesn't auto-renew",
+        "context": "Email validation sends to WHOIS contacts that are often wrong or outdated. DNS validation is automated, doesn't expire, and auto-renews without manual intervention. Always explicitly set --validation-method DNS.",
+        "suggestion": "--validation-method DNS"
+      }
+    ]
+  },
+  {
+    "command": "acm delete-certificate",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the certificate is not in use before deleting",
+        "context": "Deleting a certificate still associated with a CloudFront distribution, ALB, or API Gateway causes HTTPS to fail immediately. ACM warns you if it's in use, but verify manually.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "acm import-certificate",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "The private key must never be stored in git, S3 without encryption, or shared via chat",
+        "context": "Importing a certificate requires the private key on the command line. That key must be stored in Secrets Manager or KMS-encrypted storage \u2014 not in your shell history or a text file.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "acm resend-validation-email",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Validation emails are sent to WHOIS contacts \u2014 verify the domain owner will receive them",
+        "context": "If the WHOIS contacts are outdated or incorrect, the validation email will go to the wrong person. Consider switching to DNS validation for automated, reliable certificate issuance.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "guardduty start-malware-scan",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Malware scan creates a snapshot of the EBS volume \u2014 verify the instance is in a supported region",
+        "context": "GuardDuty malware protection creates an EBS snapshot for scanning. This incurs snapshot storage costs. Scans can take minutes to hours depending on volume size.",
         "suggestion": ""
       }
     ]

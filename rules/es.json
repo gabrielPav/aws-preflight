@@ -1,5 +1,26 @@
 [
   {
+    "command": "es create-elasticsearch-domain",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--node-to-node-encryption-options",
+        "severity": "HIGH",
+        "message": "Node-to-node encryption not enabled",
+        "context": "Without node-to-node encryption, data replication between nodes in the cluster is transmitted in plaintext. This is flagged by AWS Security Hub (Elasticsearch.3).",
+        "suggestion": "--node-to-node-encryption-options Enabled=true"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--encryption-at-rest-options",
+        "severity": "HIGH",
+        "message": "Encryption at rest not enabled",
+        "context": "Without at-rest encryption, index data is stored unencrypted on disk. Encryption must be enabled at domain creation for most instance types. Flagged by AWS Security Hub (Elasticsearch.1).",
+        "suggestion": "--encryption-at-rest-options Enabled=true"
+      }
+    ]
+  },
+  {
     "command": "es delete-elasticsearch-domain",
     "checks": [
       {

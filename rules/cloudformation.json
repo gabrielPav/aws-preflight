@@ -95,7 +95,7 @@
         "severity": "HIGH",
         "message": "StackSets deploy to multiple accounts/regions simultaneously \u2014 test in one account first",
         "context": "A misconfigured StackSet can simultaneously break infrastructure across dozens of accounts. Always deploy to a single test account first, verify, then expand the deployment targets.",
-        "suggestion": ""
+        "suggestion": "--operation-preferences MaxConcurrentCount=1,FailureToleranceCount=0"
       }
     ]
   },
@@ -119,6 +119,30 @@
         "severity": "HIGH",
         "message": "Disabling termination protection exposes the stack to accidental deletion",
         "context": "Once disabled, a single delete-stack command destroys all resources managed by the stack. Only disable temporarily if you intend to delete, and re-enable immediately if you change your mind.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "cloudformation detect-stack-drift",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Drift detection identifies resources modified outside CloudFormation \u2014 review results carefully",
+        "context": "Drift detection compares the current resource configuration against the CloudFormation template. Drifted resources may indicate unauthorized changes, manual fixes, or security misconfigurations applied outside the IaC pipeline. Review all drifted resources and determine whether to remediate or update the template.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "cloudformation register-type",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the custom resource type handler is from a trusted source",
+        "context": "CloudFormation custom resource types execute code in your account with the permissions of the execution role. A malicious or compromised type handler can exfiltrate data, create backdoors, or modify resources. Only register types from trusted publishers and review the handler code.",
         "suggestion": ""
       }
     ]

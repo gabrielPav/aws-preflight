@@ -17,9 +17,17 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Send-command executes arbitrary commands on target instances \u2014 verify the document and targets",
+        "message": "Send-command executes arbitrary commands on target instances. Verify the document and targets",
         "context": "SSM Run Command can execute shell commands as root/administrator on any managed instance. A wrong target filter can run commands on production instances. Verify the instance IDs or tags carefully.",
         "suggestion": ""
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--timeout-seconds",
+        "severity": "MEDIUM",
+        "message": "No execution timeout specified. Command may run indefinitely",
+        "context": "Without a timeout, a hung or runaway command continues executing with no automatic termination. Set a timeout to prevent indefinite execution on managed instances.",
+        "suggestion": "--timeout-seconds 3600"
       }
     ]
   },

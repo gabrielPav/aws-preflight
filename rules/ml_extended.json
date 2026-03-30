@@ -1,0 +1,143 @@
+[
+  {
+    "command": "sagemaker create-domain",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--vpc-id",
+        "severity": "HIGH",
+        "message": "SageMaker domain not deployed in a VPC — traffic goes over the public internet",
+        "context": "Without a VPC configuration, SageMaker Studio domains use direct internet access for all traffic including data downloads, model training, and API calls. Deploy in a VPC with private subnets and VPC endpoints for SageMaker to keep all traffic within your network.",
+        "suggestion": "--vpc-id vpc-<your-vpc-id>"
+      },
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the default execution role follows least-privilege for all domain users",
+        "context": "The domain's default execution role is inherited by all user profiles unless overridden. A role with broad S3 or SageMaker permissions means every user in the domain has those permissions. Scope the default role tightly and override per user profile for elevated access.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "sagemaker update-domain",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the update does not enable public internet access or broaden the default execution role",
+        "context": "Domain updates can change network settings and the default execution role. Enabling public internet access or attaching a broader role affects all users in the domain. Test changes in a non-production domain first.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "sagemaker delete-domain",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Domain deletion destroys all user profiles, apps, and associated EFS storage",
+        "context": "Deleting a SageMaker domain removes all user profiles and their associated home directories on EFS. All notebooks, experiments, and data stored in the domain's EFS volume are permanently deleted. Export any important work before deleting.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "sagemaker create-pipeline",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the pipeline execution role is scoped to only the steps and data sources in the pipeline",
+        "context": "SageMaker pipeline execution roles are used for all steps in the pipeline. A role with broad S3 or SageMaker permissions means a compromised or misconfigured pipeline step can access data beyond its intended scope. Scope the role to specific bucket ARNs and SageMaker resources.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "sagemaker delete-pipeline",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify no active pipeline executions are running before deleting",
+        "context": "Deleting a pipeline does not stop in-progress executions. Running executions continue until they complete or fail. The pipeline definition is removed, but existing execution history is retained. Verify all executions are complete before deleting.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "sagemaker create-feature-group",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--offline-store-config",
+        "severity": "MEDIUM",
+        "message": "Offline store not configured — feature data will only be available in the online store",
+        "context": "Without an offline store, feature data is only available in the online store (DynamoDB) for real-time inference. For training, batch inference, and audit purposes, configure an offline store backed by S3. Verify the S3 destination has appropriate encryption and access controls.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "sagemaker delete-feature-group",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Feature group deletion removes the online store immediately but offline store data persists in S3",
+        "context": "The online store (DynamoDB) is deleted immediately. The offline store data in S3 is not deleted automatically — you must clean it up separately. Any model or pipeline that reads from this feature group will fail after deletion.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "bedrock create-flow",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the flow execution role is scoped to only the nodes and resources in the flow",
+        "context": "Bedrock flows execute multi-step AI workflows that can invoke Lambda functions, query knowledge bases, and call foundation models. The execution role must be scoped to only the specific resources each node needs. A broad role can be exploited via prompt injection to access unintended AWS resources.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "bedrock delete-flow",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Deleting a flow removes all versions and aliases — any application using it will fail immediately",
+        "context": "All flow versions and aliases are destroyed. Applications invoking the flow via its ARN will receive errors immediately. Update all callers before deleting.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "bedrock create-prompt",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the prompt template does not contain hardcoded secrets or PII in the system prompt",
+        "context": "Prompt templates are stored in Bedrock and may be logged. System prompts containing API keys, internal system details, or PII are exposed to anyone with bedrock:GetPrompt permissions and may appear in model invocation logs.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "bedrock create-inference-profile",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the inference profile routes traffic only to approved regions for data residency compliance",
+        "context": "Cross-region inference profiles route requests to multiple regions for load balancing. If your data residency policy restricts AI processing to specific regions or jurisdictions, verify the profile's routing configuration before using it with sensitive data.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

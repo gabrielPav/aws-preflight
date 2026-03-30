@@ -12,11 +12,19 @@ _FLAG_REQUIRED_TYPES = {"missing_flag", "forbidden_value"}
 _REQUIRED_CHECK_FIELDS = {"type", "severity", "message"}
 
 
+_VALID_SEVERITIES = {"HIGH", "MEDIUM", "LOW", "INFO"}
+_VALID_TYPES = {"missing_flag", "forbidden_value", "always_warn"}
+
+
 def _validate_check(check: dict, fname: str) -> str | None:
     """Return an error string if the check is malformed, else None."""
     missing = _REQUIRED_CHECK_FIELDS - check.keys()
     if missing:
         return f"check missing fields {missing}"
+    if check["type"] not in _VALID_TYPES:
+        return f"invalid type '{check['type']}'"
+    if check["severity"] not in _VALID_SEVERITIES:
+        return f"invalid severity '{check['severity']}'"
     if check["type"] in _FLAG_REQUIRED_TYPES and "flag" not in check:
         return f"check of type '{check['type']}' missing 'flag'"
     if check["type"] == "forbidden_value" and "forbidden_value" not in check:
@@ -53,26 +61,37 @@ def _load_rules() -> dict:
                                 _rules_cache[key] = valid_checks
             except (json.JSONDecodeError, KeyError, IOError) as e:
                 print(f"Warning: skipping malformed rule file {fname}: {e}", file=sys.stderr)
+    # Warn about missing_flag checks for --no-X without a paired forbidden_value for --X
+    for cmd, checks in _rules_cache.items():
+        no_flags = [c["flag"] for c in checks if c["type"] == "missing_flag" and c["flag"].startswith("--no-")]
+        for nf in no_flags:
+            positive = "--" + nf[5:]  # --no-publicly-accessible -> --publicly-accessible
+            has_pair = any(
+                c["type"] == "forbidden_value" and c["flag"] == positive
+                for c in checks
+            )
+            if not has_pair:
+                print(f"Warning: {cmd} has missing_flag for {nf} without a paired forbidden_value for {positive}", file=sys.stderr)
+
     _rules_loaded = True
     return _rules_cache
 
 
 def _flag_present(flags: dict, flag: str) -> bool:
-    """Check whether *flag* (or its --no- / positive counterpart) is present.
+    """Check whether *flag* (or its --no- counterpart) is present.
 
-    IMPORTANT: This treats --X and --no-X as equivalent for *presence* only.
-    A missing_flag check for --no-X will report "present" when --X exists.
-    This is correct ONLY when paired with a forbidden_value check that catches
-    the dangerous positive form (e.g. --publicly-accessible true).  If you add
-    a missing_flag rule for --no-X, always add a matching forbidden_value rule
-    for --X to avoid silent false negatives.
+    For --no-X checks: returns True if --X is present (the positive form
+    satisfies presence, paired forbidden_value catches the dangerous case).
+    For --X checks: returns True ONLY if --X itself is present. --no-X does
+    NOT satisfy a check for --X, because --no-X is the user explicitly
+    disabling the control — the missing_flag check must still fire.
     """
     if flag in flags:
         return True
     if flag.startswith("--no-"):
         base = flag[5:]  # e.g. "--no-publicly-accessible" -> "publicly-accessible"
         return bool(base) and ("--" + base) in flags
-    return ("--no-" + flag[2:]) in flags
+    return False
 
 
 def _flag_value_contains(flags: dict, flag: str, value: str) -> bool:
@@ -84,22 +103,27 @@ def analyze(parsed: dict) -> list[dict]:
     rules = _load_rules()
     flags = parsed["flags"]
 
-    # Warn when flags are passed via JSON file (bypasses all flag checks)
-    if "--cli-input-json" in flags or "--cli-input-yaml" in flags:
-        return [{
-            "severity": "INFO",
-            "message": "Parameters passed via JSON/YAML file, flag-based checks cannot inspect the contents",
-            "context": "Manually verify the input file against security best practices.",
-            "suggestion": "",
-        }]
+    cli_input_bypass = "--cli-input-json" in flags or "--cli-input-yaml" in flags
 
     key = f"{parsed['service']} {parsed['operation']}"
     checks = rules.get(key, [])
     findings = []
 
+    # Warn when flags are passed via JSON file (bypasses flag-based checks)
+    if cli_input_bypass:
+        findings.append({
+            "severity": "INFO",
+            "message": "Parameters passed via JSON/YAML file, flag-based checks cannot inspect the contents",
+            "context": "Manually verify the input file against security best practices.",
+            "suggestion": "",
+        })
+
     for check in checks:
         ctype = check["type"]
         finding = None
+
+        if cli_input_bypass and ctype != "always_warn":
+            continue
 
         if ctype == "missing_flag":
             if not _flag_present(flags, check["flag"]):

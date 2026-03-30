@@ -40,9 +40,7 @@
         "suggestion": "--final-db-snapshot-identifier <snapshot-name>"
       },
       {
-        "type": "forbidden_value",
-        "flag": "--skip-final-snapshot",
-        "forbidden_value": "true",
+        "type": "always_warn",
         "severity": "HIGH",
         "message": "Explicitly skipping final snapshot. All graph data will be permanently lost",
         "context": "With --skip-final-snapshot, no backup is taken before deletion. All graph data is gone forever.",
@@ -91,9 +89,7 @@
         "suggestion": "--final-db-snapshot-identifier <snapshot-name>"
       },
       {
-        "type": "forbidden_value",
-        "flag": "--skip-final-snapshot",
-        "forbidden_value": "true",
+        "type": "always_warn",
         "severity": "HIGH",
         "message": "Explicitly skipping final snapshot. All document data will be permanently lost",
         "context": "With --skip-final-snapshot, no backup is taken before deletion. All DocumentDB data is gone forever.",
@@ -108,7 +104,7 @@
         "type": "always_warn",
         "severity": "MEDIUM",
         "message": "QLDB ledger not encrypted with a customer managed KMS key",
-        "context": "QLDB uses an AWS-owned key by default. For ledgers storing financial or compliance data, specify --kms-key with a CMK ARN so you have an audit trail of every access and can revoke access independently. Note: QLDB is deprecated (end of life July 2025) \u2014 migrate to other services.",
+        "context": "QLDB uses an AWS-owned key by default. For ledgers storing financial or compliance data, specify --kms-key with a CMK ARN so you have an audit trail of every access and can revoke access independently. Note: QLDB reached end of life on July 31, 2025 and is no longer available \u2014 migrate to an alternative service.",
         "suggestion": ""
       }
     ]
@@ -169,6 +165,78 @@
         "severity": "MEDIUM",
         "message": "Verify the instance class change doesn't cause performance degradation during modification",
         "context": "Instance class changes trigger a brief failover. If modifying the writer instance, all write operations fail during the switchover. Schedule changes during maintenance windows.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "dynamodb update-continuous-backups",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify you are enabling PITR, not disabling it",
+        "context": "Point-in-Time Recovery allows restoration to any second within the last 35 days. Disabling PITR removes this protection immediately \u2014 if data is corrupted or deleted after disabling, recovery is only possible from on-demand backups. Never disable PITR on production tables.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "dynamodb restore-table-from-backup",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the restored table's billing mode, encryption, and stream settings match your requirements",
+        "context": "Restored tables may not inherit all settings from the source table. Verify the billing mode (on-demand vs provisioned), SSE configuration, and DynamoDB Streams settings are correct before routing application traffic to the restored table.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "dynamodb restore-table-to-point-in-time",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the restore point is before the data corruption or deletion event",
+        "context": "Point-in-time restores create a new table \u2014 they do not overwrite the existing one. Verify the restore time is before the incident occurred. The restored table will not have the same auto-scaling policies, TTL settings, or CloudWatch alarms as the source.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "dynamodb export-table-to-point-in-time",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the S3 destination bucket has appropriate encryption and access controls",
+        "context": "DynamoDB exports write your entire table in JSON or ION format to S3. If the destination bucket is misconfigured (public, wrong KMS key, or overly permissive bucket policy), your entire table data is exposed. Verify the bucket's Block Public Access, encryption, and access policy before exporting.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "dynamodb import-table",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the import source S3 data is from a trusted location and has not been tampered with",
+        "context": "DynamoDB table imports read data from S3 and create a new table. If the S3 source data has been modified by an unauthorized party, the imported table will contain malicious or incorrect data. Verify the S3 object integrity before importing.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "dynamodb update-global-table",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Adding or removing replicas affects data availability across regions",
+        "context": "Adding a replica replicates all existing data to the new region, which can take time for large tables. Removing a replica deletes all data in that region permanently. Verify the change is intentional and that applications in the affected region are prepared for the transition.",
         "suggestion": ""
       }
     ]

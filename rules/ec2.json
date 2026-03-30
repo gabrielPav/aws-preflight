@@ -8,7 +8,7 @@
         "expected_value": "HttpTokens=required",
         "severity": "HIGH",
         "message": "IMDSv2 not enforced",
-        "context": "Without this, any process running on the instance (including malware) can steal the attached IAM role credentials with a single curl command \u2014 no authentication required.",
+        "context": "Without this, any process running on the instance (including malware) can steal the attached IAM role credentials with a single curl command — no authentication required.",
         "suggestion": "--metadata-options HttpTokens=required"
       },
       {
@@ -28,20 +28,20 @@
         "suggestion": "--monitoring Enabled=true"
       },
       {
-        "type": "forbidden_value",
-        "flag": "--associate-public-ip-address",
-        "forbidden_value": "true",
+        "type": "missing_flag",
+        "flag": "--no-associate-public-ip-address",
         "severity": "HIGH",
-        "message": "Instance launched with a public IP address",
+        "message": "Instance launched with a public IP address (--associate-public-ip-address specified)",
         "context": "Assigning a public IP makes the instance directly reachable from the internet. Automated scanners find open ports within minutes. Use a NAT gateway for outbound traffic and a load balancer for inbound, keeping instances in private subnets.",
         "suggestion": "--no-associate-public-ip-address"
       },
       {
-        "type": "missing_flag",
-        "flag": "--no-associate-public-ip-address",
-        "severity": "INFO",
-        "message": "Public IP assignment not explicitly disabled and will depend on subnet default",
-        "context": "Whether an instance gets a public IP depends on the subnet's auto-assign setting. If you intend this instance to be private, explicitly set --no-associate-public-ip-address rather than relying on the subnet default.",
+        "type": "forbidden_value",
+        "flag": "--associate-public-ip-address",
+        "forbidden_value": "true",
+        "severity": "HIGH",
+        "message": "EC2 instance launched with a public IP address",
+        "context": "Assigning a public IP makes the instance directly reachable from the internet. Automated scanners find open ports within minutes. Use a NAT gateway for outbound traffic and a load balancer for inbound, keeping instances in private subnets.",
         "suggestion": "--no-associate-public-ip-address"
       }
     ]
@@ -117,7 +117,7 @@
         "forbidden_value": "all",
         "severity": "HIGH",
         "message": "Snapshot being shared publicly with all AWS accounts",
-        "context": "A public snapshot exposes your disk image \u2014 including any secrets, credentials, or sensitive data on the volume \u2014 to every AWS account in the world. Sharing is done via --create-volume-permission Add=[{Group=all}].",
+        "context": "A public snapshot exposes your disk image — including any secrets, credentials, or sensitive data on the volume — to every AWS account in the world. Sharing is done via --create-volume-permission Add=[{Group=all}].",
         "suggestion": ""
       }
     ]
@@ -128,7 +128,7 @@
       {
         "type": "always_warn",
         "severity": "INFO",
-        "message": "New security group created \u2014 ingress rules not yet defined",
+        "message": "New security group created — ingress rules not yet defined",
         "context": "Security groups are deny-by-default until you add rules. When you do, avoid 0.0.0.0/0 on sensitive ports (22, 3389, 3306). Use security group references instead of CIDRs where possible.",
         "suggestion": ""
       }
@@ -153,8 +153,8 @@
         "type": "always_warn",
         "severity": "MEDIUM",
         "message": "Ensure launch template enforces IMDSv2 and encrypted volumes",
-        "context": "Launch templates are reused at scale \u2014 a single insecure template can spawn hundreds of vulnerable instances. Bake in HttpTokens=required and EBS encryption now so every instance inherits them automatically.",
-        "suggestion": ""
+        "context": "Launch templates are reused at scale — a single insecure template can spawn hundreds of vulnerable instances. Bake in HttpTokens=required and EBS encryption now so every instance inherits them automatically.",
+        "suggestion": "--launch-template-data '{\"MetadataOptions\":{\"HttpTokens\":\"required\",\"HttpEndpoint\":\"enabled\"},\"BlockDeviceMappings\":[{\"DeviceName\":\"/dev/xvda\",\"Ebs\":{\"Encrypted\":true}}]}'"
       }
     ]
   },
@@ -165,7 +165,7 @@
         "type": "always_warn",
         "severity": "INFO",
         "message": "Enable VPC Flow Logs after creation",
-        "context": "Without flow logs you have zero visibility into network traffic \u2014 making it impossible to detect lateral movement, data exfiltration, or port scanning inside your VPC.",
+        "context": "Without flow logs you have zero visibility into network traffic — making it impossible to detect lateral movement, data exfiltration, or port scanning inside your VPC.",
         "suggestion": ""
       }
     ]
@@ -188,7 +188,7 @@
       {
         "type": "always_warn",
         "severity": "INFO",
-        "message": "Internet gateway created \u2014 ensure only public subnets route to it",
+        "message": "Internet gateway created — ensure only public subnets route to it",
         "context": "Attaching an IGW to a VPC and adding a default route in a subnet makes that subnet public. Verify your route tables so private subnets (databases, app servers) never have a 0.0.0.0/0 route pointing to this IGW.",
         "suggestion": ""
       }
@@ -200,7 +200,7 @@
       {
         "type": "always_warn",
         "severity": "LOW",
-        "message": "Elastic IP allocated \u2014 associate it promptly to avoid charges and exposure",
+        "message": "Elastic IP allocated — associate it promptly to avoid charges and exposure",
         "context": "Unassociated Elastic IPs incur charges. More importantly, an EIP attached to a public instance bypasses NAT and exposes the instance directly. Ensure it's associated only to resources that genuinely need direct internet access.",
         "suggestion": ""
       }
@@ -212,7 +212,7 @@
       {
         "type": "always_warn",
         "severity": "INFO",
-        "message": "New NACL created \u2014 default denies all traffic until rules are added",
+        "message": "New NACL created — default denies all traffic until rules are added",
         "context": "A custom NACL denies all inbound and outbound traffic by default. Ensure you add both inbound and outbound allow rules before associating it with a subnet, or you will break all connectivity to instances in that subnet.",
         "suggestion": ""
       }
@@ -225,8 +225,8 @@
         "type": "always_warn",
         "severity": "INFO",
         "message": "Ensure flow logs capture REJECT traffic for security analysis",
-        "context": "Flow logs set to ACCEPT-only miss blocked connection attempts \u2014 exactly the traffic that indicates port scanning or brute-force attacks. Use ALL or REJECT traffic type for security monitoring.",
-        "suggestion": ""
+        "context": "Flow logs set to ACCEPT-only miss blocked connection attempts — exactly the traffic that indicates port scanning or brute-force attacks. Use ALL or REJECT traffic type for security monitoring.",
+        "suggestion": "--traffic-type ALL"
       }
     ]
   },
@@ -234,9 +234,7 @@
     "command": "ec2 modify-instance-attribute",
     "checks": [
       {
-        "type": "forbidden_value",
-        "flag": "--no-disable-api-termination",
-        "forbidden_value": "true",
+        "type": "always_warn",
         "severity": "HIGH",
         "message": "Disabling termination protection on EC2 instance",
         "context": "Removing termination protection makes the instance vulnerable to accidental or malicious deletion via terminate-instances. Only disable this immediately before a planned termination.",
@@ -253,7 +251,7 @@
         "forbidden_value": "all",
         "severity": "HIGH",
         "message": "AMI being shared publicly with all AWS accounts",
-        "context": "A public AMI exposes your machine image \u2014 including any baked-in secrets, application code, or configuration \u2014 to every AWS account in the world. Share only with specific trusted account IDs.",
+        "context": "A public AMI exposes your machine image — including any baked-in secrets, application code, or configuration — to every AWS account in the world. Share only with specific trusted account IDs.",
         "suggestion": ""
       }
     ]
@@ -276,7 +274,7 @@
       {
         "type": "always_warn",
         "severity": "MEDIUM",
-        "message": "AMI contains a full disk snapshot \u2014 ensure no secrets or credentials are baked in",
+        "message": "AMI contains a full disk snapshot — ensure no secrets or credentials are baked in",
         "context": "The AMI captures everything on the root and attached EBS volumes: SSH keys, environment files, application secrets, and credentials. If shared, all of that data is exposed to the recipient.",
         "suggestion": ""
       }
@@ -288,9 +286,9 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Verify the new version enforces IMDSv2 and encrypted volumes \u2014 don't regress security",
+        "message": "Verify the new version enforces IMDSv2 and encrypted volumes — don't regress security",
         "context": "A new launch template version can override security settings from the previous version. If the new version omits HttpTokens=required or EBS encryption, all future instances launched from it will be insecure.",
-        "suggestion": ""
+        "suggestion": "--launch-template-data '{\"MetadataOptions\":{\"HttpTokens\":\"required\"},\"BlockDeviceMappings\":[{\"DeviceName\":\"/dev/xvda\",\"Ebs\":{\"Encrypted\":true}}]}'"
       }
     ]
   },
@@ -300,7 +298,7 @@
       {
         "type": "always_warn",
         "severity": "MEDIUM",
-        "message": "NAT gateways incur hourly charges and data processing fees \u2014 verify this is intentional",
+        "message": "NAT gateways incur hourly charges and data processing fees — verify this is intentional",
         "context": "A NAT gateway costs ~$0.045/hour plus $0.045/GB processed. For high-throughput workloads this can add up quickly. Ensure the NAT gateway is in a public subnet with a route to an internet gateway.",
         "suggestion": ""
       }
@@ -312,7 +310,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Listing reserved instances on the marketplace is a financial commitment \u2014 verify pricing and terms",
+        "message": "Listing reserved instances on the marketplace is a financial commitment — verify pricing and terms",
         "context": "Once listed, your reserved instances are available for purchase by other AWS customers. Misconfigured pricing or terms cannot be easily reversed. Verify the listing details carefully.",
         "suggestion": ""
       }
@@ -324,7 +322,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Verify the route target is correct \u2014 a wrong route can expose private traffic or black-hole it",
+        "message": "Verify the route target is correct — a wrong route can expose private traffic or black-hole it",
         "context": "A route to 0.0.0.0/0 pointing to an internet gateway makes the subnet public. A route pointing to the wrong NAT gateway, VPC peering, or transit gateway can send traffic to unintended destinations.",
         "suggestion": ""
       }
@@ -336,7 +334,7 @@
       {
         "type": "always_warn",
         "severity": "INFO",
-        "message": "New route tables have only a local route \u2014 associate subnets and add routes before use",
+        "message": "New route tables have only a local route — associate subnets and add routes before use",
         "context": "A route table without routes only allows local VPC traffic. Instances in subnets associated with it will have no internet or cross-VPC connectivity until routes are added.",
         "suggestion": ""
       }
@@ -372,7 +370,7 @@
       {
         "type": "always_warn",
         "severity": "MEDIUM",
-        "message": "Deleting the key pair does not remove it from existing instances \u2014 but you lose the ability to connect to new ones",
+        "message": "Deleting the key pair does not remove it from existing instances — but you lose the ability to connect to new ones",
         "context": "Existing instances retain the public key. However, if you need to launch a replacement instance from the same AMI, you won't be able to SSH in without creating a new key pair first.",
         "suggestion": ""
       }
@@ -420,7 +418,7 @@
       {
         "type": "always_warn",
         "severity": "MEDIUM",
-        "message": "Snapshot deletion is permanent \u2014 verify no AMIs or volumes depend on this snapshot",
+        "message": "Snapshot deletion is permanent — verify no AMIs or volumes depend on this snapshot",
         "context": "If this snapshot is the backing store for an AMI, deleting it may make the AMI unusable. Verify dependencies before deleting.",
         "suggestion": ""
       }
@@ -456,7 +454,7 @@
       {
         "type": "always_warn",
         "severity": "INFO",
-        "message": "Fast snapshot restore incurs charges per AZ per snapshot \u2014 verify cost impact",
+        "message": "Fast snapshot restore incurs charges per AZ per snapshot — verify cost impact",
         "context": "FSR is billed per minute per snapshot per AZ. Enabling it on many snapshots across multiple AZs can generate significant charges. Only enable for snapshots that need immediate full-performance volumes.",
         "suggestion": ""
       }
@@ -468,7 +466,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Reboot causes temporary service disruption \u2014 verify these are not serving live traffic",
+        "message": "Reboot causes temporary service disruption — verify these are not serving live traffic",
         "context": "Unlike stop/start, a reboot preserves the public IP and instance store data. However, all in-flight requests are dropped and the instance is unreachable for 1-5 minutes during reboot.",
         "suggestion": ""
       }
@@ -480,7 +478,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Stopping instances causes immediate service disruption \u2014 verify these are not production",
+        "message": "Stopping instances causes immediate service disruption — verify these are not production",
         "context": "Stopped instances lose their public IP (unless Elastic IP), all data on instance store volumes, and any in-flight requests. Applications relying on these instances fail immediately.",
         "suggestion": ""
       }

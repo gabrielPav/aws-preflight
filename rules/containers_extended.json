@@ -1,0 +1,138 @@
+[
+  {
+    "command": "ecr put-image-tag-mutability",
+    "checks": [
+      {
+        "type": "forbidden_value",
+        "flag": "--image-tag-mutability",
+        "forbidden_value": "MUTABLE",
+        "severity": "HIGH",
+        "message": "Setting image tags to mutable allows tag overwriting — supply chain attack risk",
+        "context": "Mutable tags allow the 'latest' or any other tag to be overwritten with a different image. An attacker with ECR push access can replace a trusted image tag with a malicious one, causing all deployments using that tag to run compromised code. AWS Security Hub flags this as ECR.2. Set to IMMUTABLE.",
+        "suggestion": "--image-tag-mutability IMMUTABLE"
+      }
+    ]
+  },
+  {
+    "command": "ecr put-lifecycle-policy",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the lifecycle policy does not delete images currently deployed to production",
+        "context": "Lifecycle policies delete images that match the rules, including images currently running in ECS tasks or EKS pods. If a running container's image is deleted, new deployments or pod restarts will fail with image pull errors. Test the policy in a non-production registry first.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ecr put-registry-policy",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Verify the registry policy does not grant cross-account pull access to untrusted accounts",
+        "context": "A registry policy with Principal: * or a broad account list allows those accounts to pull any image from your private registry. This can expose proprietary application code or be used to distribute images to unauthorized environments. Scope access to specific trusted account IDs and IAM roles.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ecr put-registry-scanning-configuration",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Prefer Enhanced scanning (Inspector) over Basic scanning for production registries",
+        "context": "Basic scanning uses an open-source CVE database and only scans on push. Enhanced scanning uses Amazon Inspector, provides continuous scanning as new CVEs are published, and covers OS packages plus programming language packages. AWS Security Hub flags registries without enhanced scanning.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ecr get-authorization-token",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "ECR authorization tokens are valid for 12 hours — treat them like passwords",
+        "context": "The token returned is a base64-encoded username:password that grants full ECR access for 12 hours. Do not log it, store it in plaintext, or pass it as an environment variable. Use it immediately for docker login and discard it.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ecr put-image-scanning-configuration",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--image-scanning-configuration",
+        "expected_value": "scanOnPush=true",
+        "severity": "MEDIUM",
+        "message": "Scan on push not enabled — images will not be automatically scanned for vulnerabilities",
+        "context": "Without scan-on-push, images are only scanned if you manually trigger a scan. Vulnerable images can be deployed without any security check. Enable scan-on-push to automatically scan every image pushed to the repository.",
+        "suggestion": "--image-scanning-configuration scanOnPush=true"
+      }
+    ]
+  },
+  {
+    "command": "ecs execute-command",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "ECS Exec provides shell access to a running container — this bypasses application-level audit trails",
+        "context": "ECS Exec uses SSM Session Manager to open an interactive shell in a running container. Commands run this way are not logged by your application and may not appear in CloudTrail unless SSM logging is configured. Enable SSM session logging to S3 or CloudWatch Logs before using ECS Exec in production.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ecs run-task",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the task definition does not use privileged containers or overly permissive task roles",
+        "context": "Running a task with a privileged container gives it root access to the underlying host. A task role with broad permissions means any code running in the container can access AWS services beyond what the application needs. Verify both the task definition and task role before running.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ecs deregister-task-definition",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Deregistered task definitions cannot be used for new deployments but existing services are unaffected",
+        "context": "Deregistering a task definition prevents it from being used in new service deployments or run-task calls. However, existing services continue running their current tasks. If you need to prevent a vulnerable task definition from being deployed, deregistering it is the correct approach.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ecs put-account-setting",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Account settings affect all ECS resources in the account — verify the change is intentional",
+        "context": "ECS account settings control features like awsvpc trunking, container insights, and task ARN format for the entire account. Changing these settings can affect all clusters, services, and tasks. Test in a non-production account before applying to production.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ecs delete-cluster",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Cluster deletion fails if active services or running tasks exist — drain first",
+        "context": "You must stop all running tasks and delete all services before deleting a cluster. Deleting a cluster does not automatically terminate EC2 instances in the cluster — those must be terminated separately. Verify all workloads are migrated before proceeding.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

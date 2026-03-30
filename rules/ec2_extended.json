@@ -1,0 +1,172 @@
+[
+  {
+    "command": "ec2 create-vpn-connection",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "VPN connections do not encrypt traffic by default unless IKE/IPsec is configured correctly",
+        "context": "AWS Site-to-Site VPN uses IPsec but the security depends entirely on the tunnel options you configure. Weak pre-shared keys, DH group 1 or 2, or DES/3DES encryption are all accepted. Explicitly set --options TunnelOptions with Phase1EncryptionAlgorithms=AES256, Phase2EncryptionAlgorithms=AES256, and DH group 14 or higher.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ec2 create-vpc-peering-connection",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "VPC peering does not route traffic automatically — update route tables in both VPCs",
+        "context": "Creating a peering connection does nothing until you add routes in both VPCs' route tables and accept the connection. More critically, verify the peered VPC belongs to a trusted account and that the CIDR ranges don't overlap with other peered VPCs, which would create transitive routing paths.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ec2 accept-vpc-peering-connection",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Accepting a peering connection grants the peer VPC network-level access to your resources",
+        "context": "Once accepted, instances in the peer VPC can reach your instances if security groups and route tables allow it. Verify the requesting account ID and VPC CIDR are expected before accepting. Reject any unexpected peering requests immediately.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ec2 create-transit-gateway-peering-attachment",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "TGW peering creates cross-region or cross-account network paths — verify the peer is trusted",
+        "context": "Transit gateway peering connects entire network domains. A misconfigured TGW route table can create unintended east-west connectivity between environments that should be isolated. Verify the peer TGW owner account and region before accepting.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ec2 create-managed-prefix-list",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify prefix list entries before using in security groups or route tables",
+        "context": "Managed prefix lists are referenced by security groups and route tables. An incorrect CIDR entry in a prefix list can silently open access to unintended IP ranges across all security groups that reference it. Audit entries carefully before associating.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ec2 create-traffic-mirror-session",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Traffic mirroring copies all network traffic to the target — verify the target is trusted and secured",
+        "context": "Traffic mirror sessions duplicate all packets (including unencrypted application data, credentials in transit, and PII) to the mirror target. If the target ENI or NLB is in an untrusted account or insecure environment, you are effectively exfiltrating your own traffic. Ensure the target is in a secured, access-controlled environment.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ec2 create-capacity-reservation",
+    "checks": [
+      {
+        "type": "forbidden_value",
+        "flag": "--instance-match-criteria",
+        "forbidden_value": "open",
+        "severity": "HIGH",
+        "message": "Open capacity reservation can be used by any instance in your account matching the criteria",
+        "context": "An open capacity reservation is automatically used by any running instance that matches the instance type, AZ, and platform — including instances you didn't intend to use it. Use 'targeted' match criteria and explicitly specify which instances can use the reservation.",
+        "suggestion": "--instance-match-criteria targeted"
+      }
+    ]
+  },
+  {
+    "command": "ec2 modify-vpc-attribute",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Disabling DNS resolution or DNS hostnames breaks VPC endpoints and private hosted zones",
+        "context": "Setting EnableDnsSupport=false disables DNS resolution in the VPC, breaking all VPC interface endpoints (PrivateLink). Setting EnableDnsHostnames=false prevents EC2 instances from receiving public DNS hostnames. Both changes can silently break services that rely on DNS-based service discovery.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ec2 create-egress-only-internet-gateway",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Egress-only IGW allows outbound IPv6 traffic — verify route tables are updated",
+        "context": "Creating an egress-only internet gateway does nothing until you add a route in the subnet's route table pointing ::/0 to it. Verify only private subnets route through it, and that no public IPv6 subnets inadvertently gain outbound access.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ec2 create-placement-group",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Cluster placement groups increase blast radius — all instances share the same physical hardware",
+        "context": "Instances in a cluster placement group run on the same underlying hardware for low latency. A hardware failure affects all instances simultaneously. For security-sensitive workloads, consider whether the performance benefit outweighs the increased failure domain.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ec2 create-network-interface",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "MEDIUM",
+        "message": "Verify the security groups assigned to this ENI follow least-privilege",
+        "context": "Network interfaces inherit the security groups you assign at creation. An ENI with overly permissive security groups can be attached to any instance in the subnet, bypassing the instance's own security group restrictions. Assign the most restrictive security groups appropriate for the intended use.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ec2 associate-route-table",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Changing a subnet's route table immediately affects all instances in that subnet",
+        "context": "Associating a new route table replaces the existing one instantly. If the new table has a 0.0.0.0/0 route to an internet gateway, the subnet becomes public. If it lacks a NAT route, instances lose internet access. Verify the route table contents before associating.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ec2 terminate-instances",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Instance termination is permanent — all instance store data is lost and EBS volumes may be deleted",
+        "context": "Terminated instances cannot be restarted. EBS volumes with DeleteOnTermination=true are permanently deleted. Verify termination protection is disabled intentionally and that no critical data exists only on instance store volumes.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "ec2 create-dhcp-options",
+    "checks": [
+      {
+        "type": "always_warn",
+        "severity": "HIGH",
+        "message": "Custom DHCP options can redirect DNS queries to a rogue server",
+        "context": "Setting a custom domain-name-servers value in DHCP options causes all instances in the associated VPC to use that DNS server. A malicious or misconfigured DNS server can redirect traffic to attacker-controlled endpoints. Only use trusted, internal DNS server IPs.",
+        "suggestion": ""
+      }
+    ]
+  }
+]

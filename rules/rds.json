@@ -7,7 +7,7 @@
         "flag": "--storage-encrypted",
         "severity": "HIGH",
         "message": "RDS storage encryption not enabled",
-        "context": "Unencrypted RDS snapshots can be shared or copied to another account, exposing your entire database. Encryption cannot be enabled after creation \u2014 you'd need to snapshot, restore, and migrate.",
+        "context": "Unencrypted RDS snapshots can be shared or copied to another account, exposing your entire database. Encryption cannot be enabled after creation — you'd need to snapshot, restore, and migrate.",
         "suggestion": "--storage-encrypted"
       },
       {
@@ -15,8 +15,16 @@
         "flag": "--deletion-protection",
         "severity": "MEDIUM",
         "message": "Deletion protection not enabled",
-        "context": "Without this, a single `rds delete-db-instance` command \u2014 accidental or malicious \u2014 permanently destroys your database. This is a one-line safeguard that has saved countless production databases.",
+        "context": "Without this, a single `rds delete-db-instance` command — accidental or malicious — permanently destroys your database. This is a one-line safeguard that has saved countless production databases.",
         "suggestion": "--deletion-protection"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--no-publicly-accessible",
+        "severity": "HIGH",
+        "message": "Public accessibility not explicitly disabled. RDS may default to publicly accessible",
+        "context": "Depending on VPC and subnet group configuration, RDS instances can default to publicly accessible. Always explicitly set --no-publicly-accessible to ensure the database is not reachable from the internet.",
+        "suggestion": "--no-publicly-accessible"
       },
       {
         "type": "forbidden_value",
@@ -25,14 +33,6 @@
         "severity": "HIGH",
         "message": "RDS instance set to publicly accessible",
         "context": "A publicly accessible database is reachable from the entire internet. Automated scanners will find it and attempt brute-force logins within hours. Databases should only be reachable from within your VPC.",
-        "suggestion": "--no-publicly-accessible"
-      },
-      {
-        "type": "missing_flag",
-        "flag": "--no-publicly-accessible",
-        "severity": "HIGH",
-        "message": "Public accessibility not explicitly disabled. RDS may default to publicly accessible",
-        "context": "Depending on VPC and subnet group configuration, RDS instances can default to publicly accessible. Always explicitly set --no-publicly-accessible to ensure the database is not reachable from the internet.",
         "suggestion": "--no-publicly-accessible"
       },
       {
@@ -56,7 +56,7 @@
         "flag": "--enable-iam-database-authentication",
         "severity": "MEDIUM",
         "message": "IAM database authentication not enabled",
-        "context": "IAM authentication lets applications connect to MySQL and PostgreSQL using short-lived IAM tokens instead of static database passwords. This eliminates a class of credential leak: no database password to rotate, store, or accidentally commit. Supported on MySQL 5.6.34+, PostgreSQL 9.5.15+, and Aurora.",
+        "context": "IAM authentication lets applications connect to MySQL, MariaDB, and PostgreSQL using short-lived IAM tokens instead of static database passwords. This eliminates a class of credential leak: no database password to rotate, store, or accidentally commit. Supported on all currently active RDS MySQL, MariaDB, PostgreSQL, and Aurora versions.",
         "suggestion": "--enable-iam-database-authentication"
       }
     ]
@@ -65,18 +65,14 @@
     "command": "rds modify-db-instance",
     "checks": [
       {
-        "type": "forbidden_value",
-        "flag": "--publicly-accessible",
-        "forbidden_value": "true",
+        "type": "always_warn",
         "severity": "HIGH",
         "message": "Making RDS instance publicly accessible",
-        "context": "You are about to expose a database directly to the internet. If this is for debugging, use an SSH tunnel or SSM port forwarding instead \u2014 then revert this change immediately after.",
+        "context": "You are about to expose a database directly to the internet. If this is for debugging, use an SSH tunnel or SSM port forwarding instead — then revert this change immediately after.",
         "suggestion": "--no-publicly-accessible"
       },
       {
-        "type": "forbidden_value",
-        "flag": "--deletion-protection",
-        "forbidden_value": "false",
+        "type": "always_warn",
         "severity": "HIGH",
         "message": "Disabling deletion protection on RDS instance",
         "context": "Removing deletion protection makes the database vulnerable to accidental or malicious deletion. Only disable this immediately before a planned deletion, then re-enable it if the deletion is cancelled.",
@@ -125,9 +121,7 @@
         "suggestion": "--final-db-snapshot-identifier <snapshot-name>"
       },
       {
-        "type": "forbidden_value",
-        "flag": "--skip-final-snapshot",
-        "forbidden_value": "true",
+        "type": "always_warn",
         "severity": "HIGH",
         "message": "Explicitly skipping final snapshot. All data will be permanently lost",
         "context": "With --skip-final-snapshot, no backup is taken before deletion. If you need this data later, it is gone forever.",
@@ -139,20 +133,20 @@
     "command": "rds restore-db-instance-from-db-snapshot",
     "checks": [
       {
-        "type": "forbidden_value",
-        "flag": "--publicly-accessible",
-        "forbidden_value": "true",
-        "severity": "HIGH",
-        "message": "Restoring RDS instance as publicly accessible",
-        "context": "Restored instances should default to private. Exposing a restored database to the internet is rarely intentional and creates immediate risk.",
-        "suggestion": "--no-publicly-accessible"
-      },
-      {
         "type": "missing_flag",
         "flag": "--no-publicly-accessible",
         "severity": "HIGH",
         "message": "Public accessibility not explicitly disabled on restored instance",
         "context": "Restored RDS instances can inherit public accessibility from the snapshot or default to publicly accessible depending on the subnet group. Always explicitly set --no-publicly-accessible.",
+        "suggestion": "--no-publicly-accessible"
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--publicly-accessible",
+        "forbidden_value": "true",
+        "severity": "HIGH",
+        "message": "Restored RDS instance set to publicly accessible",
+        "context": "A publicly accessible restored database is reachable from the entire internet. Restored instances should default to private. Exposing a restored database to the internet is rarely intentional and creates immediate risk.",
         "suggestion": "--no-publicly-accessible"
       }
     ]
@@ -187,7 +181,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Manual failover causes a brief outage \u2014 notify your team first",
+        "message": "Manual failover causes a brief outage — notify your team first",
         "context": "Aurora failover typically takes 30-120 seconds. Applications that don't handle connection drops gracefully will error during this window. Ensure your app uses the cluster endpoint (not instance endpoint) and has retry logic.",
         "suggestion": ""
       }
@@ -205,6 +199,15 @@
         "suggestion": "--no-publicly-accessible"
       },
       {
+        "type": "forbidden_value",
+        "flag": "--publicly-accessible",
+        "forbidden_value": "true",
+        "severity": "HIGH",
+        "message": "Restored RDS cluster set to publicly accessible",
+        "context": "A publicly accessible restored cluster exposes your database to the internet. Restored clusters should default to private. Always use --no-publicly-accessible.",
+        "suggestion": "--no-publicly-accessible"
+      },
+      {
         "type": "missing_flag",
         "flag": "--deletion-protection",
         "severity": "MEDIUM",
@@ -218,9 +221,7 @@
     "command": "rds modify-db-cluster",
     "checks": [
       {
-        "type": "forbidden_value",
-        "flag": "--deletion-protection",
-        "forbidden_value": "false",
+        "type": "always_warn",
         "severity": "HIGH",
         "message": "Disabling deletion protection on Aurora cluster",
         "context": "Only disable this immediately before a planned deletion. Leaving deletion protection off on a production cluster is an accident waiting to happen.",
@@ -234,7 +235,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Parameter changes affect all instances using this group \u2014 verify you're not weakening SSL or logging",
+        "message": "Parameter changes affect all instances using this group — verify you're not weakening SSL or logging",
         "context": "Disabling require_secure_transport (MySQL) or rds.force_ssl (PostgreSQL) allows unencrypted database connections. Disabling audit logging removes compliance visibility. Changes may require a reboot.",
         "suggestion": ""
       }

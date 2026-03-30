@@ -1,5 +1,18 @@
 [
   {
+    "command": "transfer create-server",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--protocols",
+        "severity": "HIGH",
+        "message": "Protocol not explicitly specified. Ensure only secure protocols are used",
+        "context": "AWS Transfer Family supports SFTP, FTPS, FTP, and AS2. FTP transmits credentials and data in plaintext. Always explicitly specify --protocols SFTP (or FTPS) to prevent unencrypted file transfers.",
+        "suggestion": "--protocols SFTP"
+      }
+    ]
+  },
+  {
     "command": "transfer stop-server",
     "checks": [
       {

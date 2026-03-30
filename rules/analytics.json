@@ -17,7 +17,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Verify the query has a partition filter \u2014 full table scans on large datasets cost real money",
+        "message": "Verify the query has a partition filter — full table scans on large datasets cost real money",
         "context": "A full scan on a multi-TB S3 dataset can cost hundreds of dollars in a single query. Always filter on partition columns and use LIMIT during development.",
         "suggestion": ""
       }
@@ -30,16 +30,16 @@
         "type": "missing_flag",
         "flag": "--security-configuration",
         "severity": "HIGH",
-        "message": "No security configuration \u2014 encryption and Kerberos are disabled by default",
+        "message": "No security configuration — encryption and Kerberos are disabled by default",
         "context": "Without a security configuration, EMR has no at-rest encryption, no in-transit encryption, and no Kerberos auth. Any node in the cluster can read all HDFS data. Create a security configuration with encryption enabled before running production workloads.",
         "suggestion": "--security-configuration <your-security-config-name>"
       },
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Verify the cluster is in private subnets \u2014 EMR master nodes in public subnets are internet-reachable",
+        "message": "Verify the cluster is in private subnets — EMR master nodes in public subnets are internet-reachable",
         "context": "The Hadoop web UIs (HDFS NameNode on 50070, YARN on 8088) have no authentication by default. A public master node exposes your entire cluster to the internet.",
-        "suggestion": ""
+        "suggestion": "--ec2-attributes SubnetId=<private-subnet-id>"
       }
     ]
   },
@@ -62,7 +62,7 @@
         "type": "always_warn",
         "severity": "MEDIUM",
         "message": "Verify the stream has server-side encryption enabled",
-        "context": "Kinesis Data Streams supports SSE with KMS. Without it, records are stored in plaintext in the stream. Encryption is enabled via a separate `kinesis start-stream-encryption` call after stream creation \u2014 not at create time.",
+        "context": "Kinesis Data Streams supports SSE with KMS. Without it, records are stored in plaintext in the stream. Encryption is enabled via a separate `kinesis start-stream-encryption` call after stream creation — not at create time.",
         "suggestion": ""
       }
     ]
