@@ -1,14 +1,16 @@
 # aws-preflight
 
-![Checks](https://img.shields.io/badge/Security_Checks-700-00C853.svg?style=flat)
-![Commands](https://img.shields.io/badge/Commands-560-1A73E8.svg?style=flat)
+![Checks](https://img.shields.io/badge/Security_Checks-703-00C853.svg?style=flat)
+![Commands](https://img.shields.io/badge/Commands-561-1A73E8.svg?style=flat)
 ![AWS](https://img.shields.io/badge/AWS_Services-91-FF8C00.svg?style=flat&logo=amazon-aws&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3.10+-5B86B3.svg?style=flat&logo=python&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat)
 
 **Security linter for AWS CLI commands. Catches misconfigurations before they hit your cloud.**
 
-700 security checks across 91 AWS services. Findings include severity ratings and a remediated command.
+703 security checks across 91 AWS services, plus global checks for dangerous CLI-level flags. Findings include severity ratings and a remediated command.
+
+---
 
 ```
 aws-preflight> aws rds create-db-instance --db-instance-identifier prod-db --db-instance-class db.m5.large --engine mysql --allocated-storage 50 --master-username <dba-name> --master-user-password <dba-password>
@@ -102,20 +104,24 @@ aws-preflight> aws eks create-cluster --name prod \
   --role-arn arn:aws:iam::123456789012:role/eks-service-role \
   --resources-vpc-config subnetIds=subnet-0abc123abc123abca,subnet-0123abc123abc123c
 
-  [LOW] 🔵 EKS control plane logging not enabled
-  ℹ️  Without control plane logs (api, audit, authenticator,
-     controllerManager, scheduler), you have no visibility into who
-     accessed the Kubernetes API or what changes were made.
-
   [HIGH] 🔴 EKS secrets encryption not configured
   ℹ️  Without envelope encryption, Kubernetes secrets are stored in etcd
      in base64 only - not encrypted. Use a KMS key to encrypt secrets
      at rest.
 
-  [MEDIUM] 🟡 Verify the cluster endpoint is not publicly accessible
-     without IP restrictions
-  ℹ️  By default, the EKS API server endpoint is publicly accessible.
-     Restrict access using publicAccessCidrs or disable public access.
+  [HIGH] 🔴 EKS API server endpoint is publicly accessible by default
+  ℹ️  By default, the EKS API server endpoint is publicly accessible from
+     the entire internet (0.0.0.0/0). Restrict access using
+     publicAccessCidrs or disable public access entirely.
+
+  [MEDIUM] 🟡 EKS authentication mode defaults to CONFIG_MAP
+  ℹ️  CONFIG_MAP authentication relies on the aws-auth ConfigMap, a
+     well-known attack surface. Use API mode for better auditability.
+
+  [LOW] 🔵 EKS control plane logging not enabled
+  ℹ️  Without control plane logs (api, audit, authenticator,
+     controllerManager, scheduler), you have no visibility into who
+     accessed the Kubernetes API or what changes were made.
 ```
 
 **Dangerous operation caught:**
@@ -288,7 +294,7 @@ security-lint:
 
 ## Coverage
 
-**560 commands | 700 checks | 91 AWS services | 0 dependencies**
+**561 commands | 703 checks | 91 AWS services | 0 dependencies**
 
 | Category | Services | Key Checks |
 |---|---|---|
@@ -309,10 +315,31 @@ security-lint:
 
 | Level | Icon | Meaning | Count |
 |---|---|---|---|
-| `HIGH` | 🔴 | Immediate security exposure or irreversible data loss | 373 |
-| `MEDIUM` | 🟡 | Significant risk - address before production | 212 |
-| `LOW` | 🔵 | Best-practice gap, low immediate impact | 7 |
-| `INFO` | ℹ️ | Advisory - worth reviewing, not blocking | 80 |
+| `HIGH` | 🔴 | Immediate security exposure or irreversible data loss | 375 |
+| `MEDIUM` | 🟡 | Significant risk - address before production | 225 |
+| `LOW` | 🔵 | Best-practice gap, low immediate impact | 10 |
+| `INFO` | ℹ️ | Advisory - worth reviewing, not blocking | 93 |
+
+---
+
+## Global Checks
+
+Some AWS CLI flags are dangerous on **every** command, regardless of service. These are checked automatically before per-command rules:
+
+| Flag | Severity | Risk |
+|---|---|---|
+| `--no-verify-ssl` | HIGH | Disables SSL certificate verification, exposing credentials and data to man-in-the-middle attacks |
+
+```
+aws-preflight> aws dynamodb scan --table-name users --no-verify-ssl
+
+  [HIGH] 🔴 SSL certificate verification disabled
+  ℹ️  The AWS CLI will not verify SSL certificates for this request.
+     Your credentials and data are exposed to man-in-the-middle attacks.
+     Remove --no-verify-ssl and fix the certificate trust chain instead.
+```
+
+Global checks fire on any `aws` command — no rule file needed. The dangerous flag is automatically removed from the suggested command.
 
 ---
 

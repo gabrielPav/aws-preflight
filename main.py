@@ -2,11 +2,11 @@
 VERSION = "1.0.0"
 
 import argparse
-import os
 import shlex
 import shutil
 import subprocess
 import sys
+import time
 
 try:
     import readline
@@ -83,9 +83,11 @@ def execute(command: str):
 
 def interactive():
     all_findings: list[dict] = []
-    os.system('clear')
+    print("\033[2J\033[H", end="", flush=True)
+    sys.stdout.flush()
+    time.sleep(0.05)
     print("")
-    print("\033[36m  ░▒▓\033[0m \033[1maws-preflight\033[0m \033[36m▓▒░\033[0m")
+    print("\033[36m  ░▒▓█\033[0m \033[1maws-preflight\033[0m \033[36m█▓▒░\033[0m")
     print("\033[2m  Security Linter for AWS CLI\033[0m")
     print("")
     print("\033[2m  Commands are linted, not executed against AWS.\033[0m")

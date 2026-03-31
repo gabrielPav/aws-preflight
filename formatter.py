@@ -113,6 +113,8 @@ def format_result_json(parsed: dict, findings: list[dict]) -> str:
 
 
 def format_parse_error(raw: str) -> str:
+    if raw.startswith("aws "):
+        return f"\n{'─'*60}\n⚠️   Skipped (parse error - check for unmatched quotes): {raw[:80]}"
     return f"\n{'─'*60}\n⚠️   Skipped (not a valid AWS command): {raw[:80]}"
 
 
