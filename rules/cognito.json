@@ -49,6 +49,33 @@
         "message": "Disable unused OAuth flows, especially implicit grant",
         "context": "The implicit grant flow returns tokens in the URL fragment, which gets logged in browser history, server logs, and referrer headers. Only enable authorization_code flow for web apps.",
         "suggestion": ""
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--explicit-auth-flows",
+        "forbidden_value": "ALLOW_USER_PASSWORD_AUTH",
+        "severity": "MEDIUM",
+        "message": "ALLOW_USER_PASSWORD_AUTH enabled - passwords sent in plaintext to Cognito API",
+        "context": "ALLOW_USER_PASSWORD_AUTH transmits the user's password directly to the Cognito API instead of using SRP (Secure Remote Password). If the request is intercepted or logged, passwords are exposed. Use ALLOW_USER_SRP_AUTH instead.",
+        "suggestion": "--explicit-auth-flows ALLOW_USER_SRP_AUTH"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--prevent-user-existence-errors",
+        "expected_value": "ENABLED",
+        "severity": "MEDIUM",
+        "message": "User enumeration protection not enabled for --prevent-user-existence-errors",
+        "context": "Without ENABLED, Cognito returns different error messages for non-existent users vs wrong passwords, allowing attackers to enumerate valid usernames. Set to ENABLED to return generic errors for both cases.",
+        "suggestion": "--prevent-user-existence-errors ENABLED"
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--no-enable-token-revocation",
+        "forbidden_value": "true",
+        "severity": "MEDIUM",
+        "message": "Token revocation disabled - stolen tokens cannot be invalidated after logout",
+        "context": "With token revocation disabled, refresh tokens cannot be revoked when a user signs out. A stolen refresh token remains valid until it naturally expires, allowing an attacker to maintain access even after the user logs out.",
+        "suggestion": "--enable-token-revocation"
       }
     ]
   },

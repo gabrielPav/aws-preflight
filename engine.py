@@ -15,6 +15,19 @@ _REQUIRED_CHECK_FIELDS = {"type", "severity", "message"}
 _VALID_SEVERITIES = {"HIGH", "MEDIUM", "LOW", "INFO"}
 _VALID_TYPES = {"missing_flag", "forbidden_value", "always_warn"}
 
+# Global checks — applied to every command before per-command rules.
+# These are CLI-level flags, not service parameters, so they fire even
+# when --cli-input-json is used (the flag is on the CLI, not in the file).
+_GLOBAL_CHECKS = [
+    {
+        "flag": "--no-verify-ssl",
+        "severity": "HIGH",
+        "message": "SSL certificate verification disabled",
+        "context": "The AWS CLI will not verify SSL certificates for this request. Your credentials and data are exposed to man-in-the-middle attacks. Remove --no-verify-ssl and fix the certificate trust chain instead.",
+        "suggestion": "",
+    },
+]
+
 
 def _validate_check(check: dict, fname: str) -> str | None:
     """Return an error string if the check is malformed, else None."""
@@ -109,6 +122,17 @@ def analyze(parsed: dict) -> list[dict]:
     checks = rules.get(key, [])
     findings = []
 
+    # Global checks — CLI-level flags that are dangerous on any command
+    for g in _GLOBAL_CHECKS:
+        if g["flag"] in flags:
+            findings.append({
+                "severity": g["severity"],
+                "message": g["message"],
+                "context": g["context"],
+                "suggestion": g["suggestion"],
+                "_forbidden_flag": g["flag"],
+            })
+
     # Warn when flags are passed via JSON file (bypasses flag-based checks)
     if cli_input_bypass:
         findings.append({
@@ -126,7 +150,9 @@ def analyze(parsed: dict) -> list[dict]:
             continue
 
         if ctype == "missing_flag":
-            if not _flag_present(flags, check["flag"]):
+            if "suppress_if_flag" in check and _flag_present(flags, check["suppress_if_flag"]):
+                pass
+            elif not _flag_present(flags, check["flag"]):
                 finding = check
             elif "expected_value" in check:
                 if not _flag_value_contains(flags, check["flag"], check["expected_value"]):

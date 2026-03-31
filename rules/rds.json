@@ -120,6 +120,7 @@
       {
         "type": "missing_flag",
         "flag": "--final-db-snapshot-identifier",
+        "suppress_if_flag": "--skip-final-snapshot",
         "severity": "HIGH",
         "message": "No final snapshot specified: database will be deleted without a backup",
         "context": "Without --final-db-snapshot-identifier, the database is deleted without a backup. Always take a final snapshot unless you are 100% certain the data is no longer needed.",

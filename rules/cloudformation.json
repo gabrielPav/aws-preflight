@@ -5,23 +5,23 @@
       {
         "type": "missing_flag",
         "flag": "--enable-termination-protection",
-        "severity": "HIGH",
+        "severity": "MEDIUM",
         "message": "Termination protection not enabled",
-        "context": "Without this, a single `cloudformation delete-stack` wipes out every resource in the stack. AWS Config flags this as NON_COMPLIANT. Enable it on every production stack \u2014 you can always disable it before a planned teardown.",
+        "context": "Without this, a single cloudformation delete-stack wipes out every resource in the stack. Enable it on every production stack - you can always disable it before a planned teardown.",
         "suggestion": "--enable-termination-protection"
       },
       {
         "type": "missing_flag",
         "flag": "--role-arn",
         "severity": "MEDIUM",
-        "message": "No service role specified \u2014 CloudFormation will use your caller credentials",
+        "message": "No service role specified - CloudFormation will use your caller credentials",
         "context": "Without a dedicated service role, CloudFormation inherits your IAM permissions. This makes it hard to audit what CloudFormation did vs what you did directly, and can grant more permissions than the stack actually needs.",
         "suggestion": "--role-arn arn:aws:iam::<account>:role/<cfn-service-role>"
       },
       {
         "type": "always_warn",
-        "severity": "HIGH",
-        "message": "Never embed credentials or secrets in template parameters",
+        "severity": "INFO",
+        "message": "Verify template parameters do not contain plaintext credentials or secrets",
         "context": "Stack parameters are stored in plaintext in CloudFormation and visible to anyone with cloudformation:DescribeStacks. Use SSM SecureString or Secrets Manager dynamic references ({{resolve:secretsmanager:...}}) instead.",
         "suggestion": ""
       }
@@ -145,6 +145,26 @@
         "severity": "HIGH",
         "message": "Verify the custom resource type handler is from a trusted source",
         "context": "CloudFormation custom resource types execute code in your account with the permissions of the execution role. A malicious or compromised type handler can exfiltrate data, create backdoors, or modify resources. Only register types from trusted publishers and review the handler code.",
+        "suggestion": ""
+      }
+    ]
+  },
+  {
+    "command": "cloudformation deploy",
+    "checks": [
+      {
+        "type": "missing_flag",
+        "flag": "--role-arn",
+        "severity": "MEDIUM",
+        "message": "No service role specified - CloudFormation will use your caller credentials",
+        "context": "Without a dedicated service role, CloudFormation inherits your IAM permissions. This makes it hard to audit what CloudFormation did vs what you did directly, and can grant more permissions than the stack actually needs.",
+        "suggestion": "--role-arn arn:aws:iam::<account>:role/<cfn-service-role>"
+      },
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Verify template parameters do not contain plaintext credentials or secrets",
+        "context": "Stack parameters are stored in plaintext in CloudFormation and visible to anyone with cloudformation:DescribeStacks. Use SSM SecureString or Secrets Manager dynamic references ({{resolve:secretsmanager:...}}) instead.",
         "suggestion": ""
       }
     ]

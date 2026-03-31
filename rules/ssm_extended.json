@@ -10,6 +10,14 @@
         "message": "Use SecureString type for sensitive values - Standard String parameters are stored in plaintext",
         "context": "SSM Parameter Store Standard String parameters are stored unencrypted and visible to anyone with ssm:GetParameter. For passwords, API keys, and connection strings, always use SecureString with a KMS key. SecureString values are encrypted at rest and require kms:Decrypt to retrieve.",
         "suggestion": "--type SecureString"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--key-id",
+        "severity": "INFO",
+        "message": "No customer-managed KMS key specified for --key-id",
+        "context": "Without --key-id, SecureString parameters are encrypted with the AWS-managed default key which you cannot control, rotate on your own schedule, or restrict via key policy. Specify a customer-managed KMS key for full control over access and audit. This check only applies if --type SecureString is used.",
+        "suggestion": "--key-id alias/<your-ssm-key>"
       }
     ]
   },

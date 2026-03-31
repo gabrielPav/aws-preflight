@@ -4,7 +4,7 @@
     "checks": [
       {
         "type": "always_warn",
-        "severity": "HIGH",
+        "severity": "INFO",
         "message": "Verify the guardrail covers sensitive information filters, not just topic filters",
         "context": "Guardrails without PII/sensitive data filters will happily return SSNs, credit card numbers, or API keys that appear in model responses. Enable sensitive information filters for any customer-facing application.",
         "suggestion": ""

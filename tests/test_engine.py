@@ -215,3 +215,73 @@ class TestEngineGeneral(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+class TestEngineGlobalChecks(unittest.TestCase):
+
+    def setUp(self):
+        engine._rules_cache.clear()
+        engine._rules_loaded = False
+
+    def _messages(self, cmd):
+        return [f["message"] for f in engine.analyze(parse_command(cmd))]
+
+    def test_no_verify_ssl_fires_on_any_command(self):
+        self.assertTrue(any("SSL" in m for m in self._messages(
+            "aws s3 cp file.txt s3://bucket/ --no-verify-ssl"
+        )))
+
+    def test_no_verify_ssl_fires_on_ec2(self):
+        self.assertTrue(any("SSL" in m for m in self._messages(
+            "aws ec2 run-instances --image-id ami-12345 --no-verify-ssl"
+        )))
+
+    def test_no_verify_ssl_absent_no_finding(self):
+        self.assertFalse(any("SSL" in m for m in self._messages(
+            "aws s3 cp file.txt s3://bucket/"
+        )))
+
+    def test_no_verify_ssl_severity_is_high(self):
+        findings = engine.analyze(parse_command(
+            "aws rds create-db-instance --db-instance-identifier prod --engine mysql --no-verify-ssl"
+        ))
+        ssl_findings = [f for f in findings if "SSL" in f["message"]]
+        self.assertEqual(len(ssl_findings), 1)
+        self.assertEqual(ssl_findings[0]["severity"], "HIGH")
+
+
+class TestEngineSuppressIfFlag(unittest.TestCase):
+
+    def setUp(self):
+        engine._rules_cache.clear()
+        engine._rules_loaded = False
+
+    def _messages(self, cmd):
+        return [f["message"] for f in engine.analyze(parse_command(cmd))]
+
+    def test_rds_snapshot_fires_without_skip_or_identifier(self):
+        self.assertTrue(any("final snapshot" in m.lower() for m in self._messages(
+            "aws rds delete-db-instance --db-instance-identifier prod-db"
+        )))
+
+    def test_rds_snapshot_suppressed_when_skip_present(self):
+        # When --skip-final-snapshot is passed, the "no snapshot" missing_flag
+        # should be suppressed - only the "explicitly skipping" forbidden_value fires
+        msgs = self._messages(
+            "aws rds delete-db-instance --db-instance-identifier prod-db --skip-final-snapshot"
+        )
+        self.assertFalse(any("No final snapshot specified" in m for m in msgs))
+        self.assertTrue(any("Explicitly skipping" in m for m in msgs))
+
+    def test_rds_no_findings_when_identifier_provided(self):
+        self.assertFalse(any("final snapshot" in m.lower() for m in self._messages(
+            "aws rds delete-db-instance --db-instance-identifier prod-db "
+            "--final-db-snapshot-identifier my-snap"
+        )))
+
+    def test_redshift_snapshot_suppressed_when_skip_present(self):
+        msgs = self._messages(
+            "aws redshift delete-cluster --cluster-identifier analytics --skip-final-cluster-snapshot"
+        )
+        self.assertFalse(any("No final snapshot specified" in m for m in msgs))
+        self.assertTrue(any("Explicitly skipping" in m for m in msgs))

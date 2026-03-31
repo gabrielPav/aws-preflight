@@ -3,11 +3,40 @@
     "command": "s3api create-bucket",
     "checks": [
       {
-        "type": "always_warn",
+        "type": "forbidden_value",
+        "flag": "--acl",
+        "forbidden_value": "public-read",
         "severity": "HIGH",
-        "message": "New S3 bucket - verify Block Public Access is enabled",
-        "context": "Public S3 buckets are the #1 cause of AWS data breaches. Billions of records have been exposed this way. Run `aws s3api put-public-access-block` immediately after creation.",
-        "suggestion": ""
+        "message": "Bucket created with public-read ACL - bucket will be publicly accessible",
+        "context": "AWS recommends keeping ACLs disabled entirely. Creating a bucket with a public ACL will also fail unless Block Public Access has already been disabled on the account - making this both a security risk and likely to error.",
+        "suggestion": "--acl private"
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--acl",
+        "forbidden_value": "public-read-write",
+        "severity": "HIGH",
+        "message": "Bucket created with public-read-write ACL - bucket will be publicly readable and writable",
+        "context": "AWS recommends keeping ACLs disabled entirely. Creating a bucket with a public ACL will also fail unless Block Public Access has already been disabled on the account - making this both a security risk and likely to error.",
+        "suggestion": "--acl private"
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--object-ownership",
+        "forbidden_value": "ObjectWriter",
+        "severity": "MEDIUM",
+        "message": "Object ownership set to ObjectWriter - re-enables ACLs and allows uploaders to own objects",
+        "context": "The default BucketOwnerEnforced disables ACLs and ensures the bucket owner owns all objects. ObjectWriter allows uploaders to retain object ownership and set their own ACLs, which can lead to objects in your bucket that you do not fully control.",
+        "suggestion": "--object-ownership BucketOwnerEnforced"
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--object-ownership",
+        "forbidden_value": "BucketOwnerPreferred",
+        "severity": "MEDIUM",
+        "message": "Object ownership set to BucketOwnerPreferred - ACLs are re-enabled",
+        "context": "The default BucketOwnerEnforced disables ACLs entirely. BucketOwnerPreferred re-enables ACLs, meaning uploaders who do not include the bucket-owner-full-control ACL retain ownership of their objects in your bucket.",
+        "suggestion": "--object-ownership BucketOwnerEnforced"
       },
       {
         "type": "missing_flag",
@@ -152,25 +181,25 @@
         "flag": "--acl",
         "forbidden_value": "public-read",
         "severity": "HIGH",
-        "message": "File uploaded with public-read ACL",
-        "context": "This object will be accessible to anyone with the URL - no AWS credentials needed. A common mistake when testing that gets forgotten and left public. Use a pre-signed URL for temporary sharing instead.",
+        "message": "File uploaded with public-read ACL - object will be publicly accessible",
+        "context": "This object will be readable by anyone on the internet - no AWS credentials needed. A common mistake when testing that gets forgotten and left public. Use a pre-signed URL for temporary sharing instead.",
         "suggestion": "--acl private"
       },
       {
         "type": "forbidden_value",
-        "flag": "--no-verify-ssl",
-        "forbidden_value": "true",
+        "flag": "--acl",
+        "forbidden_value": "public-read-write",
         "severity": "HIGH",
-        "message": "SSL verification disabled",
-        "context": "Disabling SSL verification exposes your data and credentials to man-in-the-middle attacks. If you're hitting a proxy or cert error, fix the certificate trust chain - don't bypass it.",
-        "suggestion": ""
+        "message": "File uploaded with public-read-write ACL - object is publicly readable and writable",
+        "context": "Anyone on the internet can read and overwrite this object. This is almost never intentional and can lead to data tampering or unexpected storage costs from external writes.",
+        "suggestion": "--acl private"
       },
       {
         "type": "missing_flag",
         "flag": "--sse-kms-key-id",
-        "severity": "LOW",
-        "message": "Server-side encryption not explicitly specified for upload",
-        "context": "While S3 default encryption may be configured at the bucket level, explicitly specifying a customer-managed KMS key ensures the object is encrypted under your key policy, with full control over rotation, access, and audit. Without --sse-kms-key-id, S3 falls back to the AWS-managed key (aws/s3) which you cannot control or rotate on your own schedule.",
+        "severity": "INFO",
+        "message": "No customer-managed KMS key specified for upload",
+        "context": "S3 automatically encrypts all objects with SSE-S3 by default (since January 2023), so this object will be encrypted. However, if your compliance requirements mandate a customer-managed KMS key for key rotation control and audit trails, add --sse aws:kms --sse-kms-key-id.",
         "suggestion": "--sse aws:kms --sse-kms-key-id <key-arn>"
       }
     ]
@@ -189,12 +218,38 @@
       },
       {
         "type": "forbidden_value",
+        "flag": "--acl",
+        "forbidden_value": "public-read-write",
+        "severity": "HIGH",
+        "message": "Syncing with public-read-write ACL - all synced objects will be publicly readable and writable",
+        "context": "Every file in this sync operation will be readable and writable by anyone on the internet. This can lead to data tampering, unexpected storage costs from external writes, or the bucket being used to distribute malicious content.",
+        "suggestion": "--acl private"
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--grants",
+        "forbidden_value": "uri=http://acs.amazonaws.com/groups/global/AllUsers",
+        "severity": "HIGH",
+        "message": "Grants applied to AllUsers - all synced objects will be publicly accessible",
+        "context": "The AllUsers group covers every person on the internet, authenticated or not. This is equivalent to --acl public-read or public-read-write depending on the permission granted.",
+        "suggestion": ""
+      },
+      {
+        "type": "forbidden_value",
         "flag": "--delete",
         "forbidden_value": "true",
         "severity": "MEDIUM",
-        "message": "--delete flag will permanently remove files not present in the source",
-        "context": "This is a common cause of accidental data loss. Files deleted from S3 without versioning enabled are unrecoverable. Run with --dryrun first to preview what will be deleted.",
+        "message": "--delete will permanently remove S3 objects not present in the source",
+        "context": "Files deleted from S3 without versioning enabled are unrecoverable. A misconfigured source path or an accidental sync can wipe an entire prefix. Run with --dryrun first to preview what will be deleted.",
         "suggestion": "--dryrun"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--sse-kms-key-id",
+        "severity": "INFO",
+        "message": "No customer-managed KMS key specified for sync",
+        "context": "S3 automatically encrypts all objects with SSE-S3 by default (since January 2023), so synced objects will be encrypted. If your compliance requirements mandate a customer-managed KMS key for key rotation control and audit trails, add --sse aws:kms --sse-kms-key-id.",
+        "suggestion": "--sse aws:kms --sse-kms-key-id <key-arn>"
       }
     ]
   },

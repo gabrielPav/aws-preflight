@@ -5,7 +5,7 @@
       {
         "type": "always_warn",
         "severity": "INFO",
-        "message": "Ensure the execution role follows least-privilege",
+        "message": "Ensure --role execution role follows least-privilege",
         "context": "Lambda functions are a common pivot point in cloud attacks. A function with broad IAM permissions (e.g. s3:* or iam:*) can be exploited via event injection to exfiltrate data or escalate privileges.",
         "suggestion": ""
       },
@@ -18,12 +18,36 @@
         "suggestion": "--tracing-config Mode=Active"
       },
       {
+        "type": "forbidden_value",
+        "flag": "--tracing-config",
+        "forbidden_value": "PassThrough",
+        "severity": "LOW",
+        "message": "X-Ray tracing explicitly set to PassThrough - tracing disabled",
+        "context": "PassThrough mode disables active tracing. Without it, anomalous invocation patterns and security incidents are harder to detect and trace across your serverless architecture.",
+        "suggestion": "--tracing-config Mode=Active"
+      },
+      {
         "type": "missing_flag",
         "flag": "--code-signing-config-arn",
         "severity": "MEDIUM",
         "message": "Code signing not configured",
         "context": "Without code signing, any deployment package can be deployed to this function, including one modified by a supply chain attack or a compromised CI/CD pipeline. Code signing ensures only packages signed by a trusted publisher can be deployed. Critical for production functions handling sensitive data.",
         "suggestion": "--code-signing-config-arn arn:aws:lambda:<region>:<account-id>:code-signing-config:<id>"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--kms-key-arn",
+        "severity": "INFO",
+        "message": "No customer-managed KMS key specified for --kms-key-arn",
+        "context": "Without --kms-key-arn, Lambda uses an AWS-managed key to encrypt environment variables and SnapStart snapshots. If your compliance requirements mandate a customer-managed key for rotation control and audit trails, specify a CMK.",
+        "suggestion": "--kms-key-arn arn:aws:kms:<region>:<account-id>:key/<key-id>"
+      },
+      {
+        "type": "always_warn",
+        "severity": "INFO",
+        "message": "Verify --environment variables do not contain plaintext secrets",
+        "context": "Lambda environment variables are visible in the console and CLI to anyone with lambda:GetFunctionConfiguration. Store secrets in AWS Secrets Manager or SSM Parameter Store and retrieve them at runtime.",
+        "suggestion": ""
       }
     ]
   },
@@ -38,6 +62,24 @@
         "message": "Lambda permission granted to wildcard principal (*)",
         "context": "Any AWS account in the world can invoke this function. This is almost never intentional. Scope the principal to a specific AWS account ID, service (e.g. apigateway.amazonaws.com), or ARN.",
         "suggestion": "--principal <specific-account-or-service>"
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--action",
+        "forbidden_value": "*",
+        "severity": "HIGH",
+        "message": "Wildcard action grants all Lambda permissions to the principal",
+        "context": "Using --action * grants every Lambda action including lambda:DeleteFunction, lambda:UpdateFunctionCode, and lambda:GetFunction to the principal - not just invocation. Scope to the minimum required action, typically lambda:InvokeFunction.",
+        "suggestion": "--action lambda:InvokeFunction"
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--function-url-auth-type",
+        "forbidden_value": "NONE",
+        "severity": "HIGH",
+        "message": "Permission granted for unauthenticated function URL access",
+        "context": "Setting --function-url-auth-type NONE allows anyone on the internet to invoke this function via its URL without any IAM authentication.",
+        "suggestion": "--function-url-auth-type AWS_IAM"
       }
     ]
   },
@@ -121,9 +163,18 @@
         "flag": "--auth-type",
         "forbidden_value": "NONE",
         "severity": "HIGH",
-        "message": "Function URL created with no authentication. Anyone on the internet can invoke it",
+        "message": "Function URL created with no authentication - anyone on the internet can invoke it",
         "context": "A function URL with AuthType=NONE allows unauthenticated invocations from any source. If the function processes sensitive data, modifies resources, or has broad IAM permissions, this is a critical exposure.",
         "suggestion": "--auth-type AWS_IAM"
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--cors",
+        "forbidden_value": "AllowOrigins=*",
+        "severity": "MEDIUM",
+        "message": "CORS configured with wildcard origin - any website can call this function URL",
+        "context": "AllowOrigins=* allows any website to make cross-origin requests to your function URL. Restrict to specific trusted origins to prevent cross-site request abuse.",
+        "suggestion": "--cors AllowOrigins=https://your-domain.com"
       }
     ]
   },

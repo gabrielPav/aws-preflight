@@ -595,7 +595,7 @@
     "checks": [
       {
         "type": "always_warn",
-        "severity": "HIGH",
+        "severity": "MEDIUM",
         "message": "DNS changes propagate globally within 60 seconds. Verify before submitting",
         "context": "A wrong A record or CNAME redirects production traffic immediately. For critical records, lower the TTL to 60 seconds before making changes so you can revert quickly if something breaks.",
         "suggestion": ""

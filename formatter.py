@@ -82,7 +82,8 @@ def format_result(parsed: dict, findings: list[dict]) -> str:
         if f.get("context"):
             lines.append(f"  ℹ  {f['context']}")
         if f.get("suggestion"):
-            lines.append(f"  → Add: {f['suggestion']}\n")
+            lines.append(f"  → Add: {f['suggestion']}")
+        lines.append("")
 
     if any(f.get("suggestion") for f in findings):
         lines.append("⚡  Suggested command:\n")

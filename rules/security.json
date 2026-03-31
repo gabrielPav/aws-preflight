@@ -35,12 +35,13 @@
         "suggestion": ""
       },
       {
-        "type": "missing_flag",
-        "flag": "--recovery-window-in-days",
+        "type": "forbidden_value",
+        "flag": "--force-delete-without-recovery",
+        "forbidden_value": "true",
         "severity": "HIGH",
-        "message": "Recovery window not explicitly set. Defaults to 30 days, but should be confirmed",
-        "context": "Setting the maximum recovery window (30 days) gives you time to discover any applications that depend on the secret before it is permanently destroyed.",
-        "suggestion": "--recovery-window-in-days 30"
+        "message": "Force deleting secret without recovery window - deletion is immediate and permanent",
+        "context": "This bypasses the 30-day recovery window entirely. The secret is permanently destroyed with no way to restore it. Any application still using this secret will fail immediately and permanently.",
+        "suggestion": ""
       }
     ]
   },

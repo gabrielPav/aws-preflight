@@ -1,6 +1,6 @@
 # aws-preflight
 
-![Checks](https://img.shields.io/badge/Security_Checks-673-00C853.svg?style=flat)
+![Checks](https://img.shields.io/badge/Security_Checks-700-00C853.svg?style=flat)
 ![Commands](https://img.shields.io/badge/Commands-560-1A73E8.svg?style=flat)
 ![AWS](https://img.shields.io/badge/AWS_Services-91-FF8C00.svg?style=flat&logo=amazon-aws&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3.10+-5B86B3.svg?style=flat&logo=python&logoColor=white)
@@ -8,7 +8,7 @@
 
 **Security linter for AWS CLI commands. Catches misconfigurations before they hit your cloud.**
 
-670+ security checks across 91 AWS services. Findings include severity ratings and a remediated command.
+700 security checks across 91 AWS services. Findings include severity ratings and a remediated command.
 
 ```
 aws-preflight> aws rds create-db-instance --db-instance-identifier prod-db --db-instance-class db.m5.large --engine mysql --allocated-storage 50 --master-username <dba-name> --master-user-password <dba-password>
@@ -102,7 +102,7 @@ aws-preflight> aws eks create-cluster --name prod \
   --role-arn arn:aws:iam::123456789012:role/eks-service-role \
   --resources-vpc-config subnetIds=subnet-0abc123abc123abca,subnet-0123abc123abc123c
 
-  [HIGH] 🔴 EKS control plane logging not enabled
+  [LOW] 🔵 EKS control plane logging not enabled
   ℹ️  Without control plane logs (api, audit, authenticator,
      controllerManager, scheduler), you have no visibility into who
      accessed the Kubernetes API or what changes were made.
@@ -288,7 +288,7 @@ security-lint:
 
 ## Coverage
 
-**560 commands | 673 checks | 91 AWS services | 0 dependencies**
+**560 commands | 700 checks | 91 AWS services | 0 dependencies**
 
 | Category | Services | Key Checks |
 |---|---|---|
@@ -360,6 +360,7 @@ Drop a `.json` file in `rules/` or add entries to any existing file. Rules for t
 | `checks[].message` | Yes | One-line finding description |
 | `checks[].context` | Recommended | Detailed explanation of the risk |
 | `checks[].suggestion` | Optional | Flag to add to the remediated command |
+| `checks[].suppress_if_flag` | Optional | For `missing_flag` only - suppresses the check if this flag is present (e.g. suppress "no snapshot ID" when `--skip-final-snapshot` is passed) |
 
 ---
 

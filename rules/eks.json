@@ -5,9 +5,9 @@
       {
         "type": "missing_flag",
         "flag": "--logging",
-        "severity": "HIGH",
+        "severity": "LOW",
         "message": "EKS control plane logging not enabled",
-        "context": "Without control plane logs (api, audit, authenticator, controllerManager, scheduler), you have no visibility into who accessed the Kubernetes API or what changes were made. These logs are critical for incident response.",
+        "context": "Without control plane logs (api, audit, authenticator, controllerManager, scheduler), you have no visibility into who accessed the Kubernetes API or what changes were made. The audit log is particularly important for incident response and compliance.",
         "suggestion": "--logging '{\"clusterLogging\":[{\"types\":[\"api\",\"audit\",\"authenticator\",\"controllerManager\",\"scheduler\"],\"enabled\":true}]}'"
       },
       {
@@ -22,10 +22,27 @@
         "type": "missing_flag",
         "flag": "--resources-vpc-config",
         "expected_value": "endpointPrivateAccess=true",
-        "severity": "MEDIUM",
-        "message": "Verify the cluster endpoint is not publicly accessible without IP restrictions",
-        "context": "By default, the EKS API server endpoint is publicly accessible. Restrict access using publicAccessCidrs or disable public access entirely with endpointPublicAccess=false,endpointPrivateAccess=true.",
+        "severity": "HIGH",
+        "message": "EKS API server endpoint is publicly accessible by default",
+        "context": "By default, the EKS API server endpoint is publicly accessible from the entire internet (0.0.0.0/0). Any credential leak or API server vulnerability is immediately exploitable from anywhere. Restrict access using publicAccessCidrs or disable public access entirely with endpointPublicAccess=false,endpointPrivateAccess=true.",
         "suggestion": "--resources-vpc-config endpointPublicAccess=false,endpointPrivateAccess=true"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--access-config",
+        "expected_value": "authenticationMode=API",
+        "severity": "MEDIUM",
+        "message": "EKS authentication mode defaults to CONFIG_MAP - consider using API mode",
+        "context": "CONFIG_MAP authentication relies on the aws-auth ConfigMap, a well-known attack surface where a single misconfiguration can grant cluster-admin. API and API_AND_CONFIG_MAP modes use EKS access entries which are more auditable and manageable via IAM.",
+        "suggestion": "--access-config authenticationMode=API"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--deletion-protection",
+        "severity": "LOW",
+        "message": "Deletion protection not enabled - cluster can be permanently deleted with a single command",
+        "context": "Without deletion protection, a single eks delete-cluster command permanently removes the entire cluster and all its workloads. Enable deletion protection for production clusters.",
+        "suggestion": "--deletion-protection"
       }
     ]
   },

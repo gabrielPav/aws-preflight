@@ -41,6 +41,14 @@
         "message": "Audit logging must be enabled separately via 'redshift enable-logging'",
         "context": "Audit logging is not a create-cluster flag - it's a separate API call. Without it you have no record of who connected, what queries ran, or what data was accessed. Required for PCI-DSS, HIPAA, and SOC 2.",
         "suggestion": ""
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--automated-snapshot-retention-period",
+        "severity": "MEDIUM",
+        "message": "Automated snapshot retention period not specified",
+        "context": "The default retention period is 1 day. For a data warehouse, 1-day retention is insufficient to detect data corruption or ransomware that isn't immediately noticed. Set to at least 7 days for production clusters.",
+        "suggestion": "--automated-snapshot-retention-period 7"
       }
     ]
   },
@@ -50,13 +58,16 @@
       {
         "type": "missing_flag",
         "flag": "--final-cluster-snapshot-identifier",
+        "suppress_if_flag": "--skip-final-cluster-snapshot",
         "severity": "HIGH",
         "message": "No final snapshot specified: Redshift cluster will be deleted without a backup",
         "context": "Without --final-cluster-snapshot-identifier, all data in the cluster is permanently destroyed. Snapshots are cheap relative to the cost of losing a data warehouse.",
         "suggestion": "--final-cluster-snapshot-identifier <snapshot-name>"
       },
       {
-        "type": "always_warn",
+        "type": "forbidden_value",
+        "flag": "--skip-final-cluster-snapshot",
+        "forbidden_value": "true",
         "severity": "HIGH",
         "message": "Explicitly skipping final snapshot. All warehouse data will be permanently lost",
         "context": "With --skip-final-cluster-snapshot, no backup is taken before deletion. All Redshift data is gone forever.",

@@ -87,7 +87,7 @@ jobs:
         run: |
           output=$(python main.py "aws s3api create-bucket --bucket test" || true)
           echo "$output"
-          echo "$output" | grep -q "Block Public Access"
+          echo "$output" | grep -q "Object Lock"
 
       - name: JSON output
         run: |

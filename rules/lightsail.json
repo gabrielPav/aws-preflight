@@ -22,6 +22,15 @@
         "message": "Opening all ports to the internet",
         "context": "Exposing every port on a public instance is an immediate compromise waiting to happen. Automated scanners will find open services within minutes. Only open the specific ports your application needs.",
         "suggestion": ""
+      },
+      {
+        "type": "forbidden_value",
+        "flag": "--port-info",
+        "forbidden_value": "fromPort=22",
+        "severity": "HIGH",
+        "message": "Opening SSH port 22 - verify access is restricted to specific IPs",
+        "context": "SSH on port 22 is continuously scanned and brute-forced. Restrict access by specifying cidrs in --port-info to limit to your IP. Consider using SSM Session Manager instead to avoid opening any inbound ports.",
+        "suggestion": ""
       }
     ]
   },

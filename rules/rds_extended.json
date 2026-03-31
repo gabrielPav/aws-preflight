@@ -46,13 +46,16 @@
       {
         "type": "missing_flag",
         "flag": "--final-db-snapshot-identifier",
+        "suppress_if_flag": "--skip-final-snapshot",
         "severity": "HIGH",
         "message": "No final snapshot specified: Aurora cluster will be deleted without a backup",
         "context": "Without --final-db-snapshot-identifier, the entire cluster and all its data is permanently destroyed. Always take a final snapshot unless you are 100% certain the data is no longer needed.",
         "suggestion": "--final-db-snapshot-identifier <snapshot-name>"
       },
       {
-        "type": "always_warn",
+        "type": "forbidden_value",
+        "flag": "--skip-final-snapshot",
+        "forbidden_value": "true",
         "severity": "HIGH",
         "message": "Explicitly skipping final snapshot. All Aurora cluster data will be permanently lost",
         "context": "With --skip-final-snapshot, no backup is taken before deletion. All data in the Aurora cluster is gone forever with no recovery path.",

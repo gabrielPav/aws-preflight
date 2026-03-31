@@ -27,11 +27,40 @@
     "command": "s3control put-public-access-block",
     "checks": [
       {
-        "type": "always_warn",
-        "severity": "MEDIUM",
-        "message": "Verify you are enabling (not disabling) public access block at the account level",
-        "context": "Account-level S3 Block Public Access overrides all bucket-level settings. Setting all four options to true is the strongest protection. Setting any to false opens the door for individual buckets to become public.",
-        "suggestion": ""
+        "type": "missing_flag",
+        "flag": "--public-access-block-configuration",
+        "expected_value": "BlockPublicAcls=true",
+        "severity": "HIGH",
+        "message": "BlockPublicAcls not set to true in account-level public access block configuration",
+        "context": "Without BlockPublicAcls=true, public ACLs can still be applied to any bucket in the account.",
+        "suggestion": "--public-access-block-configuration BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--public-access-block-configuration",
+        "expected_value": "IgnorePublicAcls=true",
+        "severity": "HIGH",
+        "message": "IgnorePublicAcls not set to true in account-level public access block configuration",
+        "context": "Without IgnorePublicAcls=true, existing public ACLs on any bucket in the account still grant public access.",
+        "suggestion": "--public-access-block-configuration BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--public-access-block-configuration",
+        "expected_value": "BlockPublicPolicy=true",
+        "severity": "HIGH",
+        "message": "BlockPublicPolicy not set to true in account-level public access block configuration",
+        "context": "Without BlockPublicPolicy=true at the account level, individual bucket policies can still grant public access - and a bucket policy could even disable bucket-level block public access settings.",
+        "suggestion": "--public-access-block-configuration BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
+      },
+      {
+        "type": "missing_flag",
+        "flag": "--public-access-block-configuration",
+        "expected_value": "RestrictPublicBuckets=true",
+        "severity": "HIGH",
+        "message": "RestrictPublicBuckets not set to true in account-level public access block configuration",
+        "context": "Without RestrictPublicBuckets=true, public bucket policies still allow cross-account access to any bucket in the account.",
+        "suggestion": "--public-access-block-configuration BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
       }
     ]
   }
