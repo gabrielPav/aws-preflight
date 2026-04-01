@@ -6,24 +6,24 @@
         "type": "missing_flag",
         "flag": "--storage-encrypted",
         "severity": "HIGH",
-        "message": "RDS storage encryption not enabled",
-        "context": "Unencrypted RDS snapshots can be shared or copied to another account, exposing your entire database. Encryption cannot be enabled after creation - you'd need to snapshot, restore, and migrate.",
+        "message": "Storage encryption disabled",
+        "context": "Unencrypted snapshots can be shared or copied to any AWS account, exposing your entire database. Encryption cannot be enabled after creation - you'd need to snapshot, restore, and migrate.",
         "suggestion": "--storage-encrypted"
       },
       {
         "type": "missing_flag",
         "flag": "--deletion-protection",
         "severity": "MEDIUM",
-        "message": "Deletion protection not enabled",
-        "context": "Without this, a single `rds delete-db-instance` command - accidental or malicious - permanently destroys your database. This is a one-line safeguard that has saved countless production databases.",
+        "message": "Deletion protection disabled",
+        "context": "A single 'rds delete-db-instance' call permanently destroys this database with no confirmation prompt.",
         "suggestion": "--deletion-protection"
       },
       {
         "type": "missing_flag",
         "flag": "--no-publicly-accessible",
         "severity": "HIGH",
-        "message": "Public accessibility not explicitly disabled. RDS may default to publicly accessible",
-        "context": "Depending on VPC and subnet group configuration, RDS instances can default to publicly accessible. Always explicitly set --no-publicly-accessible to ensure the database is not reachable from the internet.",
+        "message": "Public accessibility not disabled",
+        "context": "Depending on VPC and subnet configuration, RDS may default to publicly accessible. Always set --no-publicly-accessible explicitly - don't rely on subnet defaults to keep your database off the Internet.",
         "suggestion": "--no-publicly-accessible"
       },
       {
@@ -37,10 +37,18 @@
       },
       {
         "type": "missing_flag",
+        "flag": "--enable-iam-database-authentication",
+        "severity": "MEDIUM",
+        "message": "IAM database authentication disabled",
+        "context": "Static passwords don't rotate and don't expire. IAM auth issues short-lived tokens tied to your existing access controls instead. Supported on RDS MySQL, MariaDB, PostgreSQL, and Aurora.",
+        "suggestion": "--enable-iam-database-authentication"
+      },
+      {
+        "type": "missing_flag",
         "flag": "--backup-retention-period",
         "severity": "MEDIUM",
-        "message": "Backup retention period not specified",
-        "context": "The default backup retention is 1 day. For production databases, set this to at least 7 days to allow recovery from ransomware or accidental data corruption that isn't immediately noticed.",
+        "message": "Backup retention period not configured",
+        "context": "AWS defaults to 1 day. A weekend incident at that window means unrecoverable data loss. Set to at least 7 days to allow recovery from ransomware or accidental data corruption that isn't immediately noticed.",
         "suggestion": "--backup-retention-period 7"
       },
       {
@@ -48,17 +56,9 @@
         "flag": "--enable-cloudwatch-logs-exports",
         "expected_value": "error",
         "severity": "MEDIUM",
-        "message": "CloudWatch log exports not configured with error logging",
-        "context": "Without error log exports, you have no visibility into failed connections, authentication failures, or engine errors. Log types vary by engine: MySQL/MariaDB (audit, error, general, slowquery), PostgreSQL (postgresql, upgrade), Oracle (alert, audit, listener, trace), SQL Server (agent, error). At minimum, always include error.",
+        "message": "CloudWatch log exports disabled",
+        "context": "Without log exports, there's no visibility into errors or suspicious login attempts - you'd be investigating blind after an incident. Log types vary by engine: MySQL/MariaDB (audit, error, general, slowquery), PostgreSQL (postgresql, upgrade), Oracle (alert, audit, listener, trace), SQL Server (agent, error). At minimum, always include error.",
         "suggestion": "--enable-cloudwatch-logs-exports '[\"error\"]'"
-      },
-      {
-        "type": "missing_flag",
-        "flag": "--enable-iam-database-authentication",
-        "severity": "MEDIUM",
-        "message": "IAM database authentication not enabled",
-        "context": "IAM authentication lets applications connect to MySQL, MariaDB, and PostgreSQL using short-lived IAM tokens instead of static database passwords. This eliminates a class of credential leak: no database password to rotate, store, or accidentally commit. Supported on all currently active RDS MySQL, MariaDB, PostgreSQL, and Aurora versions.",
-        "suggestion": "--enable-iam-database-authentication"
       }
     ]
   },
@@ -92,7 +92,7 @@
         "type": "missing_flag",
         "flag": "--storage-encrypted",
         "severity": "HIGH",
-        "message": "Aurora cluster storage encryption not enabled",
+        "message": "Aurora cluster storage encryption disabled",
         "context": "Unencrypted Aurora clusters expose all data at rest. Encryption must be set at creation time and cannot be added later without creating a new cluster.",
         "suggestion": "--storage-encrypted"
       },
@@ -100,7 +100,7 @@
         "type": "missing_flag",
         "flag": "--deletion-protection",
         "severity": "MEDIUM",
-        "message": "Deletion protection not enabled on Aurora cluster",
+        "message": "Deletion protection disabled on Aurora cluster",
         "context": "Without deletion protection, the entire cluster and all its instances can be deleted with a single command. Enable this to prevent accidental or malicious destruction of your database.",
         "suggestion": "--deletion-protection"
       },
@@ -108,7 +108,7 @@
         "type": "missing_flag",
         "flag": "--backup-retention-period",
         "severity": "MEDIUM",
-        "message": "Backup retention period not specified",
+        "message": "Backup retention period not configured",
         "context": "Default retention is 1 day. Set to at least 7 days for production workloads to allow recovery from data corruption or ransomware that isn't immediately detected.",
         "suggestion": "--backup-retention-period 7"
       }
@@ -144,7 +144,7 @@
         "type": "missing_flag",
         "flag": "--no-publicly-accessible",
         "severity": "HIGH",
-        "message": "Public accessibility not explicitly disabled on restored instance",
+        "message": "Public accessibility not disabled on restored instance",
         "context": "Restored RDS instances can inherit public accessibility from the snapshot or default to publicly accessible depending on the subnet group. Always explicitly set --no-publicly-accessible.",
         "suggestion": "--no-publicly-accessible"
       },
@@ -202,7 +202,7 @@
         "type": "missing_flag",
         "flag": "--no-publicly-accessible",
         "severity": "HIGH",
-        "message": "Public accessibility not explicitly disabled on restored cluster",
+        "message": "Public accessibility not disabled on restored cluster",
         "context": "Restored clusters can default to publicly accessible depending on subnet group configuration. Always explicitly set --no-publicly-accessible to prevent internet exposure.",
         "suggestion": "--no-publicly-accessible"
       },
@@ -219,7 +219,7 @@
         "type": "missing_flag",
         "flag": "--deletion-protection",
         "severity": "MEDIUM",
-        "message": "Deletion protection not enabled on restored cluster",
+        "message": "Deletion protection disabled on restored cluster",
         "context": "Restored clusters do not inherit deletion protection from the snapshot. Explicitly enable it to prevent accidental deletion.",
         "suggestion": "--deletion-protection"
       }

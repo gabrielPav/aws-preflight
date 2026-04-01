@@ -6,7 +6,7 @@
         "type": "missing_flag",
         "flag": "--logging-configuration",
         "severity": "MEDIUM",
-        "message": "Execution logging not configured",
+        "message": "Execution logging disabled",
         "context": "Without logging, you have zero visibility into execution history, failed states, or what data was passed between steps. AWS Security Hub flags this as a finding. Set level to ERROR at minimum, ALL for sensitive workflows.",
         "suggestion": "--logging-configuration '{\"level\":\"ERROR\",\"includeExecutionData\":false,\"destinations\":[{\"cloudWatchLogsLogGroup\":{\"logGroupArn\":\"<arn>\"}}]}'"
       },
@@ -14,7 +14,7 @@
         "type": "missing_flag",
         "flag": "--tracing-configuration",
         "severity": "MEDIUM",
-        "message": "X-Ray tracing not enabled",
+        "message": "X-Ray tracing disabled",
         "context": "Without tracing you can't see latency breakdowns or trace a security incident through the execution graph. Especially important for workflows that touch multiple services.",
         "suggestion": "--tracing-configuration enabled=true"
       },

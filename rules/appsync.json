@@ -15,7 +15,7 @@
         "type": "missing_flag",
         "flag": "--log-config",
         "severity": "MEDIUM",
-        "message": "Execution logging not configured for AppSync API",
+        "message": "Execution logging disabled for AppSync API",
         "context": "Without logging you have no visibility into which queries are being executed, by whom, or what errors are occurring. AWS Security Hub flags AppSync APIs without logging as a finding.",
         "suggestion": "--log-config fieldLogLevel=ERROR,cloudWatchLogsRoleArn=<role-arn>"
       }

@@ -6,7 +6,7 @@
         "type": "missing_flag",
         "flag": "--sse-specification",
         "severity": "MEDIUM",
-        "message": "KMS encryption not explicitly configured",
+        "message": "KMS encryption disabled",
         "context": "DynamoDB encrypts at rest by default with an AWS-owned key, but specifying a customer managed KMS key gives you an audit trail of every access via CloudTrail and the ability to revoke access by disabling the key.",
         "suggestion": "--sse-specification Enabled=true,SSEType=KMS"
       },
@@ -14,7 +14,7 @@
         "type": "missing_flag",
         "flag": "--deletion-protection-enabled",
         "severity": "MEDIUM",
-        "message": "Deletion protection not enabled",
+        "message": "Deletion protection disabled",
         "context": "Without deletion protection, a single `dynamodb delete-table` command permanently destroys the table and all its data. Enable this for any table containing production data.",
         "suggestion": "--deletion-protection-enabled"
       }
@@ -62,7 +62,7 @@
       {
         "type": "always_warn",
         "severity": "HIGH",
-        "message": "Item deletion is permanent if PITR is not enabled",
+        "message": "Item deletion is permanent — PITR disabled",
         "context": "Without Point-in-Time Recovery enabled, deleted items cannot be restored. Enable PITR on production tables to allow recovery up to 35 days back.",
         "suggestion": ""
       }

@@ -27,7 +27,7 @@
         "type": "missing_flag",
         "flag": "--deletion-protection",
         "severity": "MEDIUM",
-        "message": "Deletion protection not enabled on user pool",
+        "message": "Deletion protection disabled on user pool",
         "context": "Without deletion protection, a single delete-user-pool command permanently destroys all user accounts, credentials, and app clients. AWS Security Hub flags this as a finding (Cognito.6). Enable it on any pool used in production.",
         "suggestion": "--deletion-protection ACTIVE"
       }
@@ -64,7 +64,7 @@
         "flag": "--prevent-user-existence-errors",
         "expected_value": "ENABLED",
         "severity": "MEDIUM",
-        "message": "User enumeration protection not enabled for --prevent-user-existence-errors",
+        "message": "User enumeration protection disabled",
         "context": "Without ENABLED, Cognito returns different error messages for non-existent users vs wrong passwords, allowing attackers to enumerate valid usernames. Set to ENABLED to return generic errors for both cases.",
         "suggestion": "--prevent-user-existence-errors ENABLED"
       },
@@ -134,7 +134,7 @@
         "type": "missing_flag",
         "flag": "--no-allow-unauthenticated-identities",
         "severity": "HIGH",
-        "message": "Unauthenticated identities not explicitly disabled",
+        "message": "Unauthenticated identities enabled by default",
         "context": "Without --no-allow-unauthenticated-identities, the pool may grant AWS credentials to anonymous users. Only enable unauthenticated access if your app explicitly requires it (e.g. guest browsing with minimal permissions).",
         "suggestion": "--no-allow-unauthenticated-identities"
       },

@@ -6,7 +6,7 @@
         "type": "missing_flag",
         "flag": "--no-publicly-accessible",
         "severity": "HIGH",
-        "message": "Public accessibility not explicitly disabled on replication instance",
+        "message": "Public accessibility not disabled on replication instance",
         "context": "DMS replication instances default to publicly accessible. A public replication instance exposes your database migration traffic path to the internet. Always deploy in private subnets.",
         "suggestion": "--no-publicly-accessible"
       },

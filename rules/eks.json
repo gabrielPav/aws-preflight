@@ -6,7 +6,7 @@
         "type": "missing_flag",
         "flag": "--logging",
         "severity": "LOW",
-        "message": "EKS control plane logging not enabled",
+        "message": "EKS control plane logging disabled",
         "context": "Without control plane logs (api, audit, authenticator, controllerManager, scheduler), you have no visibility into who accessed the Kubernetes API or what changes were made. The audit log is particularly important for incident response and compliance.",
         "suggestion": "--logging '{\"clusterLogging\":[{\"types\":[\"api\",\"audit\",\"authenticator\",\"controllerManager\",\"scheduler\"],\"enabled\":true}]}'"
       },
@@ -14,7 +14,7 @@
         "type": "missing_flag",
         "flag": "--encryption-config",
         "severity": "HIGH",
-        "message": "EKS secrets encryption not configured",
+        "message": "EKS secrets encryption disabled",
         "context": "Without envelope encryption, Kubernetes secrets (which often contain database passwords, API keys, and TLS certs) are stored in etcd in base64 only - not encrypted. Use a KMS key to encrypt secrets at rest.",
         "suggestion": "--encryption-config '[{\"resources\":[\"secrets\"],\"provider\":{\"keyArn\":\"<your-kms-key-arn>\"}}]'"
       },
@@ -23,8 +23,8 @@
         "flag": "--resources-vpc-config",
         "expected_value": "endpointPrivateAccess=true",
         "severity": "HIGH",
-        "message": "EKS API server endpoint is publicly accessible by default",
-        "context": "By default, the EKS API server endpoint is publicly accessible from the entire internet (0.0.0.0/0). Any credential leak or API server vulnerability is immediately exploitable from anywhere. Restrict access using publicAccessCidrs or disable public access entirely with endpointPublicAccess=false,endpointPrivateAccess=true.",
+        "message": "EKS API server endpoint publicly accessible",
+        "context": "By default, the EKS API server endpoint is publicly accessible from the entire Internet (0.0.0.0/0). Any credential leak or API server vulnerability is immediately exploitable from anywhere. Restrict access using publicAccessCidrs or disable public access entirely with endpointPublicAccess=false,endpointPrivateAccess=true.",
         "suggestion": "--resources-vpc-config endpointPublicAccess=false,endpointPrivateAccess=true"
       },
       {
@@ -32,7 +32,7 @@
         "flag": "--access-config",
         "expected_value": "authenticationMode=API",
         "severity": "MEDIUM",
-        "message": "EKS authentication mode defaults to CONFIG_MAP - consider using API mode",
+        "message": "EKS authentication mode defaults to CONFIG_MAP",
         "context": "CONFIG_MAP authentication relies on the aws-auth ConfigMap, a well-known attack surface where a single misconfiguration can grant cluster-admin. API and API_AND_CONFIG_MAP modes use EKS access entries which are more auditable and manageable via IAM.",
         "suggestion": "--access-config authenticationMode=API"
       },
@@ -40,7 +40,7 @@
         "type": "missing_flag",
         "flag": "--deletion-protection",
         "severity": "LOW",
-        "message": "Deletion protection not enabled - cluster can be permanently deleted with a single command",
+        "message": "Deletion protection disabled — cluster can be permanently deleted with a single command",
         "context": "Without deletion protection, a single eks delete-cluster command permanently removes the entire cluster and all its workloads. Enable deletion protection for production clusters.",
         "suggestion": "--deletion-protection"
       }
@@ -72,7 +72,7 @@
         "type": "missing_flag",
         "flag": "--disk-size",
         "severity": "LOW",
-        "message": "Disk size not specified - default may be insufficient for workloads",
+        "message": "Disk size not set — default may be insufficient for workloads",
         "context": "Nodes running out of disk space can cause pod evictions and cluster instability. Specify an appropriate disk size for your workloads.",
         "suggestion": "--disk-size 80"
       }

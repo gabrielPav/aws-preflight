@@ -6,7 +6,7 @@
         "type": "missing_flag",
         "flag": "--image-scanning-configuration",
         "severity": "MEDIUM",
-        "message": "Image scanning on push not enabled",
+        "message": "Image scanning on push disabled",
         "context": "Without scan-on-push, vulnerable base images silently accumulate in your registry. A single compromised container image can give an attacker a foothold in every environment it's deployed to.",
         "suggestion": "--image-scanning-configuration scanOnPush=true"
       },
@@ -14,7 +14,7 @@
         "type": "missing_flag",
         "flag": "--encryption-configuration",
         "severity": "MEDIUM",
-        "message": "ECR repository encryption not explicitly configured",
+        "message": "ECR repository encryption disabled",
         "context": "By default ECR uses AES-256 managed by AWS. Specifying KMS gives you an audit trail of every image pull via CloudTrail and the ability to revoke access by disabling the key.",
         "suggestion": "--encryption-configuration encryptionType=KMS"
       }

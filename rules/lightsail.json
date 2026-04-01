@@ -53,7 +53,7 @@
         "type": "missing_flag",
         "flag": "--no-publicly-accessible",
         "severity": "HIGH",
-        "message": "Public accessibility not explicitly disabled on Lightsail database",
+        "message": "Public accessibility not disabled on Lightsail database",
         "context": "Always explicitly set --no-publicly-accessible to ensure the database is not reachable from the internet. A publicly accessible database is reachable from the entire internet - automated scanners will find it and attempt brute-force logins within hours.",
         "suggestion": "--no-publicly-accessible"
       },
@@ -82,7 +82,7 @@
         "type": "missing_flag",
         "flag": "--enable-object-versioning",
         "severity": "MEDIUM",
-        "message": "Object versioning not enabled on Lightsail bucket",
+        "message": "Object versioning disabled on Lightsail bucket",
         "context": "Without versioning, deleted or overwritten objects are gone permanently. Versioning protects against accidental deletion and enables recovery from ransomware or application bugs.",
         "suggestion": "--enable-object-versioning"
       }

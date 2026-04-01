@@ -6,7 +6,7 @@
         "type": "missing_flag",
         "flag": "--at-rest-encryption-enabled",
         "severity": "HIGH",
-        "message": "ElastiCache at-rest encryption not enabled",
+        "message": "ElastiCache at-rest encryption disabled",
         "context": "Without at-rest encryption, cache data (which often includes session tokens, user data, or query results) is stored in plaintext. Encryption must be enabled at creation time and cannot be added later.",
         "suggestion": "--at-rest-encryption-enabled"
       },
@@ -14,7 +14,7 @@
         "type": "missing_flag",
         "flag": "--transit-encryption-enabled",
         "severity": "HIGH",
-        "message": "ElastiCache in-transit encryption not enabled",
+        "message": "ElastiCache in-transit encryption disabled",
         "context": "Without TLS, all data between your application and the cache is transmitted in plaintext. This exposes session data, cached credentials, and application data to network interception.",
         "suggestion": "--transit-encryption-enabled"
       },
@@ -42,7 +42,7 @@
         "type": "missing_flag",
         "flag": "--transit-encryption-enabled",
         "severity": "HIGH",
-        "message": "In-transit encryption not enabled on cache cluster",
+        "message": "In-transit encryption disabled on cache cluster",
         "context": "Without TLS, all data between your application and the cache is transmitted in plaintext, exposing session data and cached credentials to network interception. Supported for Redis, Valkey, and Memcached (1.6.12+) engines.",
         "suggestion": "--transit-encryption-enabled"
       }

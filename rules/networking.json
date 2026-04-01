@@ -15,7 +15,7 @@
         "type": "missing_flag",
         "flag": "--type",
         "severity": "INFO",
-        "message": "Load balancer type not specified \u2014 defaults to 'application'",
+        "message": "Load balancer type not set — defaults to 'application'",
         "context": "The elbv2 API defaults to Application Load Balancer (ALB) when --type is omitted. Specify --type explicitly if you need a Network Load Balancer (NLB) for TCP/UDP or Gateway Load Balancer (GWLB). Classic Load Balancers use the separate 'elb' CLI namespace.",
         "suggestion": "--type application"
       }
@@ -114,7 +114,7 @@
         "type": "missing_flag",
         "flag": "--access-log-settings",
         "severity": "HIGH",
-        "message": "Access logging not configured for this stage",
+        "message": "Access logging disabled for this stage",
         "context": "Without access logs you have no record of who called your API, what they sent, or what errors occurred. This is required for incident response and most compliance frameworks.",
         "suggestion": "--access-log-settings DestinationArn=arn:aws:logs:<region>:<account>:log-group:<group>"
       }
@@ -211,7 +211,7 @@
         "type": "missing_flag",
         "flag": "--node-to-node-encryption-options",
         "severity": "HIGH",
-        "message": "Node-to-node encryption not enabled",
+        "message": "Node-to-node encryption disabled",
         "context": "Without node-to-node encryption, data replication between cluster nodes is transmitted in plaintext. This is flagged by AWS Security Hub (OpenSearch.3). Enable it at domain creation \u2014 it cannot be added to an existing domain without creating a new one.",
         "suggestion": "--node-to-node-encryption-options Enabled=true"
       },
@@ -219,7 +219,7 @@
         "type": "missing_flag",
         "flag": "--encryption-at-rest-options",
         "severity": "HIGH",
-        "message": "Encryption at rest not enabled",
+        "message": "Encryption at rest disabled",
         "context": "Without at-rest encryption, index data is stored unencrypted on disk. Encryption must be enabled at domain creation. Flagged by AWS Security Hub (OpenSearch.1).",
         "suggestion": "--encryption-at-rest-options Enabled=true"
       },
@@ -228,7 +228,7 @@
         "flag": "--domain-endpoint-options",
         "expected_value": "EnforceHTTPS=true",
         "severity": "HIGH",
-        "message": "HTTPS not enforced on OpenSearch domain endpoint",
+        "message": "HTTPS enforcement disabled on OpenSearch domain endpoint",
         "context": "Without EnforceHTTPS=true, the domain accepts unencrypted HTTP connections, exposing search queries and results to interception. Flagged by AWS Security Hub (OpenSearch.8).",
         "suggestion": "--domain-endpoint-options EnforceHTTPS=true,TLSSecurityPolicy=Policy-Min-TLS-1-2-2019-07"
       },

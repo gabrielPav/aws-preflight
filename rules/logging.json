@@ -6,7 +6,7 @@
         "type": "missing_flag",
         "flag": "--is-multi-region-trail",
         "severity": "HIGH",
-        "message": "Trail is not multi-region",
+        "message": "Trail limited to single region",
         "context": "A single-region trail misses all API activity in other regions, including global services like IAM. Attackers often operate in regions you don't monitor. Always create multi-region trails.",
         "suggestion": "--is-multi-region-trail"
       },
@@ -14,7 +14,7 @@
         "type": "missing_flag",
         "flag": "--enable-log-file-validation",
         "severity": "MEDIUM",
-        "message": "Log file integrity validation not enabled",
+        "message": "Log file integrity validation disabled",
         "context": "Without integrity validation, you cannot prove that CloudTrail logs haven't been tampered with after delivery. This is required for forensic investigations and many compliance frameworks.",
         "suggestion": "--enable-log-file-validation"
       },
@@ -39,7 +39,7 @@
         "type": "missing_flag",
         "flag": "--cloud-watch-logs-log-group-arn",
         "severity": "INFO",
-        "message": "CloudWatch Logs integration not configured for --cloud-watch-logs-log-group-arn",
+        "message": "CloudWatch Logs integration disabled",
         "context": "Without CloudWatch Logs integration, you cannot set up real-time metric filters and alarms on CloudTrail events. This means no automated alerting on suspicious activity such as root account usage, IAM policy changes, or console logins without MFA.",
         "suggestion": "--cloud-watch-logs-log-group-arn arn:aws:logs:<region>:<account-id>:log-group:CloudTrail/DefaultLogGroup --cloud-watch-logs-role-arn arn:aws:iam::<account-id>:role/CloudTrail_CloudWatchLogs_Role"
       }

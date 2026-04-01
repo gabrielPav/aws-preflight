@@ -18,7 +18,7 @@
         "type": "missing_flag",
         "flag": "--no-publicly-accessible",
         "severity": "HIGH",
-        "message": "Public accessibility not explicitly disabled on point-in-time restored instance",
+        "message": "Public accessibility not disabled on point-in-time restored instance",
         "context": "Restored instances can default to publicly accessible depending on the subnet group. Always explicitly set --no-publicly-accessible to prevent the restored database from being reachable from the internet.",
         "suggestion": "--no-publicly-accessible"
       },

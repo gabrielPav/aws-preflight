@@ -39,7 +39,7 @@ class TestEngineMissingFlag(unittest.TestCase):
         )))
 
     def test_cloudtrail_multiregion_fires_when_absent(self):
-        self.assertTrue(any("multi-region" in m.lower() for m in self._messages(
+        self.assertTrue(any("single region" in m.lower() for m in self._messages(
             "aws cloudtrail create-trail --name my-trail --s3-bucket-name my-bucket"
         )))
 

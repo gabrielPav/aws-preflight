@@ -39,7 +39,7 @@
         "forbidden_value": "AdministratorAccess",
         "severity": "HIGH",
         "message": "Attaching AdministratorAccess - full AWS access granted",
-        "context": "AdministratorAccess is the most powerful policy in AWS. If this role is ever compromised, the attacker owns your entire account. Grant only the specific actions and resources the role actually needs.",
+        "context": "AdministratorAccess is the most powerful policy in AWS. If this role is compromised, the attacker owns your entire account. Grant only the specific actions and resources the role actually needs.",
         "suggestion": ""
       },
       {

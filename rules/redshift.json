@@ -14,7 +14,7 @@
         "type": "missing_flag",
         "flag": "--no-publicly-accessible",
         "severity": "HIGH",
-        "message": "Public accessibility not explicitly disabled - verify your subnet configuration",
+        "message": "Public accessibility not disabled - verify your subnet configuration",
         "context": "In a default VPC, Redshift clusters default to publicly accessible. In a custom VPC they default to private. Always explicitly set --no-publicly-accessible to ensure the cluster is not reachable from the internet regardless of VPC type.",
         "suggestion": "--no-publicly-accessible"
       },
@@ -31,7 +31,7 @@
         "type": "missing_flag",
         "flag": "--enhanced-vpc-routing",
         "severity": "MEDIUM",
-        "message": "Enhanced VPC routing not enabled",
+        "message": "Enhanced VPC routing disabled",
         "context": "Without it, COPY and UNLOAD traffic to S3 goes over the public internet. Enable enhanced VPC routing to force all traffic through your VPC so security groups and flow logs apply.",
         "suggestion": "--enhanced-vpc-routing"
       },
@@ -46,7 +46,7 @@
         "type": "missing_flag",
         "flag": "--automated-snapshot-retention-period",
         "severity": "MEDIUM",
-        "message": "Automated snapshot retention period not specified",
+        "message": "Automated snapshot retention period not configured",
         "context": "The default retention period is 1 day. For a data warehouse, 1-day retention is insufficient to detect data corruption or ransomware that isn't immediately noticed. Set to at least 7 days for production clusters.",
         "suggestion": "--automated-snapshot-retention-period 7"
       }

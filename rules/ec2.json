@@ -7,7 +7,7 @@
         "flag": "--metadata-options",
         "expected_value": "HttpTokens=required",
         "severity": "HIGH",
-        "message": "IMDSv2 not enforced",
+        "message": "IMDSv2 enforcement disabled",
         "context": "Without this, any process running on the instance (including malware) can steal the attached IAM role credentials with a single curl command - no authentication required.",
         "suggestion": "--metadata-options HttpTokens=required"
       },
@@ -15,7 +15,7 @@
         "type": "missing_flag",
         "flag": "--block-device-mappings",
         "severity": "HIGH",
-        "message": "Root volume encryption not specified",
+        "message": "Root volume encryption disabled",
         "context": "Unencrypted EBS volumes can be detached and mounted on another instance, exposing all data at rest. Specifying a customer-managed KMS key (KmsKeyId) gives you full control over key rotation and access policies, and creates a CloudTrail audit trail of every decrypt operation - unlike AWS-managed keys where you have no visibility into who decrypted your data or when. The device name varies by AMI (e.g. /dev/xvda for Amazon Linux, /dev/sda1 for Ubuntu).",
         "suggestion": "--block-device-mappings '[{\"DeviceName\":\"/dev/xvda\",\"Ebs\":{\"Encrypted\":true,\"KmsKeyId\":\"<key-arn>\"}}]'"
       },
@@ -23,7 +23,7 @@
         "type": "missing_flag",
         "flag": "--monitoring",
         "severity": "LOW",
-        "message": "Detailed monitoring not enabled",
+        "message": "Detailed monitoring disabled",
         "context": "Without detailed monitoring, CloudWatch metrics are only available at 5-minute intervals. Detailed monitoring provides 1-minute granularity, critical for detecting and responding to security incidents quickly. Note: detailed monitoring incurs additional CloudWatch charges.",
         "suggestion": "--monitoring Enabled=true"
       },
@@ -31,7 +31,7 @@
         "type": "missing_flag",
         "flag": "--no-associate-public-ip-address",
         "severity": "HIGH",
-        "message": "Public IP association not explicitly disabled",
+        "message": "Public IP auto-assignment not disabled",
         "context": "Without explicitly setting --no-associate-public-ip-address, instances in a default VPC or a subnet with auto-assign public IP enabled will receive a public IP. Automated scanners find open ports within minutes. Use a NAT gateway for outbound traffic and a load balancer for inbound, keeping instances in private subnets.",
         "suggestion": "--no-associate-public-ip-address"
       },
@@ -56,7 +56,7 @@
         "type": "missing_flag",
         "flag": "--disable-api-termination",
         "severity": "LOW",
-        "message": "Termination protection not enabled at launch",
+        "message": "Termination protection disabled at launch",
         "context": "Without --disable-api-termination, a single terminate-instances call permanently destroys the instance and any instance store data. Enable termination protection for production instances to prevent accidental or malicious deletion.",
         "suggestion": "--disable-api-termination"
       }

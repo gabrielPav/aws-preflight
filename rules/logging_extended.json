@@ -38,7 +38,7 @@
         "type": "missing_flag",
         "flag": "--multi-region-enabled",
         "severity": "HIGH",
-        "message": "Multi-region not enabled - API activity in other regions will not be captured",
+        "message": "Multi-region trail disabled - API activity in other regions will not be captured",
         "context": "A single-region event data store only captures events from the region where it's created. Attackers often operate in regions you don't monitor. Enable multi-region to capture all API activity across your account.",
         "suggestion": "--multi-region-enabled"
       }

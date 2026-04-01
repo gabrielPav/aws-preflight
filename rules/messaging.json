@@ -6,7 +6,7 @@
         "type": "missing_flag",
         "flag": "--attributes",
         "severity": "MEDIUM",
-        "message": "KMS encryption not configured for SNS topic",
+        "message": "KMS encryption disabled for SNS topic",
         "context": "SNS topics without KMS encryption store messages in plaintext. For topics carrying sensitive data (PII, financial records), enable server-side encryption with a customer managed KMS key. Using a CMK (instead of the AWS-managed key alias/aws/sns) gives you an audit trail of every encrypt/decrypt via CloudTrail and the ability to revoke access by disabling the key.",
         "suggestion": "--attributes KmsMasterKeyId=alias/<your-cmk-alias>"
       }
@@ -57,7 +57,7 @@
         "type": "missing_flag",
         "flag": "--attributes",
         "severity": "MEDIUM",
-        "message": "KMS encryption not configured for SQS queue",
+        "message": "KMS encryption disabled for SQS queue",
         "context": "SQS queues without server-side encryption store messages in plaintext. For queues carrying sensitive data, enable SSE with a customer managed KMS key using the KmsMasterKeyId attribute. Using a CMK (instead of the AWS-managed key alias/aws/sqs) gives you an audit trail of every encrypt/decrypt via CloudTrail and the ability to revoke access by disabling the key.",
         "suggestion": "--attributes KmsMasterKeyId=alias/<your-cmk-alias>"
       }

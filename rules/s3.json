@@ -42,7 +42,7 @@
         "type": "missing_flag",
         "flag": "--object-lock-enabled-for-bucket",
         "severity": "INFO",
-        "message": "Object Lock not enabled, so bucket objects can be overwritten or deleted immediately",
+        "message": "Object Lock disabled — bucket objects can be overwritten or deleted immediately",
         "context": "Object Lock provides WORM (write-once-read-many) protection. Without it, ransomware or a compromised credential can delete or overwrite all objects instantly. Required by many compliance frameworks (SEC 17a-4, HIPAA, CJIS). Warning: Object Lock cannot be disabled once enabled and requires versioning.",
         "suggestion": "--object-lock-enabled-for-bucket"
       }
@@ -56,7 +56,7 @@
         "flag": "--public-access-block-configuration",
         "expected_value": "BlockPublicAcls=true",
         "severity": "HIGH",
-        "message": "BlockPublicAcls not set to true in public access block configuration",
+        "message": "BlockPublicAcls disabled in public access block configuration",
         "context": "Without BlockPublicAcls=true, new public ACLs can still be applied to objects in this bucket, making them publicly readable.",
         "suggestion": "--public-access-block-configuration BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
       },
@@ -65,7 +65,7 @@
         "flag": "--public-access-block-configuration",
         "expected_value": "IgnorePublicAcls=true",
         "severity": "HIGH",
-        "message": "IgnorePublicAcls not set to true in public access block configuration",
+        "message": "IgnorePublicAcls disabled in public access block configuration",
         "context": "Without IgnorePublicAcls=true, existing public ACLs on objects still grant public access even if new ones are blocked.",
         "suggestion": "--public-access-block-configuration BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
       },
@@ -74,7 +74,7 @@
         "flag": "--public-access-block-configuration",
         "expected_value": "BlockPublicPolicy=true",
         "severity": "HIGH",
-        "message": "BlockPublicPolicy not set to true in public access block configuration",
+        "message": "BlockPublicPolicy disabled in public access block configuration",
         "context": "Without BlockPublicPolicy=true, bucket policies that grant public access can still be applied.",
         "suggestion": "--public-access-block-configuration BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
       },
@@ -83,7 +83,7 @@
         "flag": "--public-access-block-configuration",
         "expected_value": "RestrictPublicBuckets=true",
         "severity": "HIGH",
-        "message": "RestrictPublicBuckets not set to true in public access block configuration",
+        "message": "RestrictPublicBuckets disabled in public access block configuration",
         "context": "Without RestrictPublicBuckets=true, existing public bucket policies still grant public and cross-account access.",
         "suggestion": "--public-access-block-configuration BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
       }
@@ -131,7 +131,7 @@
         "type": "missing_flag",
         "flag": "--mfa",
         "severity": "INFO",
-        "message": "MFA Delete not enabled. Consider enabling for critical buckets",
+        "message": "MFA Delete disabled",
         "context": "Versioning alone doesn't prevent deletion; it just keeps old versions. MFA Delete requires a second factor to permanently delete versions, protecting against both accidental deletion and ransomware.",
         "suggestion": "--mfa 'arn:aws:iam::<account-id>:mfa/<device-name> <totp-code>'"
       }

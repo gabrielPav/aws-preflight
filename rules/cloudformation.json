@@ -6,7 +6,7 @@
         "type": "missing_flag",
         "flag": "--enable-termination-protection",
         "severity": "MEDIUM",
-        "message": "Termination protection not enabled",
+        "message": "Termination protection disabled",
         "context": "Without this, a single cloudformation delete-stack wipes out every resource in the stack. Enable it on every production stack - you can always disable it before a planned teardown.",
         "suggestion": "--enable-termination-protection"
       },

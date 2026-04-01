@@ -18,7 +18,7 @@
         "type": "missing_flag",
         "flag": "--serial-number",
         "severity": "MEDIUM",
-        "message": "MFA device not specified \u2014 session token will have no MFA context",
+        "message": "MFA device not set — session token will have no MFA context",
         "context": "Session tokens generated without --serial-number and --token-code have no MFA context. Any IAM policy conditions using aws:MultiFactorAuthPresent will deny requests made with this token. More importantly, without MFA the token provides no stronger security guarantee than the long-lived credentials it was generated from.",
         "suggestion": "--serial-number arn:aws:iam::<account-id>:mfa/<device-name> --token-code <code>"
       }

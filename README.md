@@ -8,49 +8,49 @@
 
 **Security linter for AWS CLI commands. Catches misconfigurations before they hit your cloud.**
 
-703 security checks across 91 AWS services, plus global checks for dangerous CLI-level flags. Findings include severity ratings and a remediated command.
+703 security checks across 91 AWS services. Findings include severity ratings and a remediated command.
 
 ---
 
 ```
-aws-preflight> aws rds create-db-instance --db-instance-identifier prod-db --db-instance-class db.m5.large --engine mysql --allocated-storage 50 --master-username <dba-name> --master-user-password <dba-password>
+aws rds create-db-instance --db-instance-identifier prod-db --db-instance-class db.m5.large --engine mysql --allocated-storage 50 --master-username <dba-name> --master-user-password <dba-password>
 
 ────────────────────────────────────────────────────────────
 Command: aws rds create-db-instance
 
   ⚠️ Issues detected:
 
-  [HIGH] 🔴 RDS storage encryption not enabled
-  ℹ️  Unencrypted RDS snapshots can be shared or copied to another account,
+  [HIGH] 🔴 Storage encryption disabled
+  ℹ️  Unencrypted snapshots can be shared or copied to any AWS account,
      exposing your entire database. Encryption cannot be enabled after
-     creation, you'd need to snapshot, restore, and migrate.
+     creation - you'd need to snapshot, restore, and migrate.
   → Add: --storage-encrypted
 
-  [HIGH] 🔴 Public accessibility not explicitly disabled. RDS may default to publicly accessible
-  ℹ️  Depending on VPC and subnet group configuration, RDS instances can
-     default to publicly accessible. Always explicitly set
-     --no-publicly-accessible to ensure the database is not reachable
-     from the Internet.
+  [HIGH] 🔴 Public accessibility not explicitly disabled
+  ℹ️  Depending on VPC and subnet configuration, RDS may default to publicly
+     accessible. Always set --no-publicly-accessible explicitly - don't
+     rely on subnet defaults to keep your database off the Internet.
   → Add: --no-publicly-accessible
 
-  [MEDIUM] 🟡 Deletion protection not enabled
-  ℹ️  Without this, a single 'rds delete-db-instance' command permanently
-     destroys your database.
+  [MEDIUM] 🟡 Deletion protection disabled
+  ℹ️  A single 'rds delete-db-instance' call permanently destroys this
+     database with no confirmation prompt.
   → Add: --deletion-protection
 
-  [MEDIUM] 🟡 Backup retention period not specified
-  ℹ️  Default retention is 1 day. Set to at least 7 for production workloads.
+  [MEDIUM] 🟡 IAM database authentication disabled
+  ℹ️  Static passwords don't rotate and don't expire. IAM auth issues
+     short-lived tokens tied to your existing access controls instead.
+  → Add: --enable-iam-database-authentication
+
+  [MEDIUM] 🟡 Backup retention period not configured
+  ℹ️  AWS defaults to 1 day. A weekend incident at that window means
+     unrecoverable data loss. Set to at least 7 days for production.
   → Add: --backup-retention-period 7
 
-  [MEDIUM] 🟡 CloudWatch log exports not configured
-  ℹ️  Without log exports, no visibility into errors or
-     suspicious login attempts.
+  [MEDIUM] 🟡 CloudWatch log exports disabled
+  ℹ️  Without log exports, there's no visibility into errors or suspicious
+     login attempts - you'd be investigating blind after an incident.
   → Add: --enable-cloudwatch-logs-exports '["error"]'
-
-  [MEDIUM] 🟡 IAM database authentication not enabled
-  ℹ️  IAM authentication lets applications connect using short-lived tokens
-     instead of static database passwords.
-  → Add: --enable-iam-database-authentication
 
  ⚡ Suggested command:
 
@@ -71,7 +71,7 @@ aws rds create-db-instance \
 
 ---
 
-## The Problem
+## The Problem:
 
 The AWS CLI has no guardrails. A single command can:
 
@@ -85,40 +85,37 @@ AWS Config, GuardDuty, and Security Hub catch these *after* the resource exists.
 
 ---
 
-## Examples
+## Examples:
 
 **IAM privilege escalation:**
 ```
-aws-preflight> aws iam attach-role-policy --role-name lambda-role \
-  --policy-arn arn:aws:iam::aws:policy/AdministratorAccess
+aws iam attach-role-policy --role-name lambda-role --policy-arn arn:aws:iam::aws:policy/AdministratorAccess
 
-  [HIGH] 🔴 Attaching AdministratorAccess — full AWS access granted
+  [HIGH] 🔴 Attaching AdministratorAccess - full AWS access granted
   ℹ️  AdministratorAccess is the most powerful policy in AWS. If this role is
-     ever compromised, the attacker owns your entire account. Grant only the
+     compromised, the attacker owns your entire account. Grant only the
      specific actions and resources the role actually needs.
 ```
 
 **EKS cluster missing security controls:**
 ```
-aws-preflight> aws eks create-cluster --name prod \
-  --role-arn arn:aws:iam::123456789012:role/eks-service-role \
-  --resources-vpc-config subnetIds=subnet-0abc123abc123abca,subnet-0123abc123abc123c
+aws eks create-cluster --name prod --role-arn arn:aws:iam::123456789012:role/eks-service-role --resources-vpc-config subnetIds=subnet-0abc123abc123abca,subnet-0123abc123abc123c
 
-  [HIGH] 🔴 EKS secrets encryption not configured
+  [HIGH] 🔴 EKS secrets encryption disabled
   ℹ️  Without envelope encryption, Kubernetes secrets are stored in etcd
      in base64 only - not encrypted. Use a KMS key to encrypt secrets
      at rest.
 
-  [HIGH] 🔴 EKS API server endpoint is publicly accessible by default
+  [HIGH] 🔴 EKS API server endpoint publicly accessible
   ℹ️  By default, the EKS API server endpoint is publicly accessible from
-     the entire internet (0.0.0.0/0). Restrict access using
+     the entire Internet (0.0.0.0/0). Restrict access using
      publicAccessCidrs or disable public access entirely.
 
   [MEDIUM] 🟡 EKS authentication mode defaults to CONFIG_MAP
   ℹ️  CONFIG_MAP authentication relies on the aws-auth ConfigMap, a
      well-known attack surface. Use API mode for better auditability.
 
-  [LOW] 🔵 EKS control plane logging not enabled
+  [LOW] 🔵 EKS control plane logging disabled
   ℹ️  Without control plane logs (api, audit, authenticator,
      controllerManager, scheduler), you have no visibility into who
      accessed the Kubernetes API or what changes were made.
@@ -126,7 +123,7 @@ aws-preflight> aws eks create-cluster --name prod \
 
 **Dangerous operation caught:**
 ```
-aws-preflight> aws s3api delete-public-access-block --bucket prod-data
+aws s3api delete-public-access-block --bucket prod-data
 
   [HIGH] 🔴 Removing Block Public Access - bucket may become publicly accessible
   ℹ️  Deleting the public access block removes all four protections.
@@ -136,16 +133,14 @@ aws-preflight> aws s3api delete-public-access-block --bucket prod-data
 
 **Clean command - all security flags present:**
 ```
-aws-preflight> aws cloudtrail create-trail --name prod-trail \
-  --s3-bucket-name trail-logs --is-multi-region-trail \
-  --enable-log-file-validation --kms-key-id alias/cloudtrail-key
+aws cloudtrail create-trail --name prod-trail --s3-bucket-name trail-logs --is-multi-region-trail --enable-log-file-validation --kms-key-id alias/cloudtrail-key
 
   ✅  No obvious security issues detected
 ```
 
 ---
 
-## Quick Start
+## Quick Start:
 
 ```bash
 git clone https://github.com/gabrielPav/aws-preflight.git
@@ -158,7 +153,7 @@ chmod +x aws-preflight
 
 ---
 
-## Usage
+## Usage:
 
 ### Interactive Mode
 
@@ -292,7 +287,7 @@ security-lint:
 
 ---
 
-## Coverage
+## Coverage:
 
 **561 commands | 703 checks | 91 AWS services | 0 dependencies**
 
@@ -322,16 +317,16 @@ security-lint:
 
 ---
 
-## Global Checks
+## Global Checks:
 
 Some AWS CLI flags are dangerous on **every** command, regardless of service. These are checked automatically before per-command rules:
 
 | Flag | Severity | Risk |
 |---|---|---|
-| `--no-verify-ssl` | HIGH | Disables SSL certificate verification, exposing credentials and data to man-in-the-middle attacks |
+| `--no-verify-ssl` | HIGH | Disables SSL certificate verification, exposing credentials and data to Man-in-the-Middle attacks |
 
 ```
-aws-preflight> aws dynamodb scan --table-name users --no-verify-ssl
+aws dynamodb scan --table-name users --no-verify-ssl
 
   [HIGH] 🔴 SSL certificate verification disabled
   ℹ️  The AWS CLI will not verify SSL certificates for this request.
@@ -339,11 +334,9 @@ aws-preflight> aws dynamodb scan --table-name users --no-verify-ssl
      Remove --no-verify-ssl and fix the certificate trust chain instead.
 ```
 
-Global checks fire on any `aws` command — no rule file needed. The dangerous flag is automatically removed from the suggested command.
-
 ---
 
-## Adding Custom Rules
+## Adding Custom Rules:
 
 Drop a `.json` file in `rules/` or add entries to any existing file. Rules for the same command are merged automatically.
 
@@ -391,7 +384,7 @@ Drop a `.json` file in `rules/` or add entries to any existing file. Rules for t
 
 ---
 
-## Architecture
+## Project Structure:
 
 ```
 aws-preflight/

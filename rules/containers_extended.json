@@ -69,7 +69,7 @@
         "flag": "--image-scanning-configuration",
         "expected_value": "scanOnPush=true",
         "severity": "MEDIUM",
-        "message": "Scan on push not enabled - images will not be automatically scanned for vulnerabilities",
+        "message": "Scan on push disabled - images will not be automatically scanned for vulnerabilities",
         "context": "Without scan-on-push, images are only scanned if you manually trigger a scan. Vulnerable images can be deployed without any security check. Enable scan-on-push to automatically scan every image pushed to the repository.",
         "suggestion": "--image-scanning-configuration scanOnPush=true"
       }

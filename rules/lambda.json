@@ -13,7 +13,7 @@
         "type": "missing_flag",
         "flag": "--tracing-config",
         "severity": "LOW",
-        "message": "X-Ray tracing not enabled",
+        "message": "X-Ray tracing disabled",
         "context": "Without tracing, it's difficult to detect anomalous invocation patterns or trace the path of a security incident through your serverless architecture.",
         "suggestion": "--tracing-config Mode=Active"
       },
@@ -30,7 +30,7 @@
         "type": "missing_flag",
         "flag": "--code-signing-config-arn",
         "severity": "MEDIUM",
-        "message": "Code signing not configured",
+        "message": "Code signing disabled",
         "context": "Without code signing, any deployment package can be deployed to this function, including one modified by a supply chain attack or a compromised CI/CD pipeline. Code signing ensures only packages signed by a trusted publisher can be deployed. Critical for production functions handling sensitive data.",
         "suggestion": "--code-signing-config-arn arn:aws:lambda:<region>:<account-id>:code-signing-config:<id>"
       },

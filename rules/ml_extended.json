@@ -74,7 +74,7 @@
         "type": "missing_flag",
         "flag": "--offline-store-config",
         "severity": "MEDIUM",
-        "message": "Offline store not configured - feature data will only be available in the online store",
+        "message": "Offline store disabled — feature data will only be available in the online store",
         "context": "Without an offline store, feature data is only available in the online store (DynamoDB) for real-time inference. For training, batch inference, and audit purposes, configure an offline store backed by S3. Verify the S3 destination has appropriate encryption and access controls.",
         "suggestion": "--offline-store-config S3StorageConfig={S3Uri=s3://<bucket>/feature-store/}"
       }
